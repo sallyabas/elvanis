@@ -6,12 +6,15 @@ export async function getValidToken(
 ): Promise<{ accessToken: string; source: Record<string, unknown> } | null> {
   const admin = createAdminClient()
 
-  const { data: source } = await admin
+  const { data: sources } = await admin
     .from('data_sources')
     .select('*')
     .eq('founder_id', founderId)
     .eq('source_type', sourceType)
-    .maybeSingle()
+    .order('updated_at', { ascending: false })
+    .limit(1)
+
+  const source = sources?.[0]
 
   if (!source?.access_token) return null
 

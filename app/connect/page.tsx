@@ -219,7 +219,17 @@ export default async function ConnectPage({
         {authError && (
           <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, padding: '14px 20px', marginBottom: 24 }}>
             <p style={{ fontSize: 14, color: '#DC2626', fontWeight: 600, margin: 0 }}>
-              Connection failed — {authError === 'token_failed' ? 'could not get access token' : authError}. Please try again.
+              Connection failed —{' '}
+              {authError === 'token_failed'
+                ? 'could not get access token. Check Jira callback URL matches your site.'
+                : authError === 'jira_save_failed'
+                  ? 'could not save Jira connection. Disconnect Jira and try again.'
+                  : authError === 'jira_server_config'
+                    ? 'server misconfiguration (missing Supabase service key).'
+                    : authError === 'jira_founder_not_found'
+                      ? 'account not found. Complete onboarding first.'
+                      : authError}
+              . Please try again.
             </p>
           </div>
         )}
