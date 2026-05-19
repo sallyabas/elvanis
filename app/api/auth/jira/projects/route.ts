@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@/lib/supabase-server'
+import { NextResponse } from 'next/server'
+import { createServerComponentClient } from '@/lib/supabase-server'
 import { getValidToken } from '@/lib/token-refresh'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const supabase = createRouteHandlerClient(request)
+    const supabase = await createServerComponentClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
