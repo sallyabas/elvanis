@@ -1,5 +1,6 @@
 'use client'
-export const dynamic = 'force-dynamic'
+
+import { Suspense } from 'react'
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -87,7 +88,7 @@ const SERVICES = [
 
 type Service = typeof SERVICES[number]
 
-export default function ServiceRequestPage() {
+function ServiceRequestPageContent() {
   const searchParams = useSearchParams()
   const defaultType = searchParams.get('type') ?? ''
   const goalSignal     = searchParams.get('goal')    ?? ''
@@ -369,5 +370,14 @@ export default function ServiceRequestPage() {
         ) : null}
       </div>
     </main>
+  )
+}
+
+
+export default function ServiceRequestPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>Loading...</div>}>
+      <ServiceRequestPageContent />
+    </Suspense>
   )
 }

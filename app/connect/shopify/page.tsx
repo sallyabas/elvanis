@@ -1,10 +1,11 @@
 'use client'
-export const dynamic = 'force-dynamic'
+
+import { Suspense } from 'react'
 
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-export default function ConnectShopifyPage() {
+function ConnectShopifyContent() {
   const [shop, setShop] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -113,5 +114,14 @@ export default function ConnectShopifyPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+
+export default function ConnectShopifyPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>Loading...</div>}>
+      <ConnectShopifyContent />
+    </Suspense>
   )
 }
