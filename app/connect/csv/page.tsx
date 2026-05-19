@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
+
 const TEMPLATES = [
   {
     id: 'support',
@@ -118,7 +119,7 @@ function downloadTemplate(template: typeof TEMPLATES[0]) {
   URL.revokeObjectURL(url)
 }
 
-export default function CSVUploadPage() {
+function CSVUploadContent() {
   const router = useRouter()
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -247,7 +248,7 @@ export default function CSVUploadPage() {
             ))}
           </div>
         </div>
-    
+
         {selectedTemplate && (
           <div style={{ marginBottom: 32 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 4 }}>
@@ -257,19 +258,19 @@ export default function CSVUploadPage() {
               Make sure your file has the column headers exactly as shown in the template.
             </p>
             <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <span style={{ fontSize: 15, flexShrink: 0 }}>💡</span>
-            <p style={{ fontSize: 13, color: '#1D4ED8', margin: 0, lineHeight: 1.5 }}>
-              Keep all columns exactly as they are in the template. If you don't have data for a specific row or column, just leave it blank — don't delete the column.
-            </p>
+              <span style={{ fontSize: 15, flexShrink: 0 }}>💡</span>
+              <p style={{ fontSize: 13, color: '#1D4ED8', margin: 0, lineHeight: 1.5 }}>
+                Keep all columns exactly as they are in the template. If you don't have data for a specific row or column, just leave it blank — don't delete the column.
+              </p>
             </div>
-            {selectedTemplate && uploadedTemplates.includes(selectedTemplate) && (
-                <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 15 }}>⚠️</span>
-                      <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
-                      You have previously uploaded data for this template. Re-uploading will update existing signals with the new data.
-                      </p>
-                    </div>
-                  )}
+            {uploadedTemplates.includes(selectedTemplate) && (
+              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 15 }}>⚠️</span>
+                <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
+                  You have previously uploaded data for this template. Re-uploading will update existing signals with the new data.
+                </p>
+              </div>
+            )}
             <label style={{ display: 'block', padding: '32px', background: '#fff', border: '2px dashed #E5E7EB', borderRadius: 14, textAlign: 'center', cursor: 'pointer', marginBottom: 16 }}>
               <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: 'none' }} />
               {file ? (
@@ -324,5 +325,13 @@ export default function CSVUploadPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function CSVUploadPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', color: '#6B7280' }}>Loading...</div>}>
+      <CSVUploadContent />
+    </Suspense>
   )
 }
