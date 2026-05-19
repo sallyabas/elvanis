@@ -20,11 +20,15 @@ export default function JiraSelectPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/auth/jira/projects')
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) setError(data.error)
-        else setProjects(data.projects ?? [])
+    fetch('/api/auth/jira/projects', { credentials: 'include', cache: 'no-store' })
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok) {
+          setError(data.error ?? 'Failed to load projects')
+          setLoading(false)
+          return
+        }
+        setProjects(data.projects ?? [])
         setLoading(false)
       })
       .catch(() => { setError('Failed to load projects'); setLoading(false) })
@@ -35,6 +39,7 @@ export default function JiraSelectPage() {
     setSaving(true)
     const res = await fetch('/api/auth/jira/select-project', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         projectId: selected.id,
