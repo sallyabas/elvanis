@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const clientId = process.env.JIRA_CLIENT_ID!
-  const callbackUrl = 'http://localhost:3000/api/auth/jira/callback'
+  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/jira/callback`
   
   const params = new URLSearchParams({
     audience: 'api.atlassian.com',
