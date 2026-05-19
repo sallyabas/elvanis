@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-
+import { useRouter } from 'next/navigation'
 const TEMPLATES = [
   {
     id: 'support',
@@ -121,7 +120,6 @@ function downloadTemplate(template: typeof TEMPLATES[0]) {
 
 export default function CSVUploadPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
