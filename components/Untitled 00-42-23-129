@@ -1,0 +1,131 @@
+'use client'
+
+import { useState } from 'react'
+
+type ConflictSource = {
+  source: string
+  value: number | null
+  label: string
+}
+
+export default function ConflictTrustButton({
+  signalType,
+  signalInsight,
+  sources,
+  initialChoice,
+  isDeprioritised,
+  trustedLabel,
+}: {
+  signalType: string
+  signalInsight: string
+  sources: ConflictSource[]
+  initialChoice?: string | null
+  isDeprioritised?: boolean
+  trustedLabel?: string
+}) {
+  const [saved, setSaved] = useState(!!initialChoice)
+  const [chosen, setChosen] = useState<string | null>(initialChoice ?? null)
+  const [saving, setSaving] = useState(false)
+
+  async function handleTrust(source: ConflictSource) {
+    setSaving(true)
+    try {
+      const conflictingValues: Record<string, number | null> = {}
+      sources.forEach(s => { conflictingValues[s.source] = s.value })
+
+      await fetch('/api/signals/resolve-conflict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          signalType,
+          signalInsight,
+          conflictingSources: sources.map(s => s.source),
+          conflictingValues,
+          trustedSource: source.source,
+          trustedValue: source.value,
+        }),
+      })
+
+      setChosen(source.source)
+      setSaved(true)
+    } catch (err) {
+      console.error('Failed to save conflict preference:', err)
+    }
+    setSaving(false)
+  }
+
+  // ── Green state — preference already set ──
+  if (saved && chosen) {
+    const message = isDeprioritised
+      ? `✓ ${trustedLabel ?? 'Other source'} preferred — this signal deprioritised`
+      : `✓ Trusting ${sources.find(s => s.source === chosen)?.label ?? chosen} — saved for next Action Digest`
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+        <span style={{
+          fontSize: 11, padding: '4px 12px', borderRadius: 20,
+          background: '#ECFDF5', color: '#059669', fontWeight: 600,
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}>
+          {message}
+        </span>
+        <button
+          onClick={() => setSaved(false)}
+          style={{
+            fontSize: 11, padding: '3px 10px', borderRadius: 20,
+            background: 'transparent', color: '#9CA3AF',
+            border: '1px solid #E5E7EB',
+            fontWeight: 500, cursor: 'pointer',
+          }}
+        >
+          Change
+        </button>
+      </div>
+    )
+  }
+
+  // ── Trust buttons — action needed ──
+  return (
+    <div style={{
+      background: '#FFFBEB',
+      border: '1px solid #FDE68A',
+      borderRadius: 10,
+      padding: '10px 14px',
+      marginBottom: 10,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
+            ⚡ Choose your data source
+          </p>
+          <p style={{ fontSize: 11, color: '#B45309', margin: 0 }}>
+            Your choice will be used in your next Action Digest. Unresolved conflicts default to the tool source.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
+          {sources.map(source => (
+            <button
+              key={source.source}
+              onClick={() => handleTrust(source)}
+              disabled={saving}
+              style={{
+                fontSize: 12,
+                padding: '6px 14px',
+                borderRadius: 8,
+                background: saving ? '#F3F4F6' : '#D97706',
+                color: saving ? '#9CA3AF' : '#fff',
+                border: 'none',
+                fontWeight: 600,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                whiteSpace: 'nowrap' as const,
+              }}
+            >
+              {saving ? 'Saving...' : `Trust ${source.label}${source.value !== null ? ` (${source.value})` : ''}`}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

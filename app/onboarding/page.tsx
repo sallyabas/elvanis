@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+
 
 type Step = 'welcome' | 'profile' | 'focus' | 'guidance'
 
@@ -64,6 +65,13 @@ export default function OnboardingPage() {
   const [noWebsite, setNoWebsite]             = useState(false)
   const [selectedFocus, setSelectedFocus]     = useState<string | null>(null)
   const [loading, setLoading]                 = useState(false)
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('founders')
+      .select('onboarding_completed')
+      .eq('user_id', (supabase.auth.getUser() as any))
+      .maybeSingle()
+  }, [])
 
   const stageHasData = STAGES.find(s => s.id === selectedStage)?.hasData ?? false
 

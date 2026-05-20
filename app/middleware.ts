@@ -79,8 +79,7 @@ export async function middleware(request: NextRequest) {
       .select('onboarding_completed')
       .eq('user_id', user.id)
       .maybeSingle()
-
-    // No founder row or onboarding not complete → redirect to onboarding
+      
     if (!founder || !founder.onboarding_completed) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import HeaderUser from '@/components/header-user'
+import GlobalHeader from '@/components/GlobalHeader'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -27,21 +28,7 @@ export default async function AssessmentResultPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <header style={{ background: '#fff', borderBottom: '1px solid #E5E7EB', padding: '0 24px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <a href="/dashboard" style={{ fontSize: 14, color: '#6B7280', textDecoration: 'none' }}>Dashboard</a>
-            <a href="/signals" style={{ fontSize: 14, color: '#6B7280', textDecoration: 'none' }}>Signals</a>
-            <a href="/connect" style={{ fontSize: 14, color: '#6B7280', textDecoration: 'none' }}>Connect</a>
-            <HeaderUser
-              name={founder?.full_name?.split(' ')[0] ?? ''}
-              businessName={founder?.business_name ?? null}
-             logoUrl={founder?.logo_url ?? null}
-            />
-          </div>
-        </div>
-      </header>
+      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
 
