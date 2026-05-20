@@ -90,8 +90,7 @@ export default function ScanButton({
     setScanning(false)
   }
 
-  if (!hasConnectedSources) return null
-
+if (!hasConnectedSources || isFreeTier) return null
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
