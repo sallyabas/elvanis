@@ -16,24 +16,31 @@ function ConnectShopifyContent() {
     if (!shop.trim()) return
     setError('')
   
+    // 1. Clean the input dynamically, handling both old and new Shopify URL structures
     const cleanShop = shop.trim()
       .replace('https://', '')
       .replace('http://', '')
+      .replace('admin.shopify.com/store/', '') // ✨ CRITICAL FIX: Strips out modern admin URLs
       .replace('.myshopify.com', '')
       .replace(/\/$/, '')
       .replace(/\s+/g, '')
   
+    // 2. Validate that we only have the handle remaining
     if (!/^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$/.test(cleanShop)) {
       setError('Invalid store name. Use only letters, numbers, and hyphens.')
       return
     }
   
-    const clientId = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID!
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const clientId = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID || 'f050168b0cb80a1c88ea1b730b33709c'
+    const redirectUri = `${appBaseUrl}/api/auth/shopify/callback`
     const scopes = 'read_orders,read_customers,read_products,read_inventory'
+    const encodedRedirectUri = encodeURIComponent(redirectUri)
   
     setLoading(true)
-    window.location.href = `https://${cleanShop}.myshopify.com/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`
+    
+    // 3. Always force routing through the required .myshopify.com handshake endpoint
+    window.location.href = `https://${cleanShop}.myshopify.com/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodedRedirectUri}`
   }
 
   return (
