@@ -68,89 +68,51 @@ function tpTrend(signalType: string, prevVal: number, currVal: number): string {
 }
 
 async function scrapeTrustpilot(domain: string) {
-  const targetUrl = `https://www.trustpilot.com/review/${domain}`
+  const targetUrl = `https://www.trustpilot.com/review/${domain}`;
   
-  // 1. Fallback to your raw target if API key is missing, otherwise route through stealth proxy
-  let finalApiUrl = targetUrl;
-  
-  if (process.env.SCRAPINGBEE_API_KEY) {
-    finalApiUrl = `https://app.scrapingbee.com/api/v1/?api_key=${
-      process.env.SCRAPINGBEE_API_KEY
-    }&url=${encodeURIComponent(targetUrl)}&premium_proxy=true&country_code=us`
-  } else if (process.env.SCRAPERAPI_KEY) {
-    // Alternate popular fallback option
-    finalApiUrl = `http://api.scraperapi.com?api_key=${process.env.SCRAPERAPI_KEY}&url=${encodeURIComponent(targetUrl)}`
-  } else {
-    console.warn("⚠️ WARNING: No scraping proxy key configured. Making direct fetch request (Highly likely to fail in production).")
+  if (!process.env.FIRECRAWL_API_KEY) {
+    throw new Error("Missing FIRECRAWL_API_KEY in environment variables");
   }
 
-  const res = await fetch(finalApiUrl, {
+  // Firecrawl unblocks the page and converts it directly to clean text/markdown for your LLM
+  const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
+    method: 'POST',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-GB,en;q=0.9',
-      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.FIRECRAWL_API_KEY}`
     },
-  })
-  
-  if (!res.ok) throw new Error(`Scraper API request failed with status: ${res.status}`)
-  const html = await res.text()
+    body: JSON.stringify({
+      url: targetUrl,
+      formats: ['markdown']
+    })
+  });
 
-  console.log(`Trustpilot HTML: length=${html.length}, title=${html.match(/<title>([^<]*)<\/title>/)?.[1] ?? 'unknown'}`)
+  if (!res.ok) throw new Error(`Firecrawl request failed with status: ${res.status}`);
+  const data = await res.json();
+  const markdownText = data.data?.markdown || '';
 
-  // Guard: if page is a challenge/redirect page, abort — don't save null data
-  if (
-    html.length < 15000 ||
-    html.includes('Redirection Page') ||
-    html.includes('Enable JavaScript and cookies') ||
-    !html.toLowerCase().includes(domain.split('.')[0].toLowerCase())
-  ) {
-    throw new Error(`SCRAPER_BLOCKED: received challenge page (${html.length} chars) instead of Trustpilot review page`)
-  }
+  // Parse metrics using resilient regex matches from the structured text
+  const ratingMatch = markdownText.match(/([1-5](\.\d)?)\s*out of 5/i) || markdownText.match(/TrustScore\s*([1-5](\.\d)?)/i);
+  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null;
 
-  // Attempt 1: JSON-LD extraction (most stable — Trustpilot includes for SEO)
-  let rating: number | null = null
-  let reviewCount: number | null = null
+  const countMatch = markdownText.match(/([\d,]+)\s*total reviews/i) || markdownText.match(/([\d,]+)\s*reviews/i);
+  const reviewCount = countMatch ? parseInt(countMatch[1].replace(/,/g, '')) : null;
 
-  const jsonLdMatches = html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)
-  for (const match of jsonLdMatches) {
-    try {
-      const parsed = JSON.parse(match[1])
-      // Handle both Organization and AggregateRating structures
-      const aggregateRating = parsed.aggregateRating ?? (parsed['@type'] === 'AggregateRating' ? parsed : null)
-      if (aggregateRating?.ratingValue) {
-        rating = parseFloat(String(aggregateRating.ratingValue))
-        reviewCount = parseInt(String(aggregateRating.reviewCount ?? '0').replace(/[^0-9]/g, ''))
-        console.log(`JSON-LD extracted: rating=${rating}, reviewCount=${reviewCount}`)
-        break
-      }
-    } catch { /* try next script block */ }
-  }
-
-  // Attempt 2: Original regex fallback if JSON-LD failed
-  if (rating === null) {
-    const ratingMatch = html.match(/"ratingValue"\s*:\s*"?([\d.]+)"?/)
-    rating = ratingMatch ? parseFloat(ratingMatch[1]) : null
-    const countMatch = html.match(/"reviewCount"\s*:\s*"?([\d,]+)"?/)
-    reviewCount = countMatch ? parseInt(countMatch[1].replace(',', '')) : null
-    console.log(`Regex fallback: rating=${rating}, reviewCount=${reviewCount}`)
-  }
-
-  // Extract reviews text safely
-  const reviewMatches = html.match(/"text"\s*:\s*"([^"]{20,500})"/g) ?? []
-  const reviews = reviewMatches.slice(0, 20)
-    .map(r => r.replace(/"text"\s*:\s*"/, '').replace(/"$/, ''))
-    .filter(r => r.length > 20)
-
-  const oneStarMatch = html.match(/1-star[^"]*"(\d+)%/)
-  const fiveStarMatch = html.match(/5-star[^"]*"(\d+)%/)
+  // Grab blocks of sentences to feed your existing recent reviews array
+  const cleanReviews = markdownText.split('\n')
+    .filter((line: string) => line.length > 40 && !line.includes('http') && !line.includes('|'))
+    .slice(0, 15);
 
   return {
-    targetUrl, domain, rating, reviewCount, reviews,
-    oneStar: oneStarMatch ? parseInt(oneStarMatch[1]) : null,
-    fiveStar: fiveStarMatch ? parseInt(fiveStarMatch[1]) : null,
+    targetUrl,
+    domain,
+    rating,
+    reviewCount,
+    reviews: cleanReviews,
+    oneStar: null, // Let your LLM calculate themes from text if percentages miss
+    fiveStar: null,
     scrapedAt: new Date().toISOString(),
-  }
+  };
 }
 
 async function generateSignals(data: { domain: string; rating: number | null; reviewCount: number | null; reviews: string[]; oneStar: number | null; fiveStar: number | null }) {
