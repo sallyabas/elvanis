@@ -14,34 +14,26 @@ function ConnectShopifyContent() {
 
   function validateAndConnect() {
     if (!shop.trim()) return
-
     setError('')
-
-    // Remove protocol, trailing slashes, spaces
-    const cleaned = shop.trim()
+  
+    const cleanShop = shop.trim()
       .replace('https://', '')
       .replace('http://', '')
+      .replace('.myshopify.com', '')
       .replace(/\/$/, '')
-      .replace(/\s+/g, '') // remove all spaces
-
-    // Validate — only alphanumeric, hyphens, dots
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]*[a-zA-Z0-9]$/.test(cleaned)) {
-      setError('Invalid store URL. Use only letters, numbers, and hyphens. Example: mystore.myshopify.com')
+      .replace(/\s+/g, '')
+  
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$/.test(cleanShop)) {
+      setError('Invalid store name. Use only letters, numbers, and hyphens.')
       return
     }
-
-    const shopDomain = cleaned.includes('.myshopify.com')
-      ? cleaned
-      : `${cleaned}.myshopify.com`
-
-    // Validate final domain format
-    if (!shopDomain.endsWith('.myshopify.com')) {
-      setError('Store URL must end with .myshopify.com')
-      return
-    }
-
+  
+    const clientId = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID!
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`
+    const scopes = 'read_orders,read_customers,read_products,read_inventory'
+  
     setLoading(true)
-    window.location.href = `/api/auth/shopify?shop=${encodeURIComponent(shopDomain)}`
+    window.location.href = `https://${cleanShop}.myshopify.com/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`
   }
 
   return (

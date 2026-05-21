@@ -16,6 +16,22 @@ export default async function ProfilePage() {
 
   if (!founder) redirect('/login')
 
+  // Service requests
+  const { data: serviceRequests } = await supabase
+    .from('service_requests')
+    .select('id, type, status, created_at, notes')
+    .eq('founder_id', founder.id)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  // Payment history
+  const { data: payments, error: paymentsError } = await supabase
+    .from('payments')
+    .select('id, amount, currency, status, payment_method, reference, period_start, period_end, cancelled_at, created_at')    .eq('founder_id', founder.id)
+    .order('created_at', { ascending: false })
+    .limit(24)
+    console.log('payments query:', payments?.length, paymentsError?.message)
+
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
       <GlobalHeader founder={founder} />
@@ -31,6 +47,11 @@ export default async function ProfilePage() {
         initialBrandUrl={founder.brand_url ?? ''}
         initialFocusMetric={founder.focus_metric ?? ''}
         subscriptionTier={founder.subscription_tier ?? 'free'}
+        subscriptionStatus={founder.subscription_status ?? 'inactive'}
+        subscriptionStartedAt={founder.subscription_started_at ?? null}
+        subscriptionEndsAt={founder.subscription_ends_at ?? null}
+        serviceRequests={serviceRequests ?? []}
+        payments={payments ?? []}
       />
     </main>
   )
