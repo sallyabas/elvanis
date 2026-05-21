@@ -263,8 +263,8 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{TOUR_STEPS[step].title}</h3>
                   <p  style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.65, margin: '0 0 18px' }}>{TOUR_STEPS[step].body}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#94A3B8', padding: 0, fontFamily: 'inherit' }}>Skip tour</button>
-                  <button onClick={doNext} style={{ padding: '9px 20px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+<button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#94A3B8', padding: 0, fontFamily: 'inherit' }}>Skip tour</button>
+                    <button onClick={doNext} style={{ padding: '9px 20px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                       {isLast ? "Got it, let's go →" : 'Next →'}
                     </button>
                   </div>

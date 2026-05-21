@@ -5,8 +5,6 @@ import type { SignalWithFlags } from '@/lib/signal-analysis'
 import GlobalHeader from '@/components/GlobalHeader'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health-scoring'
-import { DashboardTour, SectionTooltip } from './guide'
-import { TourWrapper } from './tour-wrapper'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
@@ -242,7 +240,7 @@ export default async function DashboardPage() {
     : '#6B7280'
 
   return (
-    <main id="tour-header" style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
+    <main  style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
       <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
@@ -286,8 +284,9 @@ export default async function DashboardPage() {
 
             {/* Business Health */}
             <div id="tour-health"  style={{ background: hasRealData ? health.bg : '#F9FAFB', borderRadius: 16, border: `1px solid ${hasRealData ? health.color + '30' : '#E5E7EB'}`, padding: '20px 22px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: hasRealData ? health.color : '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Business Health</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
+              </div>
               {hasRealData ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 6 }}>
@@ -307,7 +306,9 @@ export default async function DashboardPage() {
 
             {/* AI Readiness */}
             <div id="tour-ai-readiness" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '20px 22px' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>✨ AI Readiness</p>              
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>✨ AI Readiness</p>
+              </div>
               {!aiReadiness.hasEnoughData ? (
                 <>
                   <span style={{ fontSize: 36, fontWeight: 900, color: '#DDD6FE', lineHeight: 1, display: 'block', marginBottom: 6 }}>—</span>
@@ -333,7 +334,6 @@ export default async function DashboardPage() {
             {/* Active Signals */}
             <div id="tour-signals" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Active Signals</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 8 }}>
                 <span style={{ fontSize: 52, fontWeight: 900, color: '#111827', lineHeight: 1 }}>{activeSignals.length}</span>
               </div>
@@ -354,7 +354,6 @@ export default async function DashboardPage() {
             {/* In Progress */}
             <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>In Progress</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 8 }}>
                 <span style={{ fontSize: 52, fontWeight: 900, color: '#2563EB', lineHeight: 1 }}>{workingOnSignals.length}</span>
               </div>
@@ -525,7 +524,6 @@ export default async function DashboardPage() {
               <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <p style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>⚡ Fix This First</p>
-                  <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
                   {activeRealSignals.length === 0 && activeAssessmentSignals.length > 0 && (
                     <span style={{ fontSize: 11, color: '#9CA3AF', background: '#F3F4F6', padding: '3px 8px', borderRadius: 8 }}>Based on assessment — connect tools to verify</span>
                   )}
@@ -577,7 +575,6 @@ export default async function DashboardPage() {
             {/* Connected Sources */}
             <div id="tour-sources" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px' }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>Connected Sources</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
               {sources && sources.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {sources.map((s, index) => {
@@ -623,11 +620,8 @@ export default async function DashboardPage() {
 
           {/* ── Impact Tracking ── */}
           <div id="tour-impact" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>📈 Impact Tracking — Did your fixes work?</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
               <a href="/measure" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', fontWeight: 600 }}>View full measure →</a>
-            </div>
             {hasCycleData && cycleSummaryText && (
               <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '10px 16px', marginBottom: 16, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 16 }}>🔄</span>
@@ -733,12 +727,10 @@ export default async function DashboardPage() {
           {/* ── Action Digest upgrade — free tier ── */}
           {isFreeTier && (
             <div id="tour-digest" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>✨ Action Digest — Navigator Feature</p>
+              
                 <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>Your AI-generated 90-day action plan</p>
-                <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
                 <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>Upgrade to get an action plan built from your signals, updated each scan cycle.</p>
-              </div>
+              
               {STRIPE_PAYMENT_LINK ? (
                 <a href={STRIPE_PAYMENT_LINK} target="_blank" rel="noopener noreferrer"
                   style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -756,11 +748,8 @@ export default async function DashboardPage() {
           {/* ── AI Opportunities ── */}
           <div id="tour-ai-opps" style={{ background: '#fff', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: showAssessmentBanner || aiReadiness.opportunities.length > 0 ? 12 : 16 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>✨ AI Opportunities Detected</p>
-                <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
                 <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>{aiSectionCopy}</p>
-              </div>
+              
               {aiReadiness.opportunities.length > 0 && (
                 <div style={{ background: '#F5F3FF', borderRadius: 12, padding: '8px 16px', flexShrink: 0 }}>
                   <span style={{ fontSize: 20, fontWeight: 800, color: '#7C3AED' }}>{aiReadiness.score}</span>
@@ -823,7 +812,6 @@ export default async function DashboardPage() {
           <div id="tour-assessment"style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Assessment Score</p>
-              <SectionTooltip text="Your overall business score across 6 dimensions, calculated from your connected tools and signals." />
               {score && (
                 <div style={{ display: 'flex', gap: 8 }}>
                   <a href="/assessment/result" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', padding: '6px 14px', border: '1px solid #BFDBFE', borderRadius: 8, fontWeight: 600 }}>Full report →</a>
@@ -904,7 +892,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-      <TourWrapper guideDismissed={founder?.guide_dismissed ?? false} />
     </main>
   )
 }
