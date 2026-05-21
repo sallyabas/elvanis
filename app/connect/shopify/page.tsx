@@ -10,10 +10,19 @@ function ConnectShopifyContent() {
   const searchParams          = useSearchParams()
   const urlError              = searchParams.get('error')
 
-  // Reset loading state on every mount
-  // Handles: browser back button after redirect, Shopify error redirects, page refresh
+  // Reset loading on mount (initial visit / refresh)
   useEffect(() => {
     setLoading(false)
+  }, [])
+
+  // Reset loading when user navigates back via browser back button
+  // pageshow with e.persisted = true fires specifically on back/forward cache restore
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false)
+    }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
   }, [])
 
   function validateAndConnect() {
@@ -24,53 +33,54 @@ function ConnectShopifyContent() {
     let cleanShop = shop.trim().toLowerCase()
 
     if (cleanShop.includes('admin.shopify.com/store/')) {
-      // Extract store handle from modern Shopify admin URL format
+      // Extract store handle from modern Shopify admin URL
       // e.g. https://admin.shopify.com/store/my-store/apps → my-store
-      const match = cleanShop.match(/admin\.shopify\.com\/store\/([a-zA-Z0-9-]+)/)
-      if (match && match[1]) {
+      const match: RegExpMatchArray | null = cleanShop.match(/admin\.shopify\.com\/store\/([a-zA-Z0-9-]+)/)
+      if (match && typeof match[1] === 'string') {
         cleanShop = match[1]
       } else {
         setError('Could not read your store name from that URL. Please type just your store name, e.g. "mystore"')
         return
       }
     } else {
-      // Handle standard formats:
-      // https://mystore.myshopify.com → mystore
-      // mystore.myshopify.com → mystore
-      // mystore → mystore
-      // mystore.myshopify.com/admin → mystore
+      // Handles:
+      // mystore                           → mystore
+      // mystore.myshopify.com             → mystore
+      // https://mystore.myshopify.com     → mystore
+      // https://mystore.myshopify.com/admin/settings → mystore
       cleanShop = cleanShop
         .replace('https://', '')
         .replace('http://', '')
         .replace('.myshopify.com', '')
-        .split('/')[0]         // drop any trailing path like /admin or /settings
-        .replace(/\s+/g, '')   // remove any spaces
+        .split('/')[0]        // drop trailing paths like /admin or /settings
+        .replace(/\s+/g, '')  // remove any spaces
     }
 
-    // ── Step 2: Guard empty result ────────────────────────────
+    // ── Step 2: Guard empty result after cleaning ─────────────
     if (!cleanShop || cleanShop.length < 2) {
       setError('Could not extract a valid store name. Please type just your store name, e.g. "mystore"')
       return
     }
 
     // ── Step 3: Validate handle format ───────────────────────
-    // Shopify store handles: alphanumeric + hyphens, no leading/trailing hyphens
     if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$/.test(cleanShop)) {
       setError('Invalid store name. Use only letters, numbers, and hyphens. Example: my-store')
       return
     }
 
     // ── Step 4: Build OAuth URL and redirect ──────────────────
-    const appBaseUrl       = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-    const clientId         = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID || 'f050168b0cb80a1c88ea1b730b33709c'
-    const redirectUri      = `${appBaseUrl}/api/auth/shopify/callback`
-    const scopes           = 'read_orders,read_customers,read_products,read_inventory'
-    const encodedRedirect  = encodeURIComponent(redirectUri)
+    const appBaseUrl      = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const clientId        = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID || 'f050168b0cb80a1c88ea1b730b33709c'
+    const redirectUri     = `${appBaseUrl}/api/auth/shopify/callback`
+    const scopes          = 'read_orders,read_customers,read_products,read_inventory'
+    const encodedRedirect = encodeURIComponent(redirectUri)
 
     setLoading(true)
-
-    // Always use .myshopify.com OAuth endpoint — works for all store types
     window.location.href = `https://${cleanShop}.myshopify.com/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodedRedirect}`
+
+    // Emergency fallback — resets button if navigation stalls or fails
+    // Placed here so it only runs once per connect attempt, not on every render
+    setTimeout(() => setLoading(false), 4000)
   }
 
   // Determine error message to show
@@ -120,7 +130,7 @@ function ConnectShopifyContent() {
           {/* Inline suffix input */}
           <div style={{
             display: 'flex', alignItems: 'center',
-            border: `1.5px solid ${error ? '#FECACA' : '#E5E7EB'}`,
+            border: `1.5px solid ${errorMessage ? '#FECACA' : '#E5E7EB'}`,
             borderRadius: 10, marginBottom: 8, overflow: 'hidden', background: '#fff',
           }}>
             <input

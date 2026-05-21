@@ -69,19 +69,31 @@ function tpTrend(signalType: string, prevVal: number, currVal: number): string {
 
 async function scrapeTrustpilot(domain: string) {
   const targetUrl = `https://www.trustpilot.com/review/${domain}`
-  const res = await fetch(targetUrl, {
+  
+  // 1. Fallback to your raw target if API key is missing, otherwise route through stealth proxy
+  let finalApiUrl = targetUrl;
+  
+  if (process.env.SCRAPINGBEE_API_KEY) {
+    finalApiUrl = `https://app.scrapingbee.com/api/v1/?api_key=${
+      process.env.SCRAPINGBEE_API_KEY
+    }&url=${encodeURIComponent(targetUrl)}&premium_proxy=true&country_code=us`
+  } else if (process.env.SCRAPERAPI_KEY) {
+    // Alternate popular fallback option
+    finalApiUrl = `http://api.scraperapi.com?api_key=${process.env.SCRAPERAPI_KEY}&url=${encodeURIComponent(targetUrl)}`
+  } else {
+    console.warn("⚠️ WARNING: No scraping proxy key configured. Making direct fetch request (Highly likely to fail in production).")
+  }
+
+  const res = await fetch(finalApiUrl, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Language': 'en-GB,en;q=0.9',
       'Cache-Control': 'no-cache',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Upgrade-Insecure-Requests': '1',
     },
   })
-  if (!res.ok) throw new Error(`ScraperAPI failed: ${res.status}`)
+  
+  if (!res.ok) throw new Error(`Scraper API request failed with status: ${res.status}`)
   const html = await res.text()
 
   console.log(`Trustpilot HTML: length=${html.length}, title=${html.match(/<title>([^<]*)<\/title>/)?.[1] ?? 'unknown'}`)
@@ -104,7 +116,7 @@ async function scrapeTrustpilot(domain: string) {
   for (const match of jsonLdMatches) {
     try {
       const parsed = JSON.parse(match[1])
-      // Handle both Organization and AggregateRating types
+      // Handle both Organization and AggregateRating structures
       const aggregateRating = parsed.aggregateRating ?? (parsed['@type'] === 'AggregateRating' ? parsed : null)
       if (aggregateRating?.ratingValue) {
         rating = parseFloat(String(aggregateRating.ratingValue))
@@ -124,7 +136,7 @@ async function scrapeTrustpilot(domain: string) {
     console.log(`Regex fallback: rating=${rating}, reviewCount=${reviewCount}`)
   }
 
-  // Extract reviews text
+  // Extract reviews text safely
   const reviewMatches = html.match(/"text"\s*:\s*"([^"]{20,500})"/g) ?? []
   const reviews = reviewMatches.slice(0, 20)
     .map(r => r.replace(/"text"\s*:\s*"/, '').replace(/"$/, ''))
