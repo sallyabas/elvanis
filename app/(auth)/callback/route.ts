@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
         business_name:        businessName,
         language:             'en',
         subscription_tier:    'free',
-        subscription_status:  'inactive',
+        subscription_status:  'active',
+        account_status:       'active',
         onboarding_completed: false,
       })
 

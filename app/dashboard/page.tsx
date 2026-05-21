@@ -115,6 +115,8 @@ export default async function DashboardPage() {
 
   const { data: founder } = await supabase
     .from('founders').select('*').eq('user_id', user.id).maybeSingle()
+    if (!founder) redirect('/login')
+      if (founder.account_status === 'suspended') redirect('/suspended')
 
   const { data: latestDigest } = await supabase
     .from('action_digests')
@@ -352,7 +354,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* In Progress */}
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
+            <div id="tour-in-progress" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>In Progress</p>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 8 }}>
                 <span style={{ fontSize: 52, fontWeight: 900, color: '#2563EB', lineHeight: 1 }}>{workingOnSignals.length}</span>
@@ -563,13 +565,28 @@ export default async function DashboardPage() {
                 </div>
               </div>
             ) : (
-              <div style={{ background: '#ECFDF5', borderRadius: 16, border: '1px solid #A7F3D0', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                <span style={{ fontSize: 40 }}>✅</span>
-                <div>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: '#065F46', marginBottom: 4 }}>No active signals</p>
-                  <p style={{ fontSize: 14, color: '#059669', margin: 0 }}>Take the assessment or connect tools to detect signals.</p>
-                </div>
-              </div>
+<div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '32px 28px' }}>
+  <p style={{ fontSize: 13, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 16px' }}>⚡ Start Here</p>
+  <p style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>Get your first signals</p>
+  <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', lineHeight: 1.6 }}>
+  {assessment ? 'Connect a tool to get live signals from your real data.' : 'Takes 10 minutes. No tools needed to start — the assessment works immediately.'}
+</p>
+  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+  {!assessment && (
+  <a href="/assessment" style={{ padding: '12px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+    Take the assessment →
+  </a>
+)}
+{assessment && (
+  <a href="/assessment" style={{ padding: '12px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+    Retake assessment →
+  </a>
+)}
+    <a href="/connect" style={{ padding: '12px 24px', background: '#F9FAFB', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+      Connect a tool →
+    </a>
+  </div>
+</div>
             )}
 
             {/* Connected Sources */}

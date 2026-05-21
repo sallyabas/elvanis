@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
   try {
     // parentScanId: links child scan row to master row
     // triggeredBy: 'connect' default — passed through from parent route when called via full scan
-    const { founderId, parentScanId = null, triggeredBy = 'connect' } = await request.json()
+    const { founderId, parentScanId = null, triggeredBy = 'connect', founderContext = {} } = await request.json()
     const admin = createAdminClient()
 
     const { data: source } = await admin
@@ -269,6 +269,17 @@ METRICS — current 30 days vs previous 30 days:
 - Conversations open more than 48h: ${intercomData.longOpenConversations}
 - Repeat contact rate: ${intercomData.repeatContactRate}% (${intercomData.repeatContacts} of ${intercomData.uniqueContacts} contacts opened multiple conversations)
 ${intercomData.avgCsat !== null ? `- Avg CSAT: ${intercomData.avgCsat}/5 from ${intercomData.csatRatingsCount} ratings` : '- CSAT: not configured'}
+
+FOUNDER CONTEXT:
+- Industry: ${(founderContext as Record<string,string>).industry ?? 'Not specified'}
+- Market: ${(founderContext as Record<string,string>).market ?? 'Not specified'}
+- Stage: ${(founderContext as Record<string,string>).founder_stage ?? 'Not specified'}
+- Primary focus: ${(founderContext as Record<string,string>).focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations:
+- Gulf e-commerce founders have different support and revenue benchmarks than UK B2B SaaS founders
+- Early stage founders need validation-focused actions; product_customers founders need operational fixes
+- Primary focus metric shapes which signals to escalate vs monitor
 
 AVAILABLE SIGNAL TYPES:
 - ticket_volume_increase: conversation volume rising significantly

@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
   try {
     // parentScanId: links child scan row to master row
     // triggeredBy: 'connect' default — passed through from parent route when called via full scan
-    const { founderId, parentScanId = null, triggeredBy = 'connect' } = await request.json()
+    const { founderId, parentScanId = null, triggeredBy = 'connect', founderContext = {} } = await request.json()
     const admin = createAdminClient()
 
     const { data: source } = await admin
@@ -278,6 +278,17 @@ METRICS — current 30 days vs previous 30 days:
 - Repeat purchase rate: ${shopifyData.repeatPurchaseRate}% (${shopifyData.repeatCustomers} of ${shopifyData.uniqueCustomers} customers ordered more than once)
 - New customers acquired: ${shopifyData.newCustomers}
 ${shopifyData.topCancelReason ? `- Top cancellation reason: ${shopifyData.topCancelReason}` : ''}
+
+FOUNDER CONTEXT:
+- Industry: ${founderContext.industry ?? 'Not specified'}
+- Market: ${founderContext.market ?? 'Not specified'}
+- Stage: ${founderContext.founder_stage ?? 'Not specified'}
+- Primary focus: ${founderContext.focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations. For example:
+- A Gulf e-commerce founder has different benchmarks than a UK B2B SaaS founder
+- An early_stage founder needs different actions than a product_customers founder
+- Focus metric shapes which signals to prioritise
 
 AVAILABLE SIGNAL TYPES:
 - refund_spike: refund rate high or increasing

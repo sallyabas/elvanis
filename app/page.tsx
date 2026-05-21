@@ -209,8 +209,8 @@ const T = {
       tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للشركات الناشئة بقيادة المؤسسين.',
       help: 'تحتاج مساعدة مباشرة؟',
       helpCta: 'تحدث مع خبراء Elvanis →',
-      links: ['لوحة التحكم', 'الإشارات', 'ربط الأدوات', 'الخدمات', 'التقييم'],
-      hrefs: ['/dashboard', '/signals', '/connect', '/service-request', '/assessment'],
+      links: ['لوحة التحكم', 'الإشارات', 'ربط الأدوات', 'الخدمات', 'التقييم', 'الشروط', 'الخصوصية'],
+      hrefs: ['/dashboard', '/signals', '/connect', '/service-request', '/assessment', '/terms', '/privacy'],
     },
   },
 }

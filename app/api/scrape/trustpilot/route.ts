@@ -131,7 +131,8 @@ async function scrapeTrustpilot(domain: string) {
 async function generateSignals(data: {
   domain: string; rating: number | null; reviewCount: number | null
   reviews: string[]; oneStar: number | null; fiveStar: number | null
-}) {
+}, founderContext: { industry?: string | null; market?: string | null; founder_stage?: string | null; focus_metric?: string | null } = {})
+{
   const safeReviews = data.reviews.slice(0, 15).map(review =>
     review.replace(/["\\]/g, '').replace(/[\n\r]+/g, ' ')
   )
@@ -147,6 +148,17 @@ TRUSTPILOT DATA:
 
 RECENT REVIEWS:
 ${reviewSample}
+
+FOUNDER CONTEXT:
+- Industry: ${founderContext?.industry ?? 'Not specified'}
+- Market: ${founderContext?.market ?? 'Not specified'}
+- Stage: ${founderContext?.founder_stage ?? 'Not specified'}
+- Primary focus: ${founderContext?.focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations. For example:
+- A Gulf e-commerce founder has different benchmarks than a UK B2B SaaS founder
+- An early_stage founder needs different actions than a product_customers founder
+- Focus metric shapes which signals to prioritise
 
 AVAILABLE SIGNAL TYPES:
 - rating_decline: overall rating is low or dropping
@@ -273,7 +285,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Firecrawl not configured — add FIRECRAWL_API_KEY to environment variables' }, { status: 500 })
     }
 
-    const { domain, founderId, parentScanId = null, triggeredBy = 'connect' } = await request.json()
+    const { domain, founderId, parentScanId = null, triggeredBy = 'connect', founderContext = {} } = await request.json() as {
+      domain?: string
+      founderId: string
+      parentScanId?: string | null
+      triggeredBy?: 'connect' | 'manual' | 'cron'
+      founderContext?: {
+        industry?: string | null
+        market?: string | null
+        founder_stage?: string | null
+        focus_metric?: string | null
+      }
+    }
     if (!domain) return NextResponse.json({ error: 'Domain required' }, { status: 400 })
 
     // Fix 1 — clean and validate domain before scraping
@@ -348,7 +371,8 @@ export async function POST(request: NextRequest) {
 
     let analysis
     try {
-      analysis = await generateSignals(scraped)
+      analysis = await generateSignals(scraped, founderContext)
+
     } catch (err) {
       return NextResponse.json({ error: `AI analysis failed: ${err}` }, { status: 500 })
     }

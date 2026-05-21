@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     const { data: founder } = await supabase
       .from('founders')
-      .select('id, email, full_name, subscription_tier')
+      .select('id, email, full_name, subscription_tier, industry, market, founder_stage, focus_metric')
       .eq('id', founderId)
       .maybeSingle()
 
@@ -230,7 +230,16 @@ export async function POST(request: NextRequest) {
             const res = await fetch(`${base}/api/scrape/trustpilot`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ domain, founderId, parentScanId: masterScanId, triggeredBy }),
+              body: JSON.stringify({ 
+                domain,
+                founderId, parentScanId: masterScanId, triggeredBy,
+                founderContext: {
+                  industry:       founder.industry,
+                  market:         founder.market,
+                  founder_stage:  founder.founder_stage,
+                  focus_metric:   founder.focus_metric,
+                }
+              })
             })
             const data = await res.json()
             results.push({ source: 'trustpilot', signals: data.signals ?? 0, inserted: data.inserted ?? 0, updated: data.updated ?? 0 })
@@ -243,7 +252,8 @@ export async function POST(request: NextRequest) {
             const res = await fetch(`${base}/api/scrape/ga4`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ founderId, parentScanId: masterScanId, triggeredBy }),
+              body: JSON.stringify({ founderId, parentScanId: masterScanId, triggeredBy, founderContext: { industry: founder.industry, market: founder.market, founder_stage: founder.founder_stage, focus_metric: founder.focus_metric } }),
+
             })
             const data = await res.json()
             results.push({ source: 'ga4', signals: data.signals ?? 0, inserted: data.inserted ?? 0, updated: data.updated ?? 0 })

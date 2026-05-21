@@ -6,6 +6,7 @@ import type { SignalUpsertResult } from '@/lib/scan-recorder'
 import { resetStaleConflictPreferences } from '@/lib/conflict-reset'
 import { calculateHealthScore, ScoringInput } from '@/lib/health-scoring'
 import Groq from 'groq-sdk'
+import { availableParallelism } from 'node:os'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
@@ -207,7 +208,9 @@ async function analyseCSV(
   templateType: string,
   headers: string[],
   rows: Record<string, string>[],
-) {
+  founderContext: { industry?: string | null; market?: string | null; founder_stage?: string | null; focus_metric?: string | null } = {}
+)
+{
   // Issue 11: Sample rows — max 500 to Groq to stay within context budget
   // Shows founders with large files still get analysis from representative sample
   const MAX_ROWS_TO_GROQ = 500
@@ -268,6 +271,14 @@ ${templateType === 'marketing' ? `
 - Calculate CPL trend — percentage change
 - Flag if paid traffic > 60% of total traffic as traffic_source_shift risk
 - Signal types to use: conversion_fall for CAC/CPL increase, engagement_drop for email open rate decline, traffic_source_shift for paid dependency` : ''}
+
+FOUNDER CONTEXT:
+- Industry: ${founderContext?.industry ?? 'Not specified'}
+- Market: ${founderContext?.market ?? 'Not specified'}
+- Stage: ${founderContext?.founder_stage ?? 'Not specified'}
+- Primary focus: ${founderContext?.focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations.
 
 VALID SIGNAL TYPES — you must ONLY use these exact values for signal_type field:
 churn_spike, ticket_volume_increase, rating_decline, velocity_drop, conversion_fall,
@@ -371,7 +382,7 @@ export async function POST(request: NextRequest) {
 
     const { data: founder } = await supabase
       .from('founders')
-      .select('id')
+      .select('id, industry, market, founder_stage, focus_metric')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -490,7 +501,12 @@ export async function POST(request: NextRequest) {
     const existingMap = new Map(existingSignals?.map(s => [s.signal_type, s]) ?? [])
 
     // ── Groq analysis — after source confirmed, before delete ──
-    const analysis = await analyseCSV(templateType, headers, rows)
+    const analysis = await analyseCSV(templateType, headers, rows, {
+      industry:      founder.industry,
+      market:        founder.market,
+      founder_stage: founder.founder_stage,
+      focus_metric:  founder.focus_metric,
+    })
 
     // ── Build signals with trend tracking ──
     // Issue 9 + Hybrid approach: carry previous_value from existingMap before delete

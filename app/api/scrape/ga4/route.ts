@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
   try {
     // parentScanId: set by parent scan route — links this child scan row to master row
     // triggeredBy: 'connect' when called directly from connect flow, passed through from parent route otherwise
-    const { founderId, parentScanId = null, triggeredBy = 'connect' } = await request.json()
+    const { founderId, parentScanId = null, triggeredBy = 'connect', founderContext = {} } = await request.json()
     const admin = createAdminClient()
 
     const tokenData = await getValidToken(founderId, 'ga4')
@@ -353,6 +353,17 @@ ${ga4Data.exitPages.map((p: { page: string; exits: number }) => `- ${p.page}: ${
 
 DEVICE BREAKDOWN:
 ${ga4Data.devices.map((d: { device: string; sessions: number; bounceRate: number }) => `- ${d.device}: ${d.sessions} sessions, ${d.bounceRate}% bounce rate`).join('\n')}
+
+FOUNDER CONTEXT:
+- Industry: ${founderContext.industry ?? 'Not specified'}
+- Market: ${founderContext.market ?? 'Not specified'}
+- Stage: ${founderContext.founder_stage ?? 'Not specified'}
+- Primary focus: ${founderContext.focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations. For example:
+- A Gulf e-commerce founder has different benchmarks than a UK B2B SaaS founder
+- An early_stage founder needs different actions than a product_customers founder
+- Focus metric shapes which signals to prioritise
 
 AVAILABLE SIGNAL TYPES:
 - conversion_fall: conversions dropping

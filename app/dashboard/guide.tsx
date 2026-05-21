@@ -238,13 +238,13 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
               {/* Dark Layout Clip-Mask Overlay */}
               {rect ? (
                 <>
-                  <div style={{ position: 'fixed', top: 0,              left: 0,             right: 0,  height: Math.max(0, rect.top - PAD),                       background: 'rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: rect.bottom+PAD, left: 0,            right: 0,  bottom: 0,                                                  background: 'rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: 0,  width: Math.max(0, rect.left-PAD), height: rect.height+PAD*2,           background: 'rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: rect.right+PAD, right: 0, height: rect.height+PAD*2,                        background: 'rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: 0,              left: 0,             right: 0,  height: Math.max(0, rect.top - PAD),                       background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: rect.bottom+PAD, left: 0,            right: 0,  bottom: 0,                                                  background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: 0,  width: Math.max(0, rect.left-PAD), height: rect.height+PAD*2,           background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: rect.right+PAD, right: 0, height: rect.height+PAD*2,                        background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
                   <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: Math.max(0,rect.left-PAD), width: rect.width+PAD*2, height: rect.height+PAD*2, border: '2px solid #3B82F6', borderRadius: 14, boxShadow: '0 0 0 4px rgba(37,99,235,0.2)', outline: '9999px solid rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />                </>
               ) : (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
               )}
 
               {/* Step Card Element */}

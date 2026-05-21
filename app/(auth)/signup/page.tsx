@@ -12,6 +12,22 @@ const BENEFITS = [
   { icon: '✨', title: 'Find where AI can save you 10+ hours a week', desc: 'Specific to your business — not generic suggestions' },
 ]
 
+// ── Password strength ─────────────────────────────────────────
+function getStrength(pw: string): { score: number; label: string; color: string } {
+  if (pw.length === 0) return { score: 0, label: '', color: '#E5E7EB' }
+  let score = 0
+  if (pw.length >= 8)                          score++
+  if (pw.length >= 12)                         score++
+  if (/[0-9]/.test(pw))                        score++
+  if (/[^a-zA-Z0-9]/.test(pw))                score++ // special char or space counts
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw))   score++
+
+  if (score <= 1) return { score, label: 'Weak',   color: '#EF4444' }
+  if (score <= 2) return { score, label: 'Fair',   color: '#F59E0B' }
+  if (score <= 3) return { score, label: 'Good',   color: '#3B82F6' }
+  return              { score, label: 'Strong', color: '#10B981' }
+}
+
 export default function SignupPage() {
   const router = useRouter()
   const [email, setEmail]               = useState('')
@@ -22,6 +38,9 @@ export default function SignupPage() {
   const [error, setError]               = useState('')
   const [emailSent, setEmailSent]       = useState(false)
   const [isResend, setIsResend]         = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const strength = getStrength(password)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -32,13 +51,27 @@ export default function SignupPage() {
     const trimmedFullName     = fullName.trim()
     const trimmedBusinessName = businessName.trim()
 
+    // Password: no trim — spaces are valid characters
+    // Minimum strength check
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      setLoading(false)
+      return
+    }
+
+    if (strength.score < 2) {
+      setError('Password is too weak. Add numbers, symbols, or make it longer.')
+      setLoading(false)
+      return
+    }
+
     const supabase = createClient()
 
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email:   trimmedEmail,
-      password,
+      email:    trimmedEmail,
+      password, // no trim — preserve spaces as valid special characters
       options: {
-        data:         { full_name: trimmedFullName, business_name: trimmedBusinessName },
+        data:            { full_name: trimmedFullName, business_name: trimmedBusinessName },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       }
     })
@@ -57,7 +90,6 @@ export default function SignupPage() {
 
     if (data.session) {
       // Email confirmation DISABLED — session exists immediately (local dev)
-      // Create founder row now using browser client
       const { error: founderError } = await supabase
         .from('founders')
         .insert({
@@ -67,7 +99,8 @@ export default function SignupPage() {
           business_name:        trimmedBusinessName,
           language:             'en',
           subscription_tier:    'free',
-          subscription_status:  'inactive',
+          subscription_status:  'active',
+          account_status:       'active',
           onboarding_completed: false,
         })
 
@@ -83,7 +116,6 @@ export default function SignupPage() {
 
     // Email confirmation ENABLED — no session yet (production)
     // Founder row created in /auth/callback after confirmation
-    // Detect resend: created_at !== updated_at means existing unconfirmed user
     const isExistingUnconfirmed = data.user.created_at !== data.user.updated_at
     setIsResend(isExistingUnconfirmed)
     setEmailSent(true)
@@ -103,9 +135,7 @@ export default function SignupPage() {
             <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.6, marginBottom: 8 }}>
               {isResend ? 'We resent your confirmation link to' : 'We sent a confirmation link to'}
             </p>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 24 }}>
-              {email.trim()}
-            </p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 24 }}>{email.trim()}</p>
             <p style={{ fontSize: 14, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 28 }}>
               {isResend
                 ? 'Your account details have been updated. Click the link to confirm your email and activate your account.'
@@ -128,7 +158,7 @@ export default function SignupPage() {
     )
   }
 
-  // ── Signup form — split layout ──
+  // ── Signup form ──
   return (
     <div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', fontFamily: 'Inter, sans-serif' }}>
 
@@ -184,11 +214,8 @@ export default function SignupPage() {
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full name</label>
               <input
-                type="text"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                required
-                placeholder="Sally Abbas"
+                type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                required placeholder="Sally Abbas"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor = '#2563EB'}
                 onBlur={e => e.target.style.borderColor = '#E5E7EB'}
@@ -198,11 +225,8 @@ export default function SignupPage() {
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Business name</label>
               <input
-                type="text"
-                value={businessName}
-                onChange={e => setBusinessName(e.target.value)}
-                required
-                placeholder="Acme Corp"
+                type="text" value={businessName} onChange={e => setBusinessName(e.target.value)}
+                required placeholder="Acme Corp"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor = '#2563EB'}
                 onBlur={e => e.target.style.borderColor = '#E5E7EB'}
@@ -212,30 +236,57 @@ export default function SignupPage() {
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Work email</label>
               <input
-                type="email"
-                value={email}
-                onChange={e => { setEmail(e.target.value); setError('') }}
-                required
-                placeholder="you@company.com"
+                type="email" value={email} onChange={e => { setEmail(e.target.value); setError('') }}
+                required placeholder="you@company.com"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor = '#2563EB'}
                 onBlur={e => e.target.style.borderColor = '#E5E7EB'}
               />
             </div>
 
+            {/* Password with strength indicator */}
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={8}
-                placeholder="At least 8 characters"
-                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor = '#2563EB'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  required
+                  placeholder="At least 8 characters"
+                  style={{ width: '100%', padding: '11px 44px 11px 14px', border: `1.5px solid ${password.length > 0 ? strength.color : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}
+                >
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
+
+              {/* Strength bar */}
+              {password.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} style={{
+                        flex: 1, height: 3, borderRadius: 99,
+                        background: i <= strength.score ? strength.color : '#E5E7EB',
+                        transition: 'background 0.2s',
+                      }} />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <p style={{ fontSize: 11, color: strength.color, fontWeight: 600, margin: 0 }}>{strength.label}</p>
+                    <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>
+                      {strength.score < 2 ? 'Add numbers or symbols' :
+                       strength.score < 4 ? 'Good — add more variety' :
+                       'Strong password'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {error && (
@@ -254,8 +305,7 @@ export default function SignupPage() {
               disabled={loading}
               style={{
                 width: '100%', padding: '14px',
-                background: loading ? '#2563EB' : '#2563EB',
-                opacity: loading ? 0.7 : 1,
+                background: '#2563EB', opacity: loading ? 0.7 : 1,
                 color: '#fff', fontWeight: 700, borderRadius: 12, border: 'none',
                 fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer',
                 marginTop: 4, transition: 'opacity 0.15s',
@@ -266,11 +316,10 @@ export default function SignupPage() {
 
             <p style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
               By signing up you agree to our{' '}
-              <a href="/terms" style={{ color: '#6B7280', textDecoration: 'underline' }}>Terms of Service</a>
+              <Link href="/terms" style={{ color: '#6B7280', textDecoration: 'underline' }}>Terms of Service</Link>
               {' '}and{' '}
-              <a href="/privacy" style={{ color: '#6B7280', textDecoration: 'underline' }}>Privacy Policy</a>
+              <Link href="/privacy" style={{ color: '#6B7280', textDecoration: 'underline' }}>Privacy Policy</Link>
             </p>
-
           </form>
 
           <p style={{ textAlign: 'center', fontSize: 13, color: '#6B7280', marginTop: 28 }}>

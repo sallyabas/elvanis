@@ -25,8 +25,10 @@ const PUBLIC_ROUTES = [
   '/forgot-password',
   '/reset-password',
   '/auth/callback',
+  '/suspended',
+  '/terms',
+  '/privacy',
 ]
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -76,13 +78,17 @@ export async function middleware(request: NextRequest) {
   if (pathname !== '/onboarding' && !pathname.startsWith('/onboarding/')) {
     const { data: founder } = await supabase
       .from('founders')
-      .select('onboarding_completed')
+      .select('onboarding_completed, account_status')
       .eq('user_id', user.id)
       .maybeSingle()
       
-    if (!founder || !founder.onboarding_completed) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
-    }
+      if (!founder || !founder.onboarding_completed) {
+        return NextResponse.redirect(new URL('/onboarding', request.url))
+      }
+      
+      if (founder.account_status === 'suspended' && pathname !== '/suspended') {
+        return NextResponse.redirect(new URL('/suspended', request.url))
+      }
   }
 
   return response

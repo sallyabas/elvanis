@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
   try {
     // parentScanId: links this child scan row to master row inserted by parent scan route
     // triggeredBy: 'connect' default — passed through from parent route when called via full scan
-    const { founderId, parentScanId = null, triggeredBy = 'connect' } = await request.json()
+    const { founderId, parentScanId = null, triggeredBy = 'connect', founderContext = {} } = await request.json()
     const admin = createAdminClient()
 
     const tokenData = await getValidToken(founderId, 'jira')
@@ -295,6 +295,19 @@ export async function POST(request: NextRequest) {
 PROJECT: ${projectKey}
 OPEN BUGS:
 ${jiraData.bugSummaries.length > 0 ? jiraData.bugSummaries.join('\n') : 'None'}
+
+
+FOUNDER CONTEXT:
+- Industry: ${founderContext.industry ?? 'Not specified'}
+- Market: ${founderContext.market ?? 'Not specified'}
+- Stage: ${founderContext.founder_stage ?? 'Not specified'}
+- Primary focus: ${founderContext.focus_metric ?? 'Not specified'}
+
+Use this context to calibrate signal severity and recommendations. For example:
+- A Gulf e-commerce founder has different benchmarks than a UK B2B SaaS founder
+- An early_stage founder needs different actions than a product_customers founder
+- Focus metric shapes which signals to prioritise
+
 
 AVAILABLE SIGNAL TYPES:
 - velocity_drop: sprint completion below 70%, low done rate, OR high bug-to-feature ratio (team is reactive, not shipping features)
