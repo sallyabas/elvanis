@@ -21,24 +21,15 @@ export async function GET(request: NextRequest) {
     ? cleanShop
     : `${cleanShop}.myshopify.com`
 
-  try {
-    const clientId = process.env.SHOPIFY_CLIENT_ID!
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`
-    const scopes = 'read_orders,read_customers,read_products,read_inventory,read_analytics'
-    const state = Buffer.from(JSON.stringify({ shop: shopDomain, ts: Date.now() })).toString('base64')
-
-    const authUrl = new URL(`https://${shopDomain}/admin/oauth/authorize`)
-    authUrl.searchParams.set('client_id', clientId)
-    authUrl.searchParams.set('scope', scopes)
-    authUrl.searchParams.set('redirect_uri', redirectUri)
-    authUrl.searchParams.set('state', state)
-
-    // Redirect with headers that prevent iframe embedding
-    const response = NextResponse.redirect(authUrl.toString())
-    response.headers.set('Content-Security-Policy', "frame-ancestors 'none'")
-    response.headers.set('X-Frame-Options', 'DENY')
-    return response
-  } catch {
-    return NextResponse.redirect(new URL('/connect/shopify?error=invalid_store', request.url))
-  }
+    try {
+      const clientId = process.env.SHOPIFY_CLIENT_ID!
+      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`
+      const scopes = 'read_orders,read_customers,read_products,read_inventory'
+    
+      const authUrl = `https://${shopDomain}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`
+    
+      return NextResponse.redirect(authUrl)
+    } catch {
+      return NextResponse.redirect(new URL('/connect/shopify?error=invalid_store', request.url))
+    }
 }
