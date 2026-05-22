@@ -89,8 +89,8 @@ async function fetchShopifyData(shop: string, accessToken: string) {
     `${base}/orders.json?status=any&created_at_min=${thirtyDaysAgo}&limit=250&fields=id,created_at,total_price,financial_status,customer,line_items,cancel_reason`,
     { headers }
   )
-  if (!ordersRes.ok) throw new Error(`Shopify orders API error: ${ordersRes.status}`)
-  const ordersData = await ordersRes.json()
+  if (!ordersRes.ok) throw new Error(`SHOPIFY_${ordersRes.status}`)
+    const ordersData = await ordersRes.json()
   const orders = (ordersData.orders ?? []) as Record<string, unknown>[]
 
   // Previous period orders for comparison
@@ -98,7 +98,7 @@ async function fetchShopifyData(shop: string, accessToken: string) {
     `${base}/orders.json?status=any&created_at_min=${sixtyDaysAgo}&created_at_max=${thirtyDaysAgo}&limit=250&fields=id,created_at,total_price,financial_status,customer`,
     { headers }
   )
-  if (!prevOrdersRes.ok) throw new Error(`Shopify prev orders API error: ${prevOrdersRes.status}`)
+  if (!prevOrdersRes.ok) throw new Error(`SHOPIFY_${prevOrdersRes.status}`)  
   const prevOrdersData = await prevOrdersRes.json()
   const prevOrders = (prevOrdersData.orders ?? []) as Record<string, unknown>[]
 
@@ -245,9 +245,9 @@ export async function POST(request: NextRequest) {
       .eq('status', 'active')
       .maybeSingle()
 
-    if (!source?.access_token) {
-      return NextResponse.json({ error: 'Shopify not connected' }, { status: 400 })
-    }
+      if (!source?.access_token) {
+        return NextResponse.json({ error: 'Could not reach your Shopify store. Check your connection.' }, { status: 400 })
+      }
 
     const shop = (source.config as Record<string, string>)?.shop
     if (!shop) return NextResponse.json({ error: 'Shop not configured' }, { status: 400 })
@@ -258,7 +258,13 @@ export async function POST(request: NextRequest) {
     try {
       shopifyData = await fetchShopifyData(shop, source.access_token)
     } catch (err) {
-      return NextResponse.json({ error: `Shopify fetch failed: ${err}` }, { status: 500 })
+      const raw = String(err)
+      const isAuthError = raw.includes('401') || raw.includes('403')
+      return NextResponse.json({
+        error: isAuthError
+          ? 'Shopify disconnected. Please reconnect.'
+          : 'Could not reach your Shopify store. Check your connection.'
+      }, { status: 500 })
     }
 
     console.log('Shopify data:', JSON.stringify(shopifyData))

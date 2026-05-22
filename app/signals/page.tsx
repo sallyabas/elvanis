@@ -318,13 +318,20 @@ export default async function SignalsPage({
               {connected ? 'Refresh in a few seconds to see your first signals' :
                filter ? 'Try a different filter' :
                hasConnectedSources ? 'Click Run new scan to check latest data' :
-               'Connect a tool from the Connect page to start getting signals'}
+               hasAssessment ? 'Connect a tool to get live signals from your real data' : 'Take the assessment or connect a tool to get your first signals'}
             </p>
             {!connected && !hasConnectedSources && (
-              <a href="/connect" style={{ display: 'inline-block', marginTop: 16, padding: '10px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-                Connect a tool →
-              </a>
-            )}
+  <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+    {!hasAssessment && (
+      <a href="/assessment" style={{ display: 'inline-block', padding: '10px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+        Take assessment →
+      </a>
+    )}
+    <a href="/connect" style={{ display: 'inline-block', padding: '10px 24px', background: hasAssessment ? '#2563EB' : '#F9FAFB', color: hasAssessment ? '#fff' : '#374151', border: hasAssessment ? 'none' : '1px solid #E5E7EB', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+      Connect a tool →
+    </a>
+  </div>
+)}
           </div>
         )}
 

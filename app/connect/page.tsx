@@ -44,11 +44,6 @@ export default async function ConnectPage({
   const effectiveSourceCount = liveIntegrationCount + (hasCsvUploads ? 1 : 0)
   const isAtLimit = isFreeTier && effectiveSourceCount >= 3
 
-  // Trial days remaining
-  const trialEndsAt = founder?.trial_ends_at ? new Date(founder.trial_ends_at) : null
-  const isOnTrial = !!trialEndsAt && trialEndsAt > new Date() && founder?.subscription_tier !== 'navigator'
-  const trialDaysLeft = trialEndsAt ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0
-
   const CSV_TEMPLATES = [
     { id: 'support',   name: 'Customer Support', icon: '🎫', color: '#D97706', bg: '#FFFBEB' },
     { id: 'orders',    name: 'Orders & Revenue',  icon: '💰', color: '#2563EB', bg: '#EFF6FF' },
@@ -145,33 +140,10 @@ export default async function ConnectPage({
           </p>
         </div>
 
-        {/* Trial banner */}
-        {isOnTrial && (
-          <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 12, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 18 }}>✨</span>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#4C1D95', margin: '0 0 2px' }}>
-                  Navigator trial — {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} remaining
-                </p>
-                <p style={{ fontSize: 13, color: '#7C3AED', margin: 0 }}>
-                  Full access to all tools and features during your trial
-                </p>
-              </div>
-            </div>
-            <a
-              href={STRIPE_PAYMENT_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ padding: '8px 18px', background: '#7C3AED', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              Upgrade — £29/mo →
-            </a>
-          </div>
-        )}
+  
 
         {/* Free tier limit banner */}
-        {isAtLimit && !isOnTrial && (
+        {isAtLimit && (
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 12, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 18 }}>🔒</span>
@@ -232,7 +204,7 @@ export default async function ConnectPage({
               <div>
                 <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>
                   {connectedCount} source{connectedCount > 1 ? 's' : ''} active
-                  {isFreeTier && !isOnTrial && ` · ${effectiveSourceCount}/3 slots used`}
+                  {isFreeTier && ` · ${effectiveSourceCount}/3 slots used`}
                 </p>
                 <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
                   {activeSources.map(s => s.source_type === 'csv' ? `CSV (${(s.config as Record<string, string>)?.template_type ?? 'unknown'})` : s.source_type).join(' · ')}
@@ -367,7 +339,7 @@ export default async function ConnectPage({
             const isUploaded = !!uploadedSource
             const uploadedConfig = uploadedSource?.config as Record<string, string> | undefined
             // Block new CSV upload if at limit and no CSV uploaded yet
-            const csvBlocked = isAtLimit && !isOnTrial && !hasCsvUploads && !isUploaded
+            const csvBlocked = isAtLimit && !hasCsvUploads && !isUploaded
 
             return (
               <div key={t.id} style={{

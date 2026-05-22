@@ -121,11 +121,11 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient()
 
     const tokenData = await getValidToken(founderId, 'ga4')
-    if (!tokenData) return NextResponse.json({ error: 'GA4 not connected' }, { status: 400 })
+    if (!tokenData) return NextResponse.json({ error: 'Google Analytics disconnected. Please reconnect.' }, { status: 400 })
 
     const { accessToken, source: ga4Source } = tokenData
     const rawPropertyId = (ga4Source.config as Record<string, string>)?.selected_property_id
-    if (!rawPropertyId) return NextResponse.json({ error: 'No GA4 property selected' }, { status: 400 })
+    if (!rawPropertyId) return NextResponse.json({ error: 'Google Analytics disconnected. Please reconnect.' }, { status: 400 })    
     const propertyId = String(rawPropertyId).replace('properties/', '')
 
     const headers = {
@@ -160,7 +160,12 @@ export async function POST(request: NextRequest) {
     if (!coreRes.ok) {
       const errorText = await coreRes.text()
       console.error('GA4 API error:', coreRes.status, errorText.substring(0, 300))
-      return NextResponse.json({ error: `GA4 API error: ${coreRes.status}` }, { status: 500 })
+      const isAuthError = coreRes.status === 401 || coreRes.status === 403
+      return NextResponse.json({
+        error: isAuthError
+          ? 'Google Analytics disconnected. Please reconnect.'
+          : 'Could not reach Google Analytics. Try again later.'
+      }, { status: 500 })
     }
     const coreData = await coreRes.json()
 

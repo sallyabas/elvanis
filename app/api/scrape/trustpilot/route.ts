@@ -82,8 +82,11 @@ async function scrapeTrustpilot(domain: string) {
     })
   })
 
-  if (!res.ok) throw new Error(`Firecrawl request failed with status: ${res.status}`)
-  const data = await res.json()
+  if (!res.ok) {
+    if (res.status === 402) throw new Error('FIRECRAWL_402')
+    if (res.status === 429) throw new Error('FIRECRAWL_429')
+    throw new Error(`Firecrawl request failed with status: ${res.status}`)
+  }  const data = await res.json()
 
   if (!data.success || !data.data) {
     throw new Error(`Firecrawl parsing error: ${data.error || 'No data returned'}`)
@@ -345,11 +348,17 @@ export async function POST(request: NextRequest) {
     try {
       scraped = await scrapeTrustpilot(cleanDomain)
     } catch (err) {
+      const raw = String(err)
+      const humanError = raw.includes('FIRECRAWL_402')
+        ? 'Trustpilot scan unavailable. Contact support.'
+        : raw.includes('FIRECRAWL_429')
+        ? 'Too many scans running. Try again in a few minutes.'
+        : 'Trustpilot scan unavailable. Try again later.'
       await supabase.from('scrape_jobs').update({
-        status: 'failed', error_message: String(err),
+        status: 'failed', error_message: raw,
         completed_at: new Date().toISOString()
       }).eq('id', job?.id)
-      return NextResponse.json({ error: `Scraping failed: ${err}` }, { status: 500 })
+      return NextResponse.json({ error: humanError }, { status: 500 })
     }
 
     console.log(`Scraped: rating=${scraped.rating}, reviewCount=${scraped.reviewCount}, reviews=${scraped.reviews.length}`)
@@ -374,7 +383,7 @@ export async function POST(request: NextRequest) {
       analysis = await generateSignals(scraped, founderContext)
 
     } catch (err) {
-      return NextResponse.json({ error: `AI analysis failed: ${err}` }, { status: 500 })
+      return NextResponse.json({ error: 'Analysis temporarily unavailable. Your data was saved. Try again in a few minutes.' }, { status: 500 })
     }
 
     console.log('Groq signals returned:', JSON.stringify(

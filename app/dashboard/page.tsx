@@ -282,7 +282,7 @@ export default async function DashboardPage() {
         )}
         <div>
           {/* ── Row 1 — Score cards ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
+          <div className="grid-4-col" style={{ marginBottom: 20 }}>
 
             {/* Business Health */}
             <div id="tour-health"  style={{ background: hasRealData ? health.bg : '#F9FAFB', borderRadius: 16, border: `1px solid ${hasRealData ? health.color + '30' : '#E5E7EB'}`, padding: '20px 22px' }}>
@@ -487,6 +487,24 @@ export default async function DashboardPage() {
             </div>
           )}
 
+{/* ── Token expiry alert ── */}
+{sources?.some(s => s.status === 'token_expired') && (
+  <div style={{ background: '#FFFBEB', borderRadius: 16, border: '1px solid #FDE68A', padding: '16px 24px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 18 }}>⚠️</span>
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 700, color: '#D97706', margin: '0 0 2px' }}>Connection issue detected</p>
+        <p style={{ fontSize: 12, color: '#92400E', margin: 0 }}>
+          {sources.filter(s => s.status === 'token_expired').map(s => sourceLabel[s.source_type] ?? s.source_type).join(', ')} — expired. Signals from {sources.filter(s => s.status === 'token_expired').length === 1 ? 'this source are' : 'these sources are'} outdated.
+        </p>
+      </div>
+    </div>
+    <a href="/connect" style={{ fontSize: 13, fontWeight: 600, color: '#D97706', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, background: '#FEF3C7', padding: '7px 14px', borderRadius: 8, border: '1px solid #FDE68A' }}>
+      Reconnect →
+    </a>
+  </div>
+)}
+
           {/* ── Conflicts section ── */}
           {conflictedSignals.length > 0 && (
             <div style={{ background: '#FFFBEB', borderRadius: 16, border: '1px solid #FDE68A', padding: '20px 24px', marginBottom: 20 }}>
@@ -521,9 +539,9 @@ export default async function DashboardPage() {
           )}
 
           {/* ── Fix This First + Connected Sources ── */}
-          <div id="tour-fix-first" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14, marginBottom: 20 }}>
-            {top3Signals.length > 0 ? (
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px' }}>
+           <div id="tour-fix-first" className="grid-2-1" style={{ marginBottom: 20 }}>
+          {top3Signals.length > 0 ? (
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <p style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>⚡ Fix This First</p>
                   {activeRealSignals.length === 0 && activeAssessmentSignals.length > 0 && (
@@ -743,7 +761,7 @@ export default async function DashboardPage() {
 
           {/* ── Action Digest upgrade — free tier ── */}
           {isFreeTier && (
-            <div id="tour-digest" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
+            <div id="tour-digest" className="stack-mobile" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
               
                 <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>Your AI-generated 90-day action plan</p>
                 <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>Upgrade to get an action plan built from your signals, updated each scan cycle.</p>
@@ -788,8 +806,8 @@ export default async function DashboardPage() {
             )}
             {aiReadiness.opportunities.length > 0 ? (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
-                  {aiReadiness.opportunities.slice(0, 3).map(opp => (
+              <div className="grid-3-col" style={{ marginBottom: 20 }}>                  
+                   {aiReadiness.opportunities.slice(0, 3).map(opp => (
                     <div key={opp.signal_type} style={{ background: '#F5F3FF', borderRadius: 12, padding: '16px', border: '1px solid #EDE9FE' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                         <p style={{ fontSize: 14, fontWeight: 700, color: '#4C1D95', margin: 0 }}>{opp.title}</p>
@@ -861,7 +879,7 @@ export default async function DashboardPage() {
                     <p style={{ fontSize: 12, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{(score.overall_summary as string)?.substring(0, 150)}...</p>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+                <div className="grid-3-col" style={{ marginBottom: 16 }}>
                   {[
                     { label: 'Revenue',              val: score.score_revenue   as number | null },
                     { label: 'Product-Market Fit',   val: score.score_pmf       as number | null },
@@ -897,12 +915,12 @@ export default async function DashboardPage() {
           </div>
 
           {/* ── Service CTA ── */}
-          <div style={{ background: '#1E1B4B', borderRadius: 16, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+          <div className="stack-mobile" style={{ background: '#1E1B4B', borderRadius: 16, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
             <div>
               <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Need a strategic plan or hands-on help?</p>
               <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>Get an AI-generated 90-day roadmap or book a session with a fractional CPO.</p>
             </div>
-            <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+            <div className="stack-mobile" style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
               <a href="/service-request?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>Get AI Roadmap</a>
               <a href="/service-request?type=cpo"     style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}>Book CPO Session</a>
             </div>

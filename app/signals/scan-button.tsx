@@ -79,13 +79,23 @@ export default function ScanButton({
         const total = data.results?.reduce(
           (sum: number, r: { signals: number }) => sum + (r.signals ?? 0), 0
         ) ?? 0
-        setResult(total > 0 ? `✓ ${total} new signals found` : '✓ Scan complete — no new signals')
+        const errors = data.results?.filter((r: { error?: string }) => r.error) ?? []
+        const errorSources = errors.map((r: { source: string }) => r.source).join(', ')
+        if (total > 0 && errors.length === 0) {
+          setResult(`✓ ${total} new signals found`)
+        } else if (total > 0 && errors.length > 0) {
+          setResult(`✓ ${total} signals found · ${errorSources} had issues`)
+        } else if (errors.length > 0) {
+          setResult(`⚠ Scan completed with issues on ${errorSources} — check connections`)
+        } else {
+          setResult('✓ Scan complete — no new signals')
+        }
         router.refresh()
       } else {
         setResult(data.error ?? 'Scan failed — try again')
       }
     } catch {
-      setResult('Scan failed — check your connections')
+      setResult('Scan failed — check your internet connection and try again')
     }
     setScanning(false)
   }

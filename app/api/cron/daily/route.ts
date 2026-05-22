@@ -101,8 +101,38 @@ async function insertAlert(
       message,
     })
   } catch (err) {
-    // Alert insert must never crash the orchestrator
     console.error('[daily] system_alerts insert failed:', err)
+  }
+
+  // Admin email alert — non-fatal, never throws
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL
+    if (adminEmail) {
+      await resend.emails.send({
+        from:    process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+        to:      adminEmail,
+        subject: `[Elvanis Alert] ${alertType} — ${new Date().toISOString().split('T')[0]}`,
+        html: `
+          <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px 16px">
+            <h2 style="color:#DC2626;margin:0 0 16px">⚠ Elvanis System Alert</h2>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+              <tr><td style="padding:8px;background:#F9FAFB;font-weight:600;width:120px">Type</td><td style="padding:8px;background:#F9FAFB">${alertType}</td></tr>
+              <tr><td style="padding:8px;font-weight:600">Founder ID</td><td style="padding:8px">${founderId ?? 'system'}</td></tr>
+              <tr><td style="padding:8px;background:#F9FAFB;font-weight:600">Time</td><td style="padding:8px;background:#F9FAFB">${new Date().toISOString()}</td></tr>
+            </table>
+            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:16px;margin-bottom:16px">
+              <p style="margin:0;font-size:14px;color:#111827;line-height:1.6">${message}</p>
+            </div>
+            <a href="https://supabase.com/dashboard/project/scisdpycunhyhxaotjuk/editor" 
+               style="display:inline-block;padding:10px 20px;background:#2563EB;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
+              Open Supabase →
+            </a>
+          </div>
+        `,
+      })
+    }
+  } catch (emailErr) {
+    console.error('[daily] admin alert email failed:', emailErr)
   }
 }
 

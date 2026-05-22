@@ -34,7 +34,6 @@ export default function LoginPage() {
       return
     }
 
-    // Check onboarding status — middleware is not active so we check here
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data: founder } = await supabase
@@ -44,8 +43,6 @@ export default function LoginPage() {
         .maybeSingle()
 
       if (!founder) {
-        // L2: Auth succeeded but no founder row — broken account edge case
-        // Create founder row from auth metadata then send to onboarding
         const fullName     = (user.user_metadata?.full_name     as string | undefined)?.trim() ?? ''
         const businessName = (user.user_metadata?.business_name as string | undefined)?.trim() ?? ''
         await supabase.from('founders').insert({
@@ -81,10 +78,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', fontFamily: 'Inter, sans-serif' }}>
+    <div className="auth-layout" style={{ background: '#F9FAFB' }}>
 
-      {/* Left — brand panel */}
-      <div style={{ flex: 1, background: '#1E1B4B', padding: '48px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
+      {/* Left — brand panel (hidden on mobile) */}
+      <div className="auth-brand-panel">
         <div style={{ maxWidth: 460 }}>
           <a href="/" style={{ textDecoration: 'none' }}>
             <span style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>Elvanis</span>
@@ -126,8 +123,15 @@ export default function LoginPage() {
       </div>
 
       {/* Right — login form */}
-      <div style={{ width: 480, flexShrink: 0, background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px', overflowY: 'auto' }}>
+      <div className="auth-form-panel">
         <div style={{ maxWidth: 380, width: '100%', margin: '0 auto' }}>
+
+          {/* Mobile logo — only shows on mobile */}
+          <div className="auth-mobile-logo" style={{ display: 'none', marginBottom: 28 }}>
+            <a href="/" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#2563EB', letterSpacing: '-0.5px' }}>Elvanis</span>
+            </a>
+          </div>
 
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 6 }}>
             Welcome back

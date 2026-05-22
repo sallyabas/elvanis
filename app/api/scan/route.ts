@@ -196,6 +196,42 @@ export async function POST(request: NextRequest) {
       error?: string
     }> = []
 
+    function humaniseError(sourceType: string, error: string): string {
+      const e = error.toLowerCase()
+      if (e.includes('groq') || e.includes('llm') || e.includes('ai') || e.includes('parse')) {
+        return 'Analysis temporarily unavailable. Your data was saved. Try again in a few minutes.'
+      }
+      if (sourceType === 'trustpilot') {
+        if (e.includes('402')) return 'Trustpilot scan unavailable. Contact support.'
+        if (e.includes('429')) return 'Too many scans running. Try again in a few minutes.'
+        if (e.includes('firecrawl')) return 'Trustpilot scan unavailable. Try again later.'
+      }
+      if (sourceType === 'shopify') {
+        if (e.includes('401') || e.includes('403')) return 'Shopify disconnected. Please reconnect.'
+        return 'Could not reach your Shopify store. Check your connection.'
+      }
+      if (sourceType === 'ga4') {
+        if (e.includes('401') || e.includes('403') || e.includes('token') || e.includes('auth')) {
+          return 'Google Analytics disconnected. Please reconnect.'
+        }
+        return 'Could not reach Google Analytics. Try again later.'
+      }
+      if (sourceType === 'jira') {
+        if (e.includes('401') || e.includes('403') || e.includes('token') || e.includes('auth')) {
+          return 'Jira disconnected. Please reconnect.'
+        }
+        return 'Could not reach Jira. Try again later.'
+      }
+      if (sourceType === 'intercom') {
+        if (e.includes('401') || e.includes('403') || e.includes('token') || e.includes('auth')) {
+          return 'Intercom disconnected. Please reconnect.'
+        }
+        return 'Could not reach Intercom. Try again later.'
+      }
+      return 'Scan failed. Try again in a few minutes.'
+    }
+    
+
     const base = process.env.NEXT_PUBLIC_APP_URL!
 
     for (const source of sources) {
@@ -242,6 +278,11 @@ export async function POST(request: NextRequest) {
               })
             })
             const data = await res.json()
+            if (!res.ok || data.error) {
+            results.push({ source: 'ga4', signals: 0, inserted: 0, updated: 0, error: humaniseError('ga4', data.error ?? `HTTP ${res.status}`) })
+           } else {
+            results.push({ source: 'ga4', signals: data.signals ?? 0, inserted: data.inserted ?? 0, updated: data.updated ?? 0 })
+             }
             results.push({ source: 'trustpilot', signals: data.signals ?? 0, inserted: data.inserted ?? 0, updated: data.updated ?? 0 })
           }
         }
@@ -302,7 +343,12 @@ export async function POST(request: NextRequest) {
         }
 
       } catch (err) {
-        results.push({ source: source.source_type, signals: 0, inserted: 0, updated: 0, error: String(err) })
+        const rawError = String(err)
+        results.push({
+          source: source.source_type,
+          signals: 0, inserted: 0, updated: 0,
+          error: humaniseError(source.source_type, rawError),
+        })
       }
     }
 

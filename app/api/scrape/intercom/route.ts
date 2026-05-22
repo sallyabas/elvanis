@@ -239,9 +239,9 @@ export async function POST(request: NextRequest) {
       .eq('status', 'active')
       .maybeSingle()
 
-    if (!source?.access_token) {
-      return NextResponse.json({ error: 'Intercom not connected' }, { status: 400 })
-    }
+      if (!source?.access_token) {
+        return NextResponse.json({ error: 'Intercom disconnected. Please reconnect.' }, { status: 400 })
+      }
 
     console.log('Fetching Intercom data...')
 
@@ -249,7 +249,13 @@ export async function POST(request: NextRequest) {
     try {
       intercomData = await fetchIntercomData(source.access_token)
     } catch (err) {
-      return NextResponse.json({ error: `Intercom fetch failed: ${err}` }, { status: 500 })
+      const raw = String(err)
+      const isAuthError = raw.includes('401') || raw.includes('403') || raw.includes('Unauthorized') || raw.includes('unauthorized')
+      return NextResponse.json({
+        error: isAuthError
+          ? 'Intercom disconnected. Please reconnect.'
+          : 'Could not reach Intercom. Try again later.'
+      }, { status: 500 })
     }
 
     console.log('Intercom data:', JSON.stringify(intercomData))
@@ -500,6 +506,6 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
 
   } catch (err) {
     console.error('Intercom scrape error:', err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Analysis temporarily unavailable. Your data was saved. Try again in a few minutes.' }, { status: 500 })
   }
 }

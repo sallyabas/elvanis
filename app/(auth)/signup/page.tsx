@@ -12,16 +12,14 @@ const BENEFITS = [
   { icon: '✨', title: 'Find where AI can save you 10+ hours a week', desc: 'Specific to your business — not generic suggestions' },
 ]
 
-// ── Password strength ─────────────────────────────────────────
 function getStrength(pw: string): { score: number; label: string; color: string } {
   if (pw.length === 0) return { score: 0, label: '', color: '#E5E7EB' }
   let score = 0
   if (pw.length >= 8)                          score++
   if (pw.length >= 12)                         score++
   if (/[0-9]/.test(pw))                        score++
-  if (/[^a-zA-Z0-9]/.test(pw))                score++ // special char or space counts
+  if (/[^a-zA-Z0-9]/.test(pw))                score++
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw))   score++
-
   if (score <= 1) return { score, label: 'Weak',   color: '#EF4444' }
   if (score <= 2) return { score, label: 'Fair',   color: '#F59E0B' }
   if (score <= 3) return { score, label: 'Good',   color: '#3B82F6' }
@@ -51,8 +49,6 @@ export default function SignupPage() {
     const trimmedFullName     = fullName.trim()
     const trimmedBusinessName = businessName.trim()
 
-    // Password: no trim — spaces are valid characters
-    // Minimum strength check
     if (password.length < 8) {
       setError('Password must be at least 8 characters.')
       setLoading(false)
@@ -69,7 +65,7 @@ export default function SignupPage() {
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email:    trimmedEmail,
-      password, // no trim — preserve spaces as valid special characters
+      password,
       options: {
         data:            { full_name: trimmedFullName, business_name: trimmedBusinessName },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
@@ -89,7 +85,6 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      // Email confirmation DISABLED — session exists immediately (local dev)
       const { error: founderError } = await supabase
         .from('founders')
         .insert({
@@ -106,7 +101,6 @@ export default function SignupPage() {
 
       if (founderError) {
         console.error('Founder insert error:', founderError.message)
-        // Not blocking — user still continues
       }
 
       router.push('/onboarding')
@@ -114,15 +108,12 @@ export default function SignupPage() {
       return
     }
 
-    // Email confirmation ENABLED — no session yet (production)
-    // Founder row created in /auth/callback after confirmation
     const isExistingUnconfirmed = data.user.created_at !== data.user.updated_at
     setIsResend(isExistingUnconfirmed)
     setEmailSent(true)
     setLoading(false)
   }
 
-  // ── Email sent state ──
   if (emailSent) {
     return (
       <div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'Inter, sans-serif' }}>
@@ -139,7 +130,7 @@ export default function SignupPage() {
             <p style={{ fontSize: 14, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 28 }}>
               {isResend
                 ? 'Your account details have been updated. Click the link to confirm your email and activate your account.'
-                : 'Click the link in the email to activate your account and get your free business health score. Check your spam folder if you do not see it within 2 minutes.'}
+                : 'Click the link in the email to activate your account. Check your spam folder if you do not see it within 2 minutes.'}
             </p>
             <div style={{ background: '#F9FAFB', borderRadius: 12, padding: '16px 20px' }}>
               <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
@@ -158,12 +149,11 @@ export default function SignupPage() {
     )
   }
 
-  // ── Signup form ──
   return (
-    <div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', fontFamily: 'Inter, sans-serif' }}>
+    <div className="auth-layout" style={{ background: '#F9FAFB' }}>
 
-      {/* Left — value proposition */}
-      <div style={{ flex: 1, background: '#1E1B4B', padding: '48px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
+      {/* Left — brand panel (hidden on mobile) */}
+      <div className="auth-brand-panel">
         <div style={{ maxWidth: 460 }}>
           <a href="/" style={{ textDecoration: 'none' }}>
             <span style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>Elvanis</span>
@@ -193,15 +183,23 @@ export default function SignupPage() {
 
           <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #312E81' }}>
             <p style={{ fontSize: 13, color: '#818CF8', margin: 0 }}>
-              Built for founder-led startups in the <strong style={{ color: '#A5B4FC' }}>UK</strong> and <strong style={{ color: '#A5B4FC' }}>Gulf</strong> — B2B SaaS, e-commerce, and service businesses.
+              Built for founder-led startups in the <strong style={{ color: '#A5B4FC' }}>UK</strong> and <strong style={{ color: '#A5B4FC' }}>Gulf</strong>.
             </p>
           </div>
         </div>
       </div>
 
       {/* Right — form */}
-      <div style={{ width: 480, flexShrink: 0, background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 48px', overflowY: 'auto' }}>
+      <div className="auth-form-panel">
         <div style={{ maxWidth: 380, width: '100%', margin: '0 auto' }}>
+
+          {/* Mobile logo */}
+          <div className="auth-mobile-logo" style={{ display: 'none', marginBottom: 28 }}>
+            <a href="/" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#2563EB', letterSpacing: '-0.5px' }}>Elvanis</span>
+            </a>
+          </div>
+
           <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 6 }}>
             Get your free health score
           </h2>
@@ -213,38 +211,25 @@ export default function SignupPage() {
 
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full name</label>
-              <input
-                type="text" value={fullName} onChange={e => setFullName(e.target.value)}
-                required placeholder="Sally Abbas"
+              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Sally Abbas"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor = '#2563EB'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
-              />
+                onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
             </div>
 
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Business name</label>
-              <input
-                type="text" value={businessName} onChange={e => setBusinessName(e.target.value)}
-                required placeholder="Acme Corp"
+              <input type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} required placeholder="Acme Corp"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor = '#2563EB'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
-              />
+                onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
             </div>
 
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Work email</label>
-              <input
-                type="email" value={email} onChange={e => { setEmail(e.target.value); setError('') }}
-                required placeholder="you@company.com"
+              <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError('') }} required placeholder="you@company.com"
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor = '#2563EB'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
-              />
+                onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
             </div>
 
-            {/* Password with strength indicator */}
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
               <div style={{ position: 'relative' }}>
@@ -256,33 +241,22 @@ export default function SignupPage() {
                   placeholder="At least 8 characters"
                   style={{ width: '100%', padding: '11px 44px 11px 14px', border: `1.5px solid ${password.length > 0 ? strength.color : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(s => !s)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}
-                >
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
                   {showPassword ? '🙈' : '👁'}
                 </button>
               </div>
-
-              {/* Strength bar */}
               {password.length > 0 && (
                 <div style={{ marginTop: 8 }}>
                   <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
                     {[1, 2, 3, 4, 5].map(i => (
-                      <div key={i} style={{
-                        flex: 1, height: 3, borderRadius: 99,
-                        background: i <= strength.score ? strength.color : '#E5E7EB',
-                        transition: 'background 0.2s',
-                      }} />
+                      <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, background: i <= strength.score ? strength.color : '#E5E7EB', transition: 'background 0.2s' }} />
                     ))}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <p style={{ fontSize: 11, color: strength.color, fontWeight: 600, margin: 0 }}>{strength.label}</p>
                     <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>
-                      {strength.score < 2 ? 'Add numbers or symbols' :
-                       strength.score < 4 ? 'Good — add more variety' :
-                       'Strong password'}
+                      {strength.score < 2 ? 'Add numbers or symbols' : strength.score < 4 ? 'Good — add more variety' : 'Strong password'}
                     </p>
                   </div>
                 </div>
@@ -300,17 +274,8 @@ export default function SignupPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%', padding: '14px',
-                background: '#2563EB', opacity: loading ? 0.7 : 1,
-                color: '#fff', fontWeight: 700, borderRadius: 12, border: 'none',
-                fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer',
-                marginTop: 4, transition: 'opacity 0.15s',
-              }}
-            >
+            <button type="submit" disabled={loading}
+              style={{ width: '100%', padding: '14px', background: '#2563EB', opacity: loading ? 0.7 : 1, color: '#fff', fontWeight: 700, borderRadius: 12, border: 'none', fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4, transition: 'opacity 0.15s' }}>
               {loading ? 'Creating your account...' : 'Get my free health score →'}
             </button>
 

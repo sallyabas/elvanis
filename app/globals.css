@@ -12,15 +12,158 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── Auth pages ──────────────────────────────────────────────── */
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  font-family: Inter, sans-serif;
+}
+.auth-brand-panel {
+  flex: 1;
+  background: #1E1B4B;
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+.auth-form-panel {
+  width: 480px;
+  flex-shrink: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px;
+  overflow-y: auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.header-nav {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.header-mobile-controls {
+  display: none !important;
+}
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 16px 24px;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.mobile-nav.open {
+  display: flex;
+}
+.mobile-nav a {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+}
+
+/* ── Dashboard grids ─────────────────────────────────────────── */
+.grid-4-col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+}
+.grid-3-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.grid-2-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.grid-3-col-csv {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ── Signal filter cards ─────────────────────────────────────── */
+.signal-filter-cards {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.signal-filter-card {
+  flex: 1;
+  min-width: 130px;
+}
+
+/* ── Utility ─────────────────────────────────────────────────── */
+.hide-mobile { display: block; }
+.show-mobile { display: none !important; }
+.stack-mobile { display: flex; }
+
+/* ── Mobile breakpoint ───────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Auth */
+  .auth-brand-panel { display: none; }
+  .auth-form-panel {
+    width: 100%;
+    padding: 32px 24px;
+    min-height: 100vh;
+    justify-content: flex-start;
+    padding-top: 48px;
+  }
+
+  /* Header */
+  .header-nav { display: none !important; }
+  .header-mobile-controls { display: flex !important; align-items: center; gap: 12px; }
+
+  /* Auth mobile logo */
+  .auth-mobile-logo { display: block !important; }
+
+  /* Grids */
+  .grid-4-col { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-2-1   { grid-template-columns: 1fr !important; }
+  .grid-3-col { grid-template-columns: 1fr !important; }
+  .grid-2-col { grid-template-columns: 1fr !important; }
+  .grid-3-col-csv { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Signal filters */
+  .signal-filter-card {
+    min-width: calc(50% - 6px);
+    flex: 1 1 calc(50% - 6px);
+  }
+
+  /* Utility */
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: block !important; }
+  .stack-mobile { flex-direction: column !important; }
+}
+
+@media (max-width: 480px) {
+  .grid-4-col { grid-template-columns: 1fr 1fr !important; }
+  .grid-3-col-csv { grid-template-columns: 1fr !important; }
+  .signal-filter-card { min-width: 100%; flex: 1 1 100%; }
 }

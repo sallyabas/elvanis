@@ -128,13 +128,11 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient()
 
     const tokenData = await getValidToken(founderId, 'jira')
-    if (!tokenData) return NextResponse.json({ error: 'Jira not connected' }, { status: 400 })
-
+    if (!tokenData) return NextResponse.json({ error: 'Jira disconnected. Please reconnect.' }, { status: 400 })
     const { accessToken: jiraToken, source: jiraSource } = tokenData
     const cloudId = (jiraSource.config as Record<string, string>)?.cloud_id
     const projectKey = (jiraSource.config as Record<string, string>)?.project_key
-    if (!cloudId || !projectKey) return NextResponse.json({ error: 'Jira project not selected' }, { status: 400 })
-
+    if (!cloudId || !projectKey) return NextResponse.json({ error: 'Jira disconnected. Please reconnect.' }, { status: 400 })
     const headers = { Authorization: `Bearer ${jiraToken}`, Accept: 'application/json' }
     const base = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3`
     const jqlProject = `project="${String(projectKey).replace(/"/g, '\\"')}"`
@@ -147,7 +145,10 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({ jql, maxResults: 100, fields: fieldList }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(`Jira search failed: ${data.errorMessages?.join('; ') ?? data.message ?? `HTTP ${res.status}`}`)
+      if (!res.ok) {
+        const isAuthError = res.status === 401 || res.status === 403
+        throw new Error(isAuthError ? 'JIRA_AUTH' : `JIRA_${res.status}`)
+      }      
       return { issues: (data.issues ?? []) as Record<string, unknown>[] }
     }
 
@@ -523,6 +524,11 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
 
   } catch (err) {
     console.error('Jira scrape error:', err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    const raw = String(err)
+    return NextResponse.json({
+      error: raw.includes('JIRA_AUTH')
+        ? 'Jira disconnected. Please reconnect.'
+        : 'Could not reach Jira. Try again later.'
+    }, { status: 500 })
   }
 }

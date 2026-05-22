@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description: "Know what's breaking your business before it breaks you. Elvanis reads your real operational data and tells you exactly what to fix.",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
