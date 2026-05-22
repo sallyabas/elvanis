@@ -219,7 +219,7 @@ export default async function ConnectPage({
 
         {/* API integrations */}
         <h2 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 14 }}>Live integrations</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, marginBottom: 32 }}>
+        <div className="grid-2-col" style={{ marginBottom: 32 }}>
           {integrations.map(integration => {
             const isConnected = !!connected(integration.id)
             const isExpired = connected(integration.id)?.status === 'token_expired'
@@ -333,7 +333,7 @@ export default async function ConnectPage({
         <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 14 }}>
           Export from any tool and upload here. All CSV templates count as one source slot.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div className="grid-3-col-csv" style={{ marginBottom: 32 }}>
           {CSV_TEMPLATES.map(t => {
             const uploadedSource = csvSources.find(s => (s.config as Record<string, string>)?.template_type === t.id)
             const isUploaded = !!uploadedSource

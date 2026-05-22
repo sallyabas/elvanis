@@ -234,7 +234,7 @@ export default async function SignalsPage({
 
 
         {/* ── Status filter cards ── */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div className="signal-filter-cards">
           {[
             { label: 'All Active', value: '', count: total, color: '#111827', bg: '#fff', border: '#E5E7EB' },
             { label: 'Critical', value: 'critical', count: critical, color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },

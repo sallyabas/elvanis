@@ -375,7 +375,7 @@ export default async function PlanPage() {
 
             {/* Consultant hook */}
             {consultantHook && (
-              <div style={{ background: '#1E1B4B', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, marginBottom: 20 }}>
+              <div className="stack-mobile" style={{ background: '#1E1B4B', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, marginBottom: 20 }}>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>Want a human strategist to review this with you?</p>
                   <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>{consultantHook}</p>
