@@ -178,7 +178,7 @@ export default async function BusinessHealthTrackerPage() {
         ) : (
           <>
             {/* ── Summary strip ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+             <div className="grid-4-col" style={{ marginBottom: 24 }}>
               {/* Health score */}
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '16px 20px' }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>Health Score</p>
@@ -258,7 +258,7 @@ export default async function BusinessHealthTrackerPage() {
             {/* ── Section 2: Signal Cycle Summary + Scan History ── */}
             <div style={{ marginBottom: 24 }}>
               <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>Signal Cycle Summary</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+              <div className="grid-4-col" style={{ marginBottom: 16 }}>
                 {[
                   { label: 'New Detected', count: newSignals.length, color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE', icon: '🆕' },
                   { label: 'Improving',    count: improving.length,  color: '#059669', bg: '#ECFDF5', border: '#A7F3D0', icon: '↑'  },
@@ -342,8 +342,8 @@ export default async function BusinessHealthTrackerPage() {
               />
             </div>
 
-            {/* ── Section 5: 🔧 Resolved Signals ── */}
-            {(resolvedSignals ?? []).length > 0 && (
+{/* ── Section 5: 🔧 Resolved Signals ── */}
+{(resolvedSignals ?? []).length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div>
@@ -356,21 +356,33 @@ export default async function BusinessHealthTrackerPage() {
                   </div>
                   <span style={{ fontSize: 12, color: '#9CA3AF' }}>{resolvedSignals?.length} total</span>
                 </div>
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.7fr 0.8fr 0.9fr 2fr', padding: '10px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                
+                {/* Scrollable Container */}
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflowX: 'auto' }}>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'minmax(200px, 2fr) minmax(80px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.9fr) minmax(250px, 2fr)', 
+                    padding: '10px 20px', 
+                    background: '#F9FAFB', 
+                    borderBottom: '1px solid #E5E7EB',
+                    minWidth: '750px' /* Forces browser to show scrollbar if container < 750px */
+                  }}>
                     {['Signal', 'Source', 'Category', 'Date Resolved', 'Outcome Note'].map(h => (
                       <p key={h} style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{h}</p>
                     ))}
                   </div>
+                  
                   {(resolvedSignals ?? []).map((signal, index) => {
                     const isLast      = index === (resolvedSignals?.length ?? 0) - 1
                     const outcomeNote = String(signal.insight_summary ?? '')
                     return (
                       <div key={signal.id} style={{
-                        display: 'grid', gridTemplateColumns: '2fr 0.7fr 0.8fr 0.9fr 2fr',
+                        display: 'grid', 
+                        gridTemplateColumns: 'minmax(200px, 2fr) minmax(80px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.9fr) minmax(250px, 2fr)',
                         padding: '10px 20px',
                         borderBottom: isLast ? 'none' : '1px solid #F3F4F6',
                         background: '#FAFFFE',
+                        minWidth: '750px'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 14 }}>{dimensionIcon(signal.dimension)}</span>
