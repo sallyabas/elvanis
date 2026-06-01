@@ -72,7 +72,7 @@ function ConnectShopifyContent() {
     const appBaseUrl      = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
     const clientId        = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID
     const redirectUri     = `${appBaseUrl}/api/auth/shopify/callback`
-    const scopes          = 'read_orders,read_customers,read_products,read_inventory'
+    const scopes          = 'read_orders,read_customers,read_products,read_inventory,read_analytics'
     const encodedRedirect = encodeURIComponent(redirectUri)
 
     setLoading(true)
