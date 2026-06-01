@@ -70,7 +70,7 @@ function ConnectShopifyContent() {
 
     // ── Step 4: Build OAuth URL and redirect ──────────────────
     const appBaseUrl      = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-    const clientId        = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID || 'f050168b0cb80a1c88ea1b730b33709c'
+    const clientId        = process.env.NEXT_PUBLIC_SHOPIFY_CLIENT_ID
     const redirectUri     = `${appBaseUrl}/api/auth/shopify/callback`
     const scopes          = 'read_orders,read_customers,read_products,read_inventory'
     const encodedRedirect = encodeURIComponent(redirectUri)
