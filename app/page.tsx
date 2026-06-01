@@ -266,7 +266,7 @@ export default function LandingPage() {
           <a href="/">
             {logoErr
               ? <span style={{ fontSize: 19, fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>Elvanis</span>
-              : <img src="/elvanis-logo-dark.png" alt="Elvanis" style={{ height: 28 }} onError={() => setLogoErr(true)} />
+              : <img src="/elvanis-logo-dark.png" alt="Elvanis" style={{ height: 38 }} onError={() => setLogoErr(true)} />
             }
           </a>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
