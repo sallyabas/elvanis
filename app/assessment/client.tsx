@@ -742,15 +742,19 @@ export default function AssessmentClient({ founderId, language }: Props) {
     />
   )
 
-  // Intro
-  if (uiState === 'intro') return (
+// Intro
+const currentPage = PAGES[pageIndex]
+if (uiState === 'intro') {
+  if (!currentPage) { setPageIndex(0); return null }
+  return (
     <IntroScreen
-      page={PAGES[pageIndex]}
+      page={currentPage}
       pageIndex={pageIndex}
       onBegin={() => setUiState('question')}
       progress={progress}
     />
   )
+}
 
   // Numbers
   if (uiState === 'numbers') return (
@@ -763,9 +767,10 @@ export default function AssessmentClient({ founderId, language }: Props) {
   )
 
   // Question
+  if (!currentPage) return null
   return (
     <QuestionScreen
-      page={PAGES[pageIndex]}
+      page={currentPage}
       pageIndex={pageIndex}
       qIndex={qIndex}
       answers={answers}
