@@ -598,12 +598,6 @@ function NumbersScreen({ realNumbers, onChange, onSubmit, error }: {
         >
           Generate my health score →
         </button>
-        <button
-          onClick={onSubmit}
-          style={{ width: '100%', padding: '14px', background: 'transparent', color: TEXT_MUTED, border: 'none', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
-        >
-          Skip and generate score
-        </button>
       </div>
     </div>
   )
