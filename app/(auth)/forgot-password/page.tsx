@@ -14,36 +14,20 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
+  
     const trimmedEmail = email.trim()
     const supabase = createClient()
-
-    // F2: Check founders table first — our architecture guarantees:
-    // founder in founders table = confirmed auth user
-    // founder NOT in founders table = never signed up OR unconfirmed
-    // Both cases → show "no account found" — no reset sent
-    const { data: founder } = await supabase
-      .from('founders')
-      .select('id')
-      .eq('email', trimmedEmail)
-      .maybeSingle()
-
-    if (!founder) {
-      setError('no_account')
-      setLoading(false)
-      return
-    }
-
+  
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-
+  
     if (resetError) {
       setError(resetError.message)
       setLoading(false)
       return
     }
-
+  
     setSent(true)
     setLoading(false)
   }
