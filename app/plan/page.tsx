@@ -180,10 +180,10 @@ export default async function PlanPage() {
             <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '0 0 10px' }}>No action plan generated yet</h2>
             <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 8px' }}>
-              Your first 90-Day Action Plan generates automatically once you have active signals.
+            Your first 90-Day Action Plan generates automatically on your first monthly review cycle.
             </p>
             <p style={{ fontSize: 13, color: '#9CA3AF', margin: '0 0 24px' }}>
-              Connect at least 2 tools and run a scan to get started.
+            Usually within 30 days of connecting your first tool — no action needed from you.
             </p>
             <a href="/connect"
               style={{ display: 'inline-block', padding: '11px 28px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
