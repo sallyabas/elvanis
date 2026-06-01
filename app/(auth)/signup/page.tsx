@@ -68,7 +68,7 @@ export default function SignupPage() {
       password,
       options: {
         data:            { full_name: trimmedFullName, business_name: trimmedBusinessName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/callback`,
       }
     })
 
@@ -182,9 +182,6 @@ export default function SignupPage() {
           </div>
 
           <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #312E81' }}>
-            <p style={{ fontSize: 13, color: '#818CF8', margin: 0 }}>
-              Built for founder-led startups in the <strong style={{ color: '#A5B4FC' }}>UK</strong> and <strong style={{ color: '#A5B4FC' }}>Gulf</strong>.
-            </p>
           </div>
         </div>
       </div>
