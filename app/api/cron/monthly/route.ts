@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+export const dynamic = 'force-dynamic'
+
+
 
 function buildMonthlyEmailHtml(params: {
   founderName: string
@@ -87,6 +89,7 @@ function buildMonthlyEmailHtml(params: {
 // 1. Trigger full scan (force:false — respects per-source frequency)
 // 2. Send monthly report email linking to /measure
 export async function GET(request: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })

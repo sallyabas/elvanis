@@ -8,7 +8,9 @@ import { createAdminClient } from '@/lib/supabase-server'
 import { calculateHealthScore, ScoringInput } from '@/lib/health-scoring'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+export const dynamic = 'force-dynamic'
+
+
 
 // ── Daily Orchestrator Cron — runs at 06:00 UTC every day ──
 // F1: Replaces app/api/cron/monthly, app/api/cron/auto-scan, app/api/cron/digest
@@ -90,6 +92,7 @@ function buildMonthlyEmailHtml(params: {
 // F7: Reusable system_alerts insert — non-fatal, never throws
 async function insertAlert(
   admin:      ReturnType<typeof createAdminClient>,
+  resend:     InstanceType<typeof Resend>,
   founderId:  string | null,
   alertType:  'stale_scan' | 'cron_failure' | 'data_error',
   message:    string
@@ -137,6 +140,7 @@ async function insertAlert(
 }
 
 export async function GET(request: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
@@ -268,7 +272,7 @@ export async function GET(request: NextRequest) {
         if (!scanRes.ok) {
           const errBody = await scanRes.json().catch(() => ({}))
           console.error(`[daily] anniversary scan failed for ${founder.id}:`, errBody)
-          await insertAlert(admin, founder.id, 'cron_failure',
+          await insertAlert(admin, resend, founder.id, 'cron_failure',
             `Anniversary Day 1 scan failed for founder ${founder.id} (${founder.full_name ?? 'unknown'}, ${founderEmail}). ` +
             `Error: ${JSON.stringify(errBody)}. Manual intervention required.`
           )
@@ -328,7 +332,7 @@ export async function GET(request: NextRequest) {
 
         if (emailErr) {
           console.error(`[daily] report email failed for ${founder.id}:`, emailErr)
-          await insertAlert(admin, founder.id, 'cron_failure',
+          await insertAlert(admin, resend, founder.id, 'cron_failure',
             `Monthly report email failed for founder ${founder.id} (${founderEmail}). Error: ${JSON.stringify(emailErr)}.`
           )
         } else {
@@ -379,7 +383,7 @@ export async function GET(request: NextRequest) {
           console.warn(`[daily] digest blocked for ${founder.id} — scan data too stale (last: ${lastScanDate})`)
 
           // F7: Actionable system_alert with full founder context
-          await insertAlert(admin, founder.id, 'stale_scan',
+          await insertAlert(admin, resend, founder.id, 'stale_scan',
             `Digest blocked for founder ${founder.id} (${founder.full_name ?? 'unknown'}, ${founderEmail}). ` +
             `Last scan: ${lastScanDate}. ` +
             `Scan data is more than 35 days old. ` +
@@ -406,7 +410,7 @@ export async function GET(request: NextRequest) {
         } else {
           const errBody = await digestRes.json().catch(() => ({}))
           console.error(`[daily] digest failed for ${founder.id}:`, errBody)
-          await insertAlert(admin, founder.id, 'cron_failure',
+          await insertAlert(admin, resend, founder.id, 'cron_failure',
             `Digest generation failed for founder ${founder.id} (${founder.full_name ?? 'unknown'}, ${founderEmail}). ` +
             `Error: ${JSON.stringify(errBody)}. Manual intervention required.`
           )
@@ -457,7 +461,7 @@ export async function GET(request: NextRequest) {
       } else {
         const errBody = await scanRes.json().catch(() => ({}))
         console.error(`[daily] auto scan failed for ${founder.id}:`, errBody)
-        await insertAlert(admin, founder.id, 'cron_failure',
+        await insertAlert(admin, resend, founder.id,'cron_failure',
           `Auto scan failed for founder ${founder.id} (${founder.full_name ?? 'unknown'}, ${founderEmail}). ` +
           `Error: ${JSON.stringify(errBody)}.`
         )
@@ -465,7 +469,7 @@ export async function GET(request: NextRequest) {
 
     } catch (err) {
       console.error(`[daily] unhandled error for founder ${founder.id}:`, err)
-      await insertAlert(admin, founder.id, 'cron_failure',
+      await insertAlert(admin, resend, founder.id, 'cron_failure',
         `Unhandled orchestrator error for founder ${founder.id}: ${String(err)}`
       )
     }
@@ -484,7 +488,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     // Unhandled top-level crash — log and let finally handle cron_runs status
     console.error('[daily] top-level crash:', err)
-    await insertAlert(admin, null, 'cron_failure',
+    await insertAlert(admin, resend, null, 'cron_failure',
       `Daily orchestrator crashed with unhandled error: ${String(err)}`
     )
     return NextResponse.json({ error: String(err) }, { status: 500 })
