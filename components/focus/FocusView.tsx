@@ -177,7 +177,7 @@ export default function FocusView({
             pinnedAt={pinnedAt}
             onPin={pin}
             onUnpin={unpin}
-            orderedIds={orderedIds}
+            orderedIds={orderedIds.slice(1)}
           />
         )}
       </div>

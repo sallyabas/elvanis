@@ -131,6 +131,7 @@ export default function HeroCard({
           return dimMap[s] ?? null
         })
         .filter((d): d is string => d !== null && d !== config.label)
+        .filter((d, i, arr) => arr.indexOf(d) === i) // deduplicate
     : []
 
   return (
