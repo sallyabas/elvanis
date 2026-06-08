@@ -31,7 +31,6 @@ export default function FocusChanger({
   isUpdating = false,
 }: FocusChangerProps) {
   const [open,        setOpen]        = useState(false)
-  const [showTooltip, setShowTooltip] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   // Close dropdown on outside click
@@ -50,44 +49,21 @@ export default function FocusChanger({
 
       {/* ── Info tooltip ── */}
       <div style={{ position: 'relative' }}>
-        <button
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-          style={{
-            background:   'none',
-            border:       'none',
-            cursor:       'pointer',
-            fontSize:     13,
-            color:        '#9CA3AF',
-            padding:      '4px',
-            lineHeight:   1,
-            fontFamily:   'inherit',
-          }}
-        >
-          ?
-     </button>
-        {showTooltip && (
-          <div style={{
-            position:     'absolute',
-            top:          'calc(100% + 8px)',
-            left:          '50%',
-            transform:     'translateX(-50%)',
-            right:        0,
-            background:   '#111827',
-            color:        '#F9FAFB',
-            fontSize:     11,
-            lineHeight:   1.6,
-            padding:      '8px 12px',
-            borderRadius: 8,
-            width:        200,
-            zIndex:       300,
-            boxShadow:     '0 4px 16px rgba(0,0,0,0.2)',
-            pointerEvents: 'none',
-            whiteSpace:    'normal' as const,
-          }}>
-            {TOOLTIP_TEXT}
-          </div>
-        )}
+      <button
+  title={TOOLTIP_TEXT}
+  style={{
+    background:  'none',
+    border:      'none',
+    cursor:      'help',
+    fontSize:    13,
+    color:       '#9CA3AF',
+    padding:     '4px',
+    lineHeight:  1,
+    fontFamily:  'inherit',
+  }}
+>
+  ?
+</button>
       </div>
 
       {/* ── Focus dropdown ── */}

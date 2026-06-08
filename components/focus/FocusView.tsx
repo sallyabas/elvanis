@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   DimensionId,
@@ -67,6 +67,9 @@ export default function FocusView({
   const router      = useRouter()
   const [showReveal, setShowReveal] = useState(false)
   const [focusChanging, setFocusChanging] = useState(false)
+  useEffect(() => {
+    setFocusChanging(false)
+  }, [focusMetric])
 
   // ── Mode ────────────────────────────────────────────────────
   const activeSources  = dataSources.filter(s => s.status === 'active')
