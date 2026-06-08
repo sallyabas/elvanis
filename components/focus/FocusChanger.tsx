@@ -6,6 +6,7 @@ import { FocusMetric } from '@/lib/gravity-engine'
 interface FocusChangerProps {
   focusMetric:   FocusMetric | null
   onFocusChange: (metric: FocusMetric) => void
+  isUpdating?:   boolean
 }
 
 const FOCUS_OPTIONS: {
@@ -27,6 +28,7 @@ const TOOLTIP_TEXT =
 export default function FocusChanger({
   focusMetric,
   onFocusChange,
+  isUpdating = false,
 }: FocusChangerProps) {
   const [open,        setOpen]        = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
@@ -63,21 +65,25 @@ export default function FocusChanger({
           }}
         >
           ?
-        </button>
+     </button>
         {showTooltip && (
           <div style={{
             position:     'absolute',
             top:          'calc(100% + 8px)',
+            left:          '50%',
+            transform:     'translateX(-50%)',
             right:        0,
             background:   '#111827',
             color:        '#F9FAFB',
-            fontSize:     12,
+            fontSize:     11,
             lineHeight:   1.6,
-            padding:      '10px 14px',
+            padding:      '8px 12px',
             borderRadius: 8,
-            width:        260,
+            width:        200,
             zIndex:       300,
-            boxShadow:    '0 4px 16px rgba(0,0,0,0.2)',
+            boxShadow:     '0 4px 16px rgba(0,0,0,0.2)',
+            pointerEvents: 'none',
+            whiteSpace:    'normal' as const,
           }}>
             {TOOLTIP_TEXT}
           </div>
@@ -89,21 +95,25 @@ export default function FocusChanger({
         <button
           onClick={() => setOpen(o => !o)}
           style={{
-            background:   focusMetric ? '#F9FAFB' : '#EFF6FF',
-            border:       `1px solid ${focusMetric ? '#E5E7EB' : '#BFDBFE'}`,
-            borderRadius: 8,
-            padding:      '6px 12px',
+            background:   focusMetric ? '#EFF6FF' : '#2563EB',
+            border:       `1.5px solid ${focusMetric ? '#2563EB' : '#1D4ED8'}`,
+            borderRadius: 20,
+            padding:      '6px 14px',
             fontSize:     12,
-            color:        focusMetric ? '#374151' : '#2563EB',
+            color:        focusMetric ? '#1D4ED8' : '#FFFFFF',
             cursor:       'pointer',
             display:      'flex',
             alignItems:   'center',
             gap:          6,
             fontFamily:   'inherit',
-            fontWeight:   focusMetric ? 400 : 600,
+            fontWeight:   600,
+            transition:   'all 0.2s ease',
+            boxShadow:    focusMetric ? '0 0 0 3px rgba(37,99,235,0.12)' : 'none',
           }}
         >
-          {focusMetric ? (
+          {isUpdating ? (
+            <span style={{ color: '#9CA3AF' }}>Updating...</span>
+          ) : focusMetric ? (
             <>
               <span>{current?.icon}</span>
               <span>Focus: {current?.label}</span>
@@ -153,7 +163,8 @@ export default function FocusChanger({
                   background:   focusMetric === opt.value ? '#EFF6FF' : 'none',
                   border:       'none',
                   borderRadius: 8,
-                  cursor:       'pointer',
+                  opacity: isUpdating ? 0.6 : 1,
+                  cursor:  isUpdating ? 'not-allowed' : 'pointer',
                   fontSize:     13,
                   color:        '#374151',
                   textAlign:    'left' as const,

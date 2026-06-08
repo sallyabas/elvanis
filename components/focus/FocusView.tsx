@@ -66,6 +66,7 @@ export default function FocusView({
 }: FocusViewProps) {
   const router      = useRouter()
   const [showReveal, setShowReveal] = useState(false)
+  const [focusChanging, setFocusChanging] = useState(false)
 
   // ── Mode ────────────────────────────────────────────────────
   const activeSources  = dataSources.filter(s => s.status === 'active')
@@ -106,6 +107,7 @@ export default function FocusView({
 
   // ── Focus change ────────────────────────────────────────────
   async function handleFocusChange(metric: FocusMetric) {
+    setFocusChanging(true)
     await fetch('/api/founder/update-focus', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -153,6 +155,7 @@ export default function FocusView({
           <FocusChanger
             focusMetric={focusMetric}
             onFocusChange={handleFocusChange}
+            isUpdating={focusChanging}
           />
         )}
       </div>
