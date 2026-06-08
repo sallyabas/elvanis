@@ -11,14 +11,13 @@ import {
   getAllDimensionScores,
   DIMENSIONS,
 } from '@/lib/gravity-engine'
-import { usePinnedDimension } from './GravityPin'
 import OnboardingSurface from './OnboardingSurface'
 import RevealAnimation from './RevealAnimation'
 import HeroCard from './HeroCard'
 import DimensionGrid from './DimensionGrid'
-import GravityPin from './GravityPin'
+import FocusChanger from './FocusChanger'
 
-type FocusMode = 'onboarding' | 'reveal' | 'os'
+type FocusMode = 'onboarding' | 'os'
 
 interface Signal {
   id:                 string
@@ -35,22 +34,22 @@ interface Signal {
 }
 
 interface DataSource {
-  id:              string
-  source_type:     string
-  status:          string
-  last_synced_at:  string | null
+  id:             string
+  source_type:    string
+  status:         string
+  last_synced_at: string | null
 }
 
 interface FocusViewProps {
-  founderId:       string
-  founderName:     string
-  founderStage:    FounderStage | null
-  focusMetric:     FocusMetric  | null
-  signals:         Signal[]
-  dataSources:     DataSource[]
-  hasAssessment:   boolean
-  hasEverScanned:  boolean
-  overallScore:    number
+  founderId:      string
+  founderName:    string
+  founderStage:   FounderStage | null
+  focusMetric:    FocusMetric  | null
+  signals:        Signal[]
+  dataSources:    DataSource[]
+  hasAssessment:  boolean
+  hasEverScanned: boolean
+  overallScore:   number
 }
 
 export default function FocusView({
@@ -64,41 +63,31 @@ export default function FocusView({
   hasEverScanned,
   overallScore,
 }: FocusViewProps) {
-  const router = useRouter()
-  const { pinnedId, pinnedAt, daysLeft, pin, unpin } = usePinnedDimension()
+  const router       = useRouter()
   const [showReveal, setShowReveal] = useState(false)
 
-  // ── Determine mode ──────────────────────────────────────────
-  const activeSources   = dataSources.filter(s => s.status === 'active')
-  const connectedCount  = activeSources.length
-  const hasScanned      = hasEverScanned
+  // ── Mode ────────────────────────────────────────────────────
+  const activeSources  = dataSources.filter(s => s.status === 'active')
+  const connectedCount = activeSources.length
+  const mode: FocusMode = hasEverScanned ? 'os' : 'onboarding'
 
-  let mode: FocusMode = 'os'
-  if (!hasScanned) {
-    mode = connectedCount === 0 ? 'onboarding' : 'onboarding'
-  }
-
-  // ── Onboarding stage ────────────────────────────────────────
   const onboardingStage =
-    connectedCount === 0
-      ? 'no_sources'
-      : !hasScanned
-        ? 'has_sources'
-        : 'ready_to_scan'
+    connectedCount === 0 ? 'no_sources' :
+    !hasEverScanned      ? 'has_sources' :
+                           'ready_to_scan'
 
   // ── Gravity order ───────────────────────────────────────────
-  const baseOrder    = getDimensionOrder(founderStage, focusMetric)
-  const orderedIds: DimensionId[] = pinnedId
-    ? [pinnedId, ...baseOrder.filter(id => id !== pinnedId)]
-    : baseOrder
+  const orderedIds: DimensionId[] = getDimensionOrder(founderStage, focusMetric)
 
-  // ── Dimension scores ────────────────────────────────────────
+  // ── Signals ─────────────────────────────────────────────────
   const activeSignals = signals.filter(
     s => (s.status === 'new' || s.status === 'acknowledged') && s.source !== 'manual'
   )
+
+  // ── Scores ──────────────────────────────────────────────────
   const scores = getAllDimensionScores(activeSignals)
 
-  // ── Dimension states ────────────────────────────────────────
+  // ── States ──────────────────────────────────────────────────
   const states = Object.fromEntries(
     (Object.keys(DIMENSIONS) as DimensionId[]).map(id => [
       id,
@@ -106,15 +95,12 @@ export default function FocusView({
     ])
   ) as Record<DimensionId, 'active' | 'secondary' | 'dormant'>
 
-  // ── Dimension trends ────────────────────────────────────────
-  // Simple: if any signal in dimension is worsening → worsening
-  // If any improving and none worsening → improving
-  // Otherwise unchanged
+  // ── Trends ──────────────────────────────────────────────────
   function getDimensionTrend(id: DimensionId): 'improving' | 'worsening' | 'unchanged' | null {
     const dimSignals = activeSignals.filter(s => s.dimension === id)
     if (dimSignals.length === 0) return null
-    if (dimSignals.some(s => s.trend === 'worsening'))  return 'worsening'
-    if (dimSignals.some(s => s.trend === 'improving'))  return 'improving'
+    if (dimSignals.some(s => s.trend === 'worsening')) return 'worsening'
+    if (dimSignals.some(s => s.trend === 'improving')) return 'improving'
     return 'unchanged'
   }
 
@@ -136,16 +122,26 @@ export default function FocusView({
     router.refresh()
   }, [router])
 
+  // ── Focus change ────────────────────────────────────────────
+  async function handleFocusChange(metric: FocusMetric) {
+    await fetch('/api/founder/update-focus', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ focusMetric: metric }),
+    })
+    router.refresh()
+  }
+
   // ── Render ──────────────────────────────────────────────────
   return (
     <div style={{
-      maxWidth:  900,
-      margin:    '0 auto',
-      padding:   '32px 24px',
-      fontFamily:'Inter, -apple-system, sans-serif',
+      maxWidth:   900,
+      margin:     '0 auto',
+      padding:    '32px 24px',
+      fontFamily: 'Inter, -apple-system, sans-serif',
     }}>
 
-      {/* Reveal animation overlay */}
+      {/* Reveal animation */}
       {showReveal && (
         <RevealAnimation onComplete={handleRevealComplete} />
       )}
@@ -156,6 +152,7 @@ export default function FocusView({
         alignItems:     'center',
         justifyContent: 'space-between',
         marginBottom:   28,
+        gap:            16,
       }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>
@@ -165,19 +162,16 @@ export default function FocusView({
           </h1>
           <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
             {mode === 'onboarding'
-              ? 'Let\'s calibrate your business engine'
+              ? "Let's calibrate your business engine"
               : `Overall health: ${overallScore === -1 ? '—' : overallScore}/100`}
           </p>
         </div>
 
-        {/* Gravity pin control */}
+        {/* Focus changer — only in OS mode */}
         {mode === 'os' && (
-          <GravityPin
-            pinnedId={pinnedId}
-            pinnedAt={pinnedAt}
-            onPin={pin}
-            onUnpin={unpin}
-            orderedIds={orderedIds.slice(1)}
+          <FocusChanger
+            focusMetric={focusMetric}
+            onFocusChange={handleFocusChange}
           />
         )}
       </div>
@@ -201,10 +195,6 @@ export default function FocusView({
             trend={trends[primaryId]}
             signals={primarySignals}
             allSignalTypes={allSignalTypes}
-            isPinned={pinnedId === primaryId}
-            pinDaysLeft={daysLeft}
-            onPin={() => pin(primaryId)}
-            onUnpin={unpin}
           />
 
           {/* Secondary dimension grid */}
@@ -213,10 +203,7 @@ export default function FocusView({
             scores={scores}
             states={states}
             trends={trends}
-            pinnedId={pinnedId}
-            pinDaysLeft={daysLeft}
             onDimensionClick={(id) => router.push(`/signals?dimension=${id}`)}
-            onPin={pin}
           />
 
         </div>
@@ -225,12 +212,12 @@ export default function FocusView({
       {/* Quick nav */}
       {mode === 'os' && (
         <div style={{
-          display:       'flex',
-          gap:           12,
-          marginTop:     32,
-          paddingTop:    24,
-          borderTop:     '1px solid #F3F4F6',
-          flexWrap:      'wrap' as const,
+          display:    'flex',
+          gap:        12,
+          marginTop:  32,
+          paddingTop: 24,
+          borderTop:  '1px solid #F3F4F6',
+          flexWrap:   'wrap' as const,
         }}>
           {[
             { label: 'Health Overview', href: '/overview'       },
@@ -239,7 +226,7 @@ export default function FocusView({
             { label: 'Connect Tools',   href: '/connect'        },
             { label: 'Health Tracker',  href: '/health-tracker' },
           ].map(({ label, href }) => (
-            <a
+              <a            
               key={href}
               href={href}
               style={{

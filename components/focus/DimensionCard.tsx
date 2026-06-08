@@ -7,11 +7,8 @@ interface DimensionCardProps {
   score:     number
   state:     DimensionState
   trend:     'improving' | 'worsening' | 'unchanged' | null
-  isPinned?: boolean
   isHero?:   boolean
   onClick?:  () => void
-  onPin?:    () => void
-  pinDaysLeft?: number
 }
 
 function getScoreLabel(score: number): { label: string; color: string } {
@@ -39,11 +36,8 @@ export default function DimensionCard({
   score,
   state,
   trend,
-  isPinned,
   isHero,
   onClick,
-  onPin,
-  pinDaysLeft,
 }: DimensionCardProps) {
   const { label, color: scoreColor } = getScoreLabel(score)
   const isDormant  = state === 'dormant'
@@ -65,21 +59,6 @@ export default function DimensionCard({
           position:      'relative',
         }}
       >
-        {/* Pin indicator */}
-        {isPinned && (
-          <div style={{
-            position:   'absolute',
-            top:        16,
-            right:      16,
-            fontSize:   12,
-            color:      '#6B7280',
-            background: '#F3F4F6',
-            padding:    '4px 10px',
-            borderRadius: 20,
-          }}>
-            📌 Pinned — resumes in {pinDaysLeft}d
-          </div>
-        )}
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

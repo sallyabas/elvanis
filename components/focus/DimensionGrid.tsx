@@ -8,10 +8,7 @@ interface DimensionGridProps {
   scores:           Record<DimensionId, number>
   states:           Record<DimensionId, 'active' | 'secondary' | 'dormant'>
   trends:           Record<DimensionId, 'improving' | 'worsening' | 'unchanged' | null>
-  pinnedId?:        DimensionId | null
-  pinDaysLeft?:     number
   onDimensionClick: (id: DimensionId) => void
-  onPin:            (id: DimensionId) => void
   opacity?:         number
 }
 
@@ -20,10 +17,7 @@ export default function DimensionGrid({
   scores,
   states,
   trends,
-  pinnedId,
-  pinDaysLeft,
   onDimensionClick,
-  onPin,
   opacity = 1,
 }: DimensionGridProps) {
   return (
@@ -40,11 +34,8 @@ export default function DimensionGrid({
             score={scores[id]}
             state={states[id]}
             trend={trends[id]}
-            isPinned={pinnedId === id}
-            pinDaysLeft={pinDaysLeft}
             isHero={false}
             onClick={() => onDimensionClick(id)}
-            onPin={() => onPin(id)}
           />
         ))}
       </div>

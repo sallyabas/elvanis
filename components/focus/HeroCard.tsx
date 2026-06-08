@@ -21,10 +21,6 @@ interface HeroCardProps {
   trend:            'improving' | 'worsening' | 'unchanged' | null
   signals:          Signal[]
   allSignalTypes:   string[]
-  isPinned?:        boolean
-  pinDaysLeft?:     number
-  onPin?:           () => void
-  onUnpin?:         () => void
 }
 
 function SeverityBadge({ severity }: { severity: string }) {
@@ -76,10 +72,6 @@ export default function HeroCard({
   trend,
   signals,
   allSignalTypes,
-  isPinned,
-  pinDaysLeft,
-  onPin,
-  onUnpin,
 }: HeroCardProps) {
   const router  = useRouter()
   const config  = DIMENSIONS[dimensionId]
@@ -143,32 +135,6 @@ export default function HeroCard({
       position:     'relative',
       boxShadow:    '0 4px 24px rgba(0,0,0,0.06)',
     }}>
-
-      {/* Pin indicator */}
-      {isPinned && (
-        <div style={{
-          position:     'absolute',
-          top:          16,
-          right:        16,
-          display:      'flex',
-          alignItems:   'center',
-          gap:          8,
-          background:   '#FEF3C7',
-          border:       '1px solid #FDE68A',
-          borderRadius: 20,
-          padding:      '4px 12px',
-          fontSize:     12,
-          color:        '#92400E',
-        }}>
-          <span>📌 Pinned — resumes in {pinDaysLeft}d</span>
-          <button
-            onClick={onUnpin}
-            style={{ background: 'none', border: 'none', color: '#92400E', cursor: 'pointer', fontSize: 12, padding: 0, fontWeight: 600 }}
-          >
-            Unpin
-          </button>
-        </div>
-      )}
 
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
@@ -316,24 +282,6 @@ export default function HeroCard({
           See action plan
         </button>
 
-        {!isPinned && onPin && (
-          <button
-            onClick={onPin}
-            style={{
-              marginLeft:   'auto',
-              padding:      '12px 16px',
-              background:   'none',
-              color:        '#9CA3AF',
-              border:       '1px solid #E5E7EB',
-              borderRadius: 10,
-              fontSize:     13,
-              cursor:       'pointer',
-              fontFamily:   'inherit',
-            }}
-          >
-            📌 Pin this focus
-          </button>
-        )}
       </div>
     </div>
   )
