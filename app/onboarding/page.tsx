@@ -214,7 +214,7 @@ export default function OnboardingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button onClick={() => completeOnboarding('/connect')}    disabled={loading} style={btnPrimary()}>Connect your tools →</button>
               <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnSecondary()}>Take assessment first →</button>
-              <button onClick={() => completeOnboarding('/dashboard')}  disabled={loading} style={btnGhost()}>Explore dashboard first</button>
+              <button onClick={() => completeOnboarding('/focus')}  disabled={loading} style={btnGhost()}>Explore dashboard first</button>
             </div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function OnboardingPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnPrimary()}>Start 10-min assessment →</button>
-              <button onClick={() => completeOnboarding('/dashboard')}  disabled={loading} style={btnSecondary()}>Explore dashboard first</button>
+              <button onClick={() => completeOnboarding('/focus')}  disabled={loading} style={btnSecondary()}>Explore dashboard first</button>
             </div>
           </div>
         </div>

@@ -138,7 +138,7 @@ export default async function BusinessHealthTrackerPage() {
 
         {/* ── Page header ── */}
         <div style={{ marginBottom: 20 }}>
-          <a href="/dashboard" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 10 }}>← Back to dashboard</a>
+          <a href="/focus" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 10 }}>← Back to dashboard</a>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
               <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>Business Health Tracker</h1>

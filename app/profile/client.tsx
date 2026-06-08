@@ -288,7 +288,7 @@ export default function ProfileClient({
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 24px' }}>
-      <a href="/dashboard" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Back to dashboard</a>
+      <a href="/focus" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Back to dashboard</a>
       <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 28 }}>Your profile</h1>
 
       {/* ── Plan badge ── */}

@@ -71,7 +71,7 @@ function buildMonthlyEmailHtml(params: {
     <a href="${appUrl}/measure" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;margin-bottom:10px">View impact tracking →</a>
   </div>
   <div style="text-align:center;margin-bottom:24px">
-    <a href="${appUrl}/dashboard" style="display:inline-block;padding:12px 28px;background:#F9FAFB;color:#6B7280;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid #E5E7EB">View full dashboard →</a>
+    <a href="${appUrl}/focus" style="display:inline-block;padding:12px 28px;background:#F9FAFB;color:#6B7280;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid #E5E7EB">View full dashboard →</a>
   </div>
 
   <div style="text-align:center;border-top:1px solid #E5E7EB;padding-top:20px">

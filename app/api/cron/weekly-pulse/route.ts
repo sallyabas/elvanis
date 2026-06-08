@@ -74,7 +74,7 @@ ${criticalList}
 QUICK WIN THIS WEEK
 ${quickWin ? `${quickWin.insight_summary}\n→ ${quickWin.recommended_action}` : 'No quick wins identified — run a scan to get fresh signals.'}
 
-View your full dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard
+View your full dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/focus
 
 —
 Elvanis · Your AI Business Analyst

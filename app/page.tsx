@@ -112,7 +112,7 @@ const T = {
       help: 'Need hands-on help?',
       helpCta: 'Talk to Elvanis Expertise →',
       links: ['Dashboard', 'Signals', 'Connect tools', 'Services', 'Assessment'],
-      hrefs: ['/dashboard', '/signals', '/connect', '/service-request', '/assessment'],
+      hrefs: ['/focus', '/signals', '/connect', '/service-request', '/assessment'],
     },
   },
   ar: {
@@ -210,7 +210,7 @@ const T = {
       help: 'تحتاج مساعدة مباشرة؟',
       helpCta: 'تحدث مع خبراء Elvanis →',
       links: ['لوحة التحكم', 'الإشارات', 'ربط الأدوات', 'الخدمات', 'التقييم', 'الشروط', 'الخصوصية'],
-      hrefs: ['/dashboard', '/signals', '/connect', '/service-request', '/assessment', '/terms', '/privacy'],
+      hrefs: ['/focus', '/signals', '/connect', '/service-request', '/assessment', '/terms', '/privacy'],
     },
   },
 }
@@ -274,7 +274,7 @@ export default function LandingPage() {
               {lang === 'en' ? 'عربي' : 'English'}
             </button>
             {userName
-              ? <a href="/dashboard" className="btn-dark" style={{ padding: '8px 20px', background: '#0F172A', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 700, transition: 'opacity 0.15s' }}>{userName} →</a>
+              ? <a href="/focus" className="btn-dark" style={{ padding: '8px 20px', background: '#0F172A', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 700, transition: 'opacity 0.15s' }}>{userName} →</a>
               : <>
                   <a href="/login" className="nav-link" style={{ fontSize: 13, color: '#64748B', fontWeight: 500, transition: 'color 0.15s' }}>{t.nav.login}</a>
                   <a href="/signup" className="btn-dark" style={{ padding: '8px 20px', background: '#0F172A', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 700, transition: 'opacity 0.15s' }}>{t.nav.cta}</a>

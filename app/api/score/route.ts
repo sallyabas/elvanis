@@ -385,7 +385,7 @@ function buildEmailHtml(diagnosis: Record<string, unknown>, founderEmail: string
     <p style="color:#1D4ED8;font-size:15px;line-height:1.7;margin:0;font-style:italic">${diagnosis.closing_message}</p>
   </div>
   <div style="text-align:center;margin-bottom:32px">
-    <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard" style="display:inline-block;padding:14px 36px;background:#2563EB;color:#fff;font-weight:700;border-radius:12px;text-decoration:none;font-size:16px">View full dashboard →</a>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/focus" style="display:inline-block;padding:14px 36px;background:#2563EB;color:#fff;font-weight:700;border-radius:12px;text-decoration:none;font-size:16px">View full dashboard →</a>
   </div>
   <div style="text-align:center;border-top:1px solid #E5E7EB;padding-top:20px">
     <p style="color:#9CA3AF;font-size:12px;margin:0">Elvanis · Know what to fix before you scale</p>

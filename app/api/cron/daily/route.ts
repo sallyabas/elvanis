@@ -76,7 +76,7 @@ function buildMonthlyEmailHtml(params: {
     <a href="${appUrl}/service-request?type=navigator" style="display:inline-block;padding:13px 32px;background:#7C3AED;color:#fff;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Upgrade to Navigator →</a>
   </div>`}
   <div style="text-align:center;margin-bottom:24px">
-    <a href="${appUrl}/dashboard" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none">View dashboard →</a>
+    <a href="${appUrl}/focus" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none">View dashboard →</a>
   </div>
   <div style="text-align:center;border-top:1px solid #E5E7EB;padding-top:20px">
     <p style="color:#9CA3AF;font-size:12px;margin:0">Elvanis · Know what to fix before you scale</p>

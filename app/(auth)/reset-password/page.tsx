@@ -42,13 +42,13 @@ export default function ResetPasswordPage() {
 
       const destination = (!founder || !founder.onboarding_completed)
         ? '/onboarding'
-        : '/dashboard'
+        : '/focus'
 
       setTimeout(() => router.push(destination), 2000)
       return
     }
 
-    setTimeout(() => router.push('/dashboard'), 2000)
+    setTimeout(() => router.push('/focus'), 2000)
   }
 
   if (done) {
