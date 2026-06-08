@@ -6,7 +6,6 @@ import { FocusMetric } from '@/lib/gravity-engine'
 interface FocusChangerProps {
   focusMetric:   FocusMetric | null
   onFocusChange: (metric: FocusMetric) => void
-  isUpdating?:   boolean
 }
 
 const FOCUS_OPTIONS: {
@@ -28,7 +27,6 @@ const TOOLTIP_TEXT =
 export default function FocusChanger({
   focusMetric,
   onFocusChange,
-  isUpdating = false,
 }: FocusChangerProps) {
   const [open,        setOpen]        = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -47,24 +45,22 @@ export default function FocusChanger({
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
 
-      {/* ── Info tooltip ── */}
-      <div style={{ position: 'relative' }}>
-      <button
+{/* ── Info tooltip ── */}
+<button
   title={TOOLTIP_TEXT}
   style={{
-    background:  'none',
-    border:      'none',
-    cursor:      'help',
-    fontSize:    13,
-    color:       '#9CA3AF',
-    padding:     '4px',
-    lineHeight:  1,
-    fontFamily:  'inherit',
+    background: 'none',
+    border:     'none',
+    cursor:     'help',
+    fontSize:   13,
+    color:      '#9CA3AF',
+    padding:    '4px',
+    lineHeight: 1,
+    fontFamily: 'inherit',
   }}
 >
   ?
 </button>
-      </div>
 
       {/* ── Focus dropdown ── */}
       <div ref={ref} style={{ position: 'relative' }}>
@@ -87,9 +83,8 @@ export default function FocusChanger({
             boxShadow:    focusMetric ? '0 0 0 3px rgba(37,99,235,0.12)' : 'none',
           }}
         >
-          {isUpdating ? (
-            <span style={{ color: '#9CA3AF' }}>Updating...</span>
-          ) : focusMetric ? (
+
+          { focusMetric ? (
             <>
               <span>{current?.icon}</span>
               <span>Focus: {current?.label}</span>
@@ -139,8 +134,7 @@ export default function FocusChanger({
                   background:   focusMetric === opt.value ? '#EFF6FF' : 'none',
                   border:       'none',
                   borderRadius: 8,
-                  opacity: isUpdating ? 0.6 : 1,
-                  cursor:  isUpdating ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   fontSize:     13,
                   color:        '#374151',
                   textAlign:    'left' as const,

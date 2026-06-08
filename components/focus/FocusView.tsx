@@ -158,7 +158,6 @@ export default function FocusView({
           <FocusChanger
             focusMetric={focusMetric}
             onFocusChange={handleFocusChange}
-            isUpdating={focusChanging}
           />
         )}
       </div>
