@@ -155,7 +155,7 @@ export default function FocusView({
           <FocusChanger
             focusMetric={focusMetric}
             onFocusChange={handleFocusChange}
-            isUpdating={focusChanging}
+            
           />
         )}
       </div>
@@ -181,6 +181,7 @@ export default function FocusView({
             allSignalTypes={allSignalTypes}
             founderStage={founderStage}
             focusMetric={focusMetric}
+            isUpdating={focusChanging}
           />
 
           {/* Secondary dimension grid */}
