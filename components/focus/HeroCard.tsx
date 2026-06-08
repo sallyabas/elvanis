@@ -20,8 +20,6 @@ interface HeroCardProps {
   allSignalTypes:  string[]
   founderStage:    string | null
   focusMetric:     string | null
-  isUpdating?:    boolean
-
 }
 
 function SeverityBadge({ severity }: { severity: string }) {
@@ -93,7 +91,6 @@ export default function HeroCard({
   allSignalTypes,
   founderStage,
   focusMetric,
-  isUpdating = false,
 }: HeroCardProps) {
   const router = useRouter()
 
@@ -144,33 +141,6 @@ export default function HeroCard({
     : []
 
   return (
-
-    <div style={{ position: 'relative' }}>
-
-    {/* Spinner overlay when updating */}
-    {isUpdating && (
-      <div style={{
-        position:       'absolute',
-        inset:          0,
-        background:     'rgba(255,255,255,0.7)',
-        borderRadius:   20,
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'center',
-        zIndex:         10,
-      }}>
-        <div style={{
-          width:        32,
-          height:       32,
-          border:       '3px solid #E5E7EB',
-          borderTop:    '3px solid #2563EB',
-          borderRadius: '50%',
-          animation:    'spin 0.7s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      </div>
-    )}
-
     <div style={{
       background:   '#FFFFFF',
       border:       `2px solid ${status.color}`,
@@ -224,7 +194,6 @@ export default function HeroCard({
             </div>
           </div>
         )}
-      </div>
       </div>
 
       {/* Divider */}

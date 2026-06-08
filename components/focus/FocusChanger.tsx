@@ -111,8 +111,9 @@ export default function FocusChanger({
             boxShadow:    focusMetric ? '0 0 0 3px rgba(37,99,235,0.12)' : 'none',
           }}
         >
-
-          {focusMetric ? (
+          {isUpdating ? (
+            <span style={{ color: '#9CA3AF' }}>Updating...</span>
+          ) : focusMetric ? (
             <>
               <span>{current?.icon}</span>
               <span>Focus: {current?.label}</span>
@@ -162,7 +163,8 @@ export default function FocusChanger({
                   background:   focusMetric === opt.value ? '#EFF6FF' : 'none',
                   border:       'none',
                   borderRadius: 8,
-                  cursor:       'pointer',
+                  opacity: isUpdating ? 0.6 : 1,
+                  cursor:  isUpdating ? 'not-allowed' : 'pointer',
                   fontSize:     13,
                   color:        '#374151',
                   textAlign:    'left' as const,
