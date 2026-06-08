@@ -183,6 +183,8 @@ export default function FocusView({
             allSignalTypes={allSignalTypes}
             founderStage={founderStage}
             focusMetric={focusMetric}
+            isUpdating={focusChanging}
+
           />
 
           {/* Secondary dimension grid */}
