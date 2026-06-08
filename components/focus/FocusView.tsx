@@ -209,7 +209,7 @@ export default function FocusView({
 
           {/* Secondary dimension grid */}
           <DimensionGrid
-            orderedIds={orderedIds}
+            orderedIds={orderedIds.slice(1)}
             scores={scores}
             states={states}
             trends={trends}
