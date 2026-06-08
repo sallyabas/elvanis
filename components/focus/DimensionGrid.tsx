@@ -1,22 +1,19 @@
 'use client'
 
-import { DimensionId, DIMENSIONS } from '@/lib/gravity-engine'
+import { DimensionId } from '@/lib/gravity-engine'
+import { DimensionStatus } from '@/lib/dimension-status'
 import DimensionCard from './DimensionCard'
 
 interface DimensionGridProps {
   orderedIds:       DimensionId[]
-  scores:           Record<DimensionId, number>
-  states:           Record<DimensionId, 'active' | 'secondary' | 'dormant'>
-  trends:           Record<DimensionId, 'improving' | 'worsening' | 'unchanged' | null>
+  statuses:         Record<DimensionId, DimensionStatus>
   onDimensionClick: (id: DimensionId) => void
   opacity?:         number
 }
 
 export default function DimensionGrid({
   orderedIds,
-  scores,
-  states,
-  trends,
+  statuses,
   onDimensionClick,
   opacity = 1,
 }: DimensionGridProps) {
@@ -30,11 +27,7 @@ export default function DimensionGrid({
         {orderedIds.map(id => (
           <DimensionCard
             key={id}
-            config={DIMENSIONS[id]}
-            score={scores[id]}
-            state={states[id]}
-            trend={trends[id]}
-            isHero={false}
+            status={statuses[id]}
             onClick={() => onDimensionClick(id)}
           />
         ))}

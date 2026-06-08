@@ -7,10 +7,9 @@ import {
   FounderStage,
   FocusMetric,
   getDimensionOrder,
-  getDimensionState,
-  getAllDimensionScores,
   DIMENSIONS,
 } from '@/lib/gravity-engine'
+import { calculateDimensionStatuses } from '@/lib/dimension-status'
 import OnboardingSurface from './OnboardingSurface'
 import RevealAnimation from './RevealAnimation'
 import HeroCard from './HeroCard'
@@ -41,15 +40,16 @@ interface DataSource {
 }
 
 interface FocusViewProps {
-  founderId:      string
-  founderName:    string
-  founderStage:   FounderStage | null
-  focusMetric:    FocusMetric  | null
-  signals:        Signal[]
-  dataSources:    DataSource[]
-  hasAssessment:  boolean
-  hasEverScanned: boolean
-  overallScore:   number
+  founderId:            string
+  founderName:          string
+  founderStage:         FounderStage | null
+  focusMetric:          FocusMetric  | null
+  signals:              Signal[]
+  dataSources:          DataSource[]
+  hasAssessment:        boolean
+  hasEverScanned:       boolean
+  overallScore:         number
+  connectedSourceTypes: string[]
 }
 
 export default function FocusView({
@@ -62,8 +62,9 @@ export default function FocusView({
   hasAssessment,
   hasEverScanned,
   overallScore,
+  connectedSourceTypes,
 }: FocusViewProps) {
-  const router       = useRouter()
+  const router      = useRouter()
   const [showReveal, setShowReveal] = useState(false)
 
   // ── Mode ────────────────────────────────────────────────────
@@ -79,34 +80,15 @@ export default function FocusView({
   // ── Gravity order ───────────────────────────────────────────
   const orderedIds: DimensionId[] = getDimensionOrder(founderStage, focusMetric)
 
-  // ── Signals ─────────────────────────────────────────────────
-  const activeSignals = signals.filter(
-    s => (s.status === 'new' || s.status === 'acknowledged') && s.source !== 'manual'
-  )
-
-  // ── Scores ──────────────────────────────────────────────────
-  const scores = getAllDimensionScores(activeSignals)
-
-  // ── States ──────────────────────────────────────────────────
-  const states = Object.fromEntries(
-    (Object.keys(DIMENSIONS) as DimensionId[]).map(id => [
-      id,
-      getDimensionState(id, founderStage, activeSignals.some(s => s.dimension === id)),
-    ])
-  ) as Record<DimensionId, 'active' | 'secondary' | 'dormant'>
-
-  // ── Trends ──────────────────────────────────────────────────
-  function getDimensionTrend(id: DimensionId): 'improving' | 'worsening' | 'unchanged' | null {
-    const dimSignals = activeSignals.filter(s => s.dimension === id)
-    if (dimSignals.length === 0) return null
-    if (dimSignals.some(s => s.trend === 'worsening')) return 'worsening'
-    if (dimSignals.some(s => s.trend === 'improving')) return 'improving'
-    return 'unchanged'
-  }
-
-  const trends = Object.fromEntries(
-    (Object.keys(DIMENSIONS) as DimensionId[]).map(id => [id, getDimensionTrend(id)])
-  ) as Record<DimensionId, 'improving' | 'worsening' | 'unchanged' | null>
+  // ── Dimension statuses (single calculation) ─────────────────
+  const dimensionResult = calculateDimensionStatuses({
+    signals,
+    connectedSourceTypes,
+    hasAssessment,
+    hasEverScanned,
+    founderStage,
+  })
+  const { statuses, unlockedCount, totalCount } = dimensionResult
 
   // ── Primary dimension ───────────────────────────────────────
   const primaryId      = orderedIds[0]
@@ -167,7 +149,6 @@ export default function FocusView({
           </p>
         </div>
 
-        {/* Focus changer — only in OS mode */}
         {mode === 'os' && (
           <FocusChanger
             focusMetric={focusMetric}
@@ -184,28 +165,67 @@ export default function FocusView({
           hasAssessment={hasAssessment}
           founderId={founderId}
           founderName={founderName}
+          founderStage={founderStage}
+          focusMetric={focusMetric}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Hero card */}
           <HeroCard
-            dimensionId={primaryId}
-            score={scores[primaryId]}
-            trend={trends[primaryId]}
+            status={statuses[primaryId]}
             signals={primarySignals}
             allSignalTypes={allSignalTypes}
+            founderStage={founderStage}
+            focusMetric={focusMetric}
           />
 
           {/* Secondary dimension grid */}
           <DimensionGrid
             orderedIds={orderedIds.slice(1)}
-            scores={scores}
-            states={states}
-            trends={trends}
+            statuses={statuses}
             onDimensionClick={(id) => router.push(`/signals?dimension=${id}`)}
           />
 
+        </div>
+      )}
+
+      {/* Gamification strip */}
+      {mode === 'os' && unlockedCount < totalCount && (
+        <div style={{
+          marginTop:    24,
+          padding:      '16px 20px',
+          background:   '#F9FAFB',
+          border:       '1px solid #E5E7EB',
+          borderRadius: 12,
+          display:      'flex',
+          alignItems:   'center',
+          justifyContent: 'space-between',
+          gap:          16,
+        }}>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
+              {unlockedCount} of {totalCount} dimensions active
+            </p>
+            <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
+              Connect more tools to unlock your full business picture
+            </p>
+          </div>
+            <a
+            href="/connect"
+            style={{
+              padding:        '8px 16px',
+              background:     '#2563EB',
+              color:          '#FFFFFF',
+              borderRadius:   8,
+              fontSize:       13,
+              fontWeight:     600,
+              textDecoration: 'none',
+              flexShrink:     0,
+            }}
+          >
+            Connect tools →
+          </a>
         </div>
       )}
 
@@ -214,7 +234,7 @@ export default function FocusView({
         <div style={{
           display:    'flex',
           gap:        12,
-          marginTop:  32,
+          marginTop:  24,
           paddingTop: 24,
           borderTop:  '1px solid #F3F4F6',
           flexWrap:   'wrap' as const,
@@ -226,7 +246,7 @@ export default function FocusView({
             { label: 'Connect Tools',   href: '/connect'        },
             { label: 'Health Tracker',  href: '/health-tracker' },
           ].map(({ label, href }) => (
-              <a            
+              <a
               key={href}
               href={href}
               style={{

@@ -34,6 +34,9 @@ export default async function FocusPage() {
     .from('data_sources')
     .select('id, source_type, status, last_synced_at')
     .eq('founder_id', founder.id)
+    const connectedSourceTypes = (dataSources ?? [])
+    .filter(s => s.status === 'active')
+    .map(s => s.source_type)
 
   // ── Assessment ───────────────────────────────────────────────
   const { data: assessment } = await supabase
@@ -80,6 +83,7 @@ export default async function FocusPage() {
           hasAssessment={!!assessment}
           hasEverScanned={!!latestScan}
           overallScore={overallScore}
+          connectedSourceTypes={connectedSourceTypes}
         />
       </main>
     </div>

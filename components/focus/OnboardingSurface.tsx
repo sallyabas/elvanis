@@ -12,6 +12,8 @@ interface OnboardingProps {
   hasAssessment:  boolean
   founderId:      string
   founderName:    string
+  founderStage:   string | null
+  focusMetric:    string | null
 }
 
 // Faded dimension grid shown behind onboarding surface
