@@ -146,11 +146,12 @@ export function getDimensionState(
 export function getDimensionScore(
   dimensionId: DimensionId,
   signals: Array<{ dimension: string; severity: string; status: string; source: string }>,
+  includeManual: boolean = false,
 ): number {
   const active = signals.filter(s =>
     s.dimension === dimensionId &&
     (s.status === 'new' || s.status === 'acknowledged') &&
-    s.source !== 'manual'
+    (includeManual ? true : s.source !== 'manual')
   )
 
   if (active.length === 0) return -1 // No data
