@@ -81,6 +81,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           {status.state === 'locked'  ? status.ctaText  :
            status.state === 'pending' ? 'Scan needed'   :
            status.state === 'healthy' ? '✓ No issues'   :
+           status.state === 'assessment_only' ? '📋 Assessment only'  :
            status.description}
         </p>
       </div>
@@ -96,6 +97,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           {isDormant            ? '—' :
            status.score === -1  ? '—' :
            status.state === 'healthy' ? '✓' :
+           status.state === 'assessment_only' ? `${status.score}*` :
            status.score}
         </p>
         <p style={{
@@ -107,6 +109,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           {isDormant ? '' :
            status.state === 'healthy' ? 'Healthy' :
            status.state === 'pending' ? 'Pending' :
+           status.state === 'assessment_only' ? 'Provisional' :
            `${getTrendArrow(status.trend)} ${label}`}
         </p>
       </div>

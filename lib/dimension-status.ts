@@ -7,25 +7,27 @@ import { DIMENSIONS } from './gravity-engine'
 import { DIMENSION_REQUIREMENTS, hasDimensionTool } from './dimension-requirements'
 import { getDimensionScore } from './gravity-engine'
 
-export type DimensionState = 'active' | 'locked' | 'pending' | 'healthy'
+export type DimensionState = 'active' | 'locked' | 'pending' | 'healthy' | 'assessment_only'
 
 export interface DimensionStatus {
-  id:           DimensionId
-  state:        DimensionState
-  score:        number
-  trend:        'improving' | 'worsening' | 'unchanged' | null
-  isUnlocked:   boolean
-  missingTools: string[]
-  ctaText:      string
-  ctaHref:      string
-  unlockText:   string
-  pendingText:  string
-  healthyText:  string
-  label:        string
-  shortLabel:   string
-  icon:         string
-  color:        string
-  description:  string
+  id:                 DimensionId
+  state:              DimensionState
+  score:              number
+  trend:              'improving' | 'worsening' | 'unchanged' | null
+  isUnlocked:         boolean
+  isProvisional:      boolean
+  assessmentOnlyText: string
+  missingTools:       string[]
+  ctaText:            string
+  ctaHref:            string
+  unlockText:         string
+  pendingText:        string
+  healthyText:        string
+  label:              string
+  shortLabel:         string
+  icon:               string
+  color:              string
+  description:        string
 }
 
 export interface DimensionStatusResult {
@@ -35,12 +37,12 @@ export interface DimensionStatusResult {
 }
 
 interface Signal {
-  dimension:  string
-  severity:   string
-  status:     string
-  source:     string
-  signal_type:string
-  trend:      string | null
+  dimension:   string
+  severity:    string
+  status:      string
+  source:      string
+  signal_type: string
+  trend:       string | null
 }
 
 export function calculateDimensionStatuses(params: {
@@ -66,8 +68,8 @@ export function calculateDimensionStatuses(params: {
 
   const statuses = Object.fromEntries(
     ids.map(id => {
-      const req     = DIMENSION_REQUIREMENTS[id]
-      const dim     = DIMENSIONS[id]
+      const req      = DIMENSION_REQUIREMENTS[id]
+      const dim      = DIMENSIONS[id]
       const hasTools = hasDimensionTool(id, connectedSourceTypes, hasAssessment)
 
       // Missing tools for this dimension
@@ -75,13 +77,22 @@ export function calculateDimensionStatuses(params: {
         t => !connectedSourceTypes.includes(t)
       )
 
-      // Signals for this dimension
+      // Live signals for this dimension (excludes manual/assessment)
       const dimSignals = activeSignals.filter(s => s.dimension === id)
 
-      // Score
-      const score = getDimensionScore(id, activeSignals)
+      // Manual/assessment signals for this dimension
+      const manualSignals = signals.filter(
+        s => s.dimension === id &&
+             s.source === 'manual' &&
+             (s.status === 'new' || s.status === 'acknowledged')
+      )
+      const hasManualSignals = manualSignals.length > 0
 
-      // Trend
+      // Score — use manual signals if assessment_only
+      const liveScore       = getDimensionScore(id, activeSignals)
+      const assessmentScore = getDimensionScore(id, manualSignals)
+
+      // Trend — from live signals only
       let trend: 'improving' | 'worsening' | 'unchanged' | null = null
       if (dimSignals.length > 0) {
         if (dimSignals.some(s => s.trend === 'worsening'))      trend = 'worsening'
@@ -91,7 +102,10 @@ export function calculateDimensionStatuses(params: {
 
       // State
       let state: DimensionState
-      if (!hasTools) {
+      if (hasManualSignals && !hasDimensionTool(id, connectedSourceTypes, false)) {
+        state = 'assessment_only'
+        unlockedCount++
+      } else if (!hasTools) {
         state = 'locked'
       } else if (!hasEverScanned) {
         state = 'pending'
@@ -106,20 +120,22 @@ export function calculateDimensionStatuses(params: {
       const status: DimensionStatus = {
         id,
         state,
-        score,
+        score:              state === 'assessment_only' ? assessmentScore : liveScore,
         trend,
-        isUnlocked:   state === 'active' || state === 'healthy',
+        isUnlocked:         state === 'active' || state === 'healthy' || state === 'assessment_only',
+        isProvisional:      state === 'assessment_only',
+        assessmentOnlyText: `This score is based on your assessment only. Connect ${req.ctaText.toLowerCase()} to validate with live data.`,
         missingTools,
-        ctaText:      req.ctaText,
-        ctaHref:      req.ctaHref,
-        unlockText:   req.unlockText,
-        pendingText:  req.pendingText,
-        healthyText:  req.healthyText,
-        label:        dim.label,
-        shortLabel:   dim.shortLabel,
-        icon:         dim.icon,
-        color:        dim.color,
-        description:  dim.description,
+        ctaText:            req.ctaText,
+        ctaHref:            req.ctaHref,
+        unlockText:         req.unlockText,
+        pendingText:        req.pendingText,
+        healthyText:        req.healthyText,
+        label:              dim.label,
+        shortLabel:         dim.shortLabel,
+        icon:               dim.icon,
+        color:              dim.color,
+        description:        dim.description,
       }
 
       return [id, status]

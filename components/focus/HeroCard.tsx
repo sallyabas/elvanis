@@ -200,12 +200,22 @@ export default function HeroCard({
         {status.state === 'active' && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
-              <span style={{ fontSize: 64, fontWeight: 900, color: getScoreColor(status.score), lineHeight: 1 }}>
-                {status.score === -1 ? '—' : status.score}
-              </span>
-              {status.score !== -1 && (
-                <span style={{ fontSize: 18, color: '#9CA3AF' }}>/100</span>
-              )}
+            <span style={{ fontSize: 64, fontWeight: 900, color: getScoreColor(status.score), lineHeight: 1 }}>
+            {status.score === -1 ? '—' : status.score}
+           { status.isProvisional && (
+              <span style={{ fontSize: 32, color: '#F59E0B', fontWeight: 700 }}>*</span>
+                 )}
+</span>
+{status.score !== -1 && (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <span style={{ fontSize: 18, color: '#9CA3AF' }}>/100</span>
+    {status.isProvisional && (
+      <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, letterSpacing: '0.05em' }}>
+        📋 PROVISIONAL
+      </span>
+    )}
+  </div>
+)}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 4 }}>
               <span style={{ fontSize: 20, color: getTrendColor(status.trend), fontWeight: 700 }}>
@@ -294,6 +304,47 @@ export default function HeroCard({
         </div>
       )}
 
+      {/* ── STATE: ASSESSMENT ONLY ── */}
+{status.state === 'assessment_only' && (
+  <div style={{ marginBottom: 20 }}>
+    <div style={{
+      background:   '#FFFBEB',
+      border:       '1px solid #FDE68A',
+      borderRadius: 10,
+      padding:      '12px 16px',
+      marginBottom: 16,
+      display:      'flex',
+      gap:          10,
+      alignItems:   'flex-start',
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>📋</span>
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
+          Assessment data only
+        </p>
+        <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
+          {status.assessmentOnlyText}
+        </p>
+      </div>
+    </div>
+    <a
+      href={status.ctaHref}
+      style={{
+        display:        'inline-block',
+        padding:        '10px 20px',
+        background:     '#F59E0B',
+        color:          '#FFFFFF',
+        borderRadius:   10,
+        fontSize:       13,
+        fontWeight:     700,
+        textDecoration: 'none',
+      }}
+    >
+      {status.ctaText} to validate →
+    </a>
+  </div>
+)}
+
       {/* ── STATE: ACTIVE — signals ── */}
       {status.state === 'active' && topSignals.length > 0 && (
         <div style={{ marginBottom: 20 }}>
@@ -361,7 +412,7 @@ export default function HeroCard({
       )}
 
       {/* ── CTA row (active state only) ── */}
-      {status.state === 'active' && (
+      {(status.state === 'active' || status.state === 'assessment_only') && (
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <button
             onClick={() => router.push(`/signals?dimension=${status.id}`)}
