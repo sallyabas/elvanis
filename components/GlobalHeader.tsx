@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import HeaderUser from './header-user'
-import { DashboardTour } from '@/app/dashboard/guide'
+import { DashboardTour } from '@/app/overview/guide'
 import { HelpPanel } from './HelpPanel'
 import styles from './GlobalHeader.module.css'
 
