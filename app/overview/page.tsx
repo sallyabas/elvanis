@@ -655,8 +655,12 @@ export default async function DashboardPage() {
 
           {/* ── Impact Tracking ── */}
           <div id="tour-impact" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 20 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>📈 Impact Tracking — Did your fixes work?</p>
-              <a href="/measure" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', fontWeight: 600 }}>View full measure →</a>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>📈 Impact Tracking — Did your fixes work?</p>
+           {hasCycleData && (
+            <a href="/tracker" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', fontWeight: 600 }}>View full measure →</a>
+            )}
+            </div>
             {hasCycleData && cycleSummaryText && (
               <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '10px 16px', marginBottom: 16, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 16 }}>🔄</span>
