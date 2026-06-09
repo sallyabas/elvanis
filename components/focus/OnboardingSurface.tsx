@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { DimensionId, DIMENSIONS, getDimensionOrder, FounderStage, FocusMetric } from '@/lib/gravity-engine'
 
 type OnboardingStage = 'no_sources' | 'has_sources' | 'ready_to_scan'
@@ -15,6 +15,8 @@ interface OnboardingProps {
   founderStage:     string | null
   focusMetric:      string | null
   subscriptionTier: string | null
+  onDismiss:        () => void
+  
 }
 
 function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: string | null, focusMetric: string | null }) {
@@ -82,20 +84,10 @@ export default function OnboardingSurface({
   founderStage,
   focusMetric,
   subscriptionTier,
+  onDismiss,
 }: OnboardingProps) {
   const router = useRouter()
   const [scanning,  setScanning]  = useState(false)
-  const [dismissed, setDismissed] = useState(false)
-
-  useEffect(() => {
-    const isDismissed = localStorage.getItem('elvanis_onboarding_dismissed')
-    if (isDismissed) setDismissed(true)
-  }, [])
-
-  function handleDismiss() {
-    localStorage.setItem('elvanis_onboarding_dismissed', 'true')
-    setDismissed(true)
-  }
 
   async function handleFirstScan() {
     setScanning(true)
@@ -110,8 +102,6 @@ export default function OnboardingSurface({
       setScanning(false)
     }
   }
-
-  if (dismissed) return null
 
   return (
     <div style={{ position: 'relative' }}>
@@ -215,7 +205,7 @@ export default function OnboardingSurface({
               </a>
 
               <button
-                onClick={handleDismiss}
+                onClick={onDismiss}
                 style={{
                   background:  'none',
                   border:      'none',

@@ -72,11 +72,21 @@ export default function FocusView({
   useEffect(() => {
     setFocusChanging(false)
   }, [focusMetric])
+  const [dismissed, setDismissed] = useState(false)
 
+  useEffect(() => {
+    const isDismissed = localStorage.getItem('elvanis_onboarding_dismissed')
+    if (isDismissed) setDismissed(true)
+  }, [])
+  
+  function handleDismiss() {
+    localStorage.setItem('elvanis_onboarding_dismissed', 'true')
+    setDismissed(true)
+  }
   // ── Mode ────────────────────────────────────────────────────
   const activeSources  = dataSources.filter(s => s.status === 'active')
   const connectedCount = activeSources.length
-  const mode: FocusMode = hasEverScanned ? 'os' : 'onboarding'
+  const mode: FocusMode = 'os'
 
   const onboardingStage =
     connectedCount === 0 ? 'no_sources' :
@@ -145,14 +155,14 @@ export default function FocusView({
       }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>
-            {mode === 'onboarding'
-              ? `Welcome, ${founderName.split(' ')[0]}`
-              : 'Your Business Focus'}
+         {!hasEverScanned && !dismissed
+          ? `Welcome, ${founderName.split(' ')[0]}`
+          : 'Your Business Focus'}
           </h1>
           <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
-            {mode === 'onboarding'
-              ? "Let's calibrate your business engine"
-              : `Overall health: ${overallScore === -1 ? '—' : overallScore}/100`}
+          {!hasEverScanned && !dismissed
+           ? "Let's calibrate your business engine"
+           : `Overall health: ${overallScore === -1 ? '—' : overallScore}/100`}
           </p>
         </div>
 
@@ -164,41 +174,42 @@ export default function FocusView({
         )}
       </div>
 
-      {/* Main content */}
-      {mode === 'onboarding' ? (
-        <OnboardingSurface
-          stage={onboardingStage}
-          connectedCount={connectedCount}
-          hasAssessment={hasAssessment}
-          founderId={founderId}
-          founderName={founderName}
-          founderStage={founderStage}
-          focusMetric={focusMetric}
-          subscriptionTier={subscriptionTier}
-        />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{/* Main content — always show OS view */}
+<div style={{ position: 'relative' }}>
 
-          {/* Hero card */}
-          <HeroCard
-            status={statuses[primaryId]}
-            signals={primarySignals}
-            allSignalTypes={allSignalTypes}
-            founderStage={founderStage}
-            focusMetric={focusMetric}
-            isUpdating={focusChanging}
+  {/* Onboarding overlay */}
+  {!hasEverScanned && !dismissed && (
+    <OnboardingSurface
+      stage={onboardingStage}
+      connectedCount={connectedCount}
+      hasAssessment={hasAssessment}
+      founderId={founderId}
+      founderName={founderName}
+      founderStage={founderStage}
+      focusMetric={focusMetric}
+      subscriptionTier={subscriptionTier}
+      onDismiss={handleDismiss}
+    />
+  )}
 
-          />
+  {/* OS view always rendered */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <HeroCard
+      status={statuses[primaryId]}
+      signals={primarySignals}
+      allSignalTypes={allSignalTypes}
+      founderStage={founderStage}
+      focusMetric={focusMetric}
+      isUpdating={focusChanging}
+    />
+    <DimensionGrid
+      orderedIds={orderedIds.slice(1)}
+      statuses={statuses}
+      onDimensionClick={(id) => router.push(`/signals?dimension=${id}`)}
+    />
+  </div>
 
-          {/* Secondary dimension grid */}
-          <DimensionGrid
-            orderedIds={orderedIds.slice(1)}
-            statuses={statuses}
-            onDimensionClick={(id) => router.push(`/signals?dimension=${id}`)}
-          />
-
-        </div>
-      )}
+</div>
 
       {/* Gamification strip */}
       {mode === 'os' && unlockedCount < totalCount && (
