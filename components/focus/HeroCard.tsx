@@ -234,34 +234,30 @@ export default function HeroCard({
       {/* Divider */}
       <div style={{ height: 1, background: '#F3F4F6', margin: '20px 0' }} />
 
-{/* ── STATE: LOCKED ── */}
-{status.state === 'locked' && (
-  <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-    <p style={{ fontSize: 32, marginBottom: 12 }}>
-      {status.isReconnect ? '🔌' : '🔒'}
-    </p>
-    <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
-      {status.isReconnect
-        ? `${status.label} disconnected`
-        : `${status.label} not yet activated`}
-    </p>
-    <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
-      {status.isReconnect ? status.reconnectText : status.unlockText}
-    </p>
-      <a
-      href={status.ctaHref}
-      style={{
-        display:        'inline-block',
-        padding:        '12px 24px',
-        background:     status.color,
-        color:          '#FFFFFF',
-        borderRadius:   10,
-        fontSize:       14,
-        fontWeight:     700,
-        textDecoration: 'none',
-      }}
-    >
-      {status.isReconnect ? `Reconnect ${status.shortLabel} →` : `${status.ctaText} →`}
+      {/* ── STATE: LOCKED ── */}
+      {status.state === 'locked' && (
+        <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
+          <p style={{ fontSize: 32, marginBottom: 12 }}>🔒</p>
+          <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
+            {status.label} not yet activated
+          </p>
+          <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
+            {status.unlockText}
+          </p>
+            <a
+            href={status.ctaHref}
+            style={{
+              display:        'inline-block',
+              padding:        '12px 24px',
+              background:     status.color,
+              color:          '#FFFFFF',
+              borderRadius:   10,
+              fontSize:       14,
+              fontWeight:     700,
+              textDecoration: 'none',
+            }}
+          >
+            {status.ctaText} →
           </a>
         </div>
       )}

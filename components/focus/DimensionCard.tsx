@@ -78,7 +78,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           overflow:     'hidden',
           textOverflow: 'ellipsis',
         }}>
-          {status.state === 'locked'  ? (status.isReconnect ? `🔌 Reconnect` : status.ctaText) :
+          {status.state === 'locked'  ? status.ctaText  :
            status.state === 'pending' ? 'Scan needed'   :
            status.state === 'healthy' ? '✓ No issues'   :
            status.state === 'assessment_only' ? '📋 Assessment only'  :
