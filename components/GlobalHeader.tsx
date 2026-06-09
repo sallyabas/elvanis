@@ -22,12 +22,13 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinks = [
-    { href: '/dashboard',      label: 'Dashboard' },
-    { href: '/signals',        label: 'Signals' },
-    { href: '/health-tracker', label: 'Health Tracker' },
-    { href: '/plan',           label: 'Action Digest' },
-    { href: '/connect',        label: 'Connect' },
-    { href: '/service-request',label: 'Services' },
+    { href: '/',         label: 'Focus' },
+    { href: '/overview', label: 'Overview' },
+    { href: '/signals',  label: 'Signals' },
+    { href: '/tracker',  label: 'Tracker' },
+    { href: '/plan',     label: 'Plan' },
+    { href: '/connect',  label: 'Connect' },
+    { href: '/advisory', label: 'Advisory' },
   ]
 
   function openHelp() {
@@ -56,7 +57,7 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
           {/* Desktop nav */}
           <div className={styles.nav}>
             {navLinks.map(link => {
-              const isActive = pathname === link.href
+              const isActive = link.href === '/' ? pathname === '/' : pathname === link.href || pathname.startsWith(link.href + '/')
               return (
                 <a key={link.href} href={link.href}
                   style={{ fontSize: 14, fontWeight: isActive ? 600 : 500, color: isActive ? '#2563EB' : '#6B7280', textDecoration: 'none' }}>
@@ -86,7 +87,7 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
       {/* Mobile dropdown */}
       <div className={`${styles.mobileMenu}${mobileOpen ? ` ${styles.mobileMenuOpen}` : ''}`}>
         {navLinks.map(link => {
-          const isActive = pathname === link.href
+          const isActive = link.href === '/' ? pathname === '/' : pathname === link.href || pathname.startsWith(link.href + '/')
           return (
             <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
               style={{ padding: '10px 12px', borderRadius: 8, fontSize: 14, fontWeight: isActive ? 600 : 500, color: isActive ? '#2563EB' : '#374151', textDecoration: 'none', background: isActive ? '#EFF6FF' : 'transparent' }}>
@@ -110,9 +111,6 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
 
       <HelpPanel onRestartTour={restartTour} />
 
-      {pathname === '/dashboard' && (
-        <TourWithRestart guideDismissed={founder?.guide_dismissed ?? false} />
-      )}
     </>
   )
 }
