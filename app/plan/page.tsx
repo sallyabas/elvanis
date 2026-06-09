@@ -161,7 +161,7 @@ export default async function PlanPage() {
                   Upgrade to Navigator — £29/month →
                 </a>
               ) : (
-                <a href="/service-request?type=upgrade"
+                <a href="/advisory?type=upgrade"
                   style={{ display: 'inline-block', padding: '13px 32px', background: '#7C3AED', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
                   Contact us to upgrade →
                 </a>
@@ -206,7 +206,7 @@ export default async function PlanPage() {
                     </p>
                     <p style={{ fontSize: 13, color: '#B45309', margin: 0 }}>
                       Your 90-Day Action Plan updates automatically each scan cycle.{' '}
-                      <a href="/service-request?type=early-sync" style={{ color: '#92400E', fontWeight: 600, textDecoration: 'underline' }}>
+                      <a href="/advisory?type=early-sync" style={{ color: '#92400E', fontWeight: 600, textDecoration: 'underline' }}>
                         Message your consultant to request an early refresh →
                       </a>
                     </p>
@@ -380,7 +380,7 @@ export default async function PlanPage() {
                   <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>Want a human strategist to review this with you?</p>
                   <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>{consultantHook}</p>
                 </div>
-                <a href="/service-request?type=cpo"
+                <a href="/advisory?type=cpo"
                   style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   Book a CPO session →
                 </a>

@@ -35,7 +35,7 @@ export async function proxy(request: NextRequest) {
 
   const protectedRoutes = [
     '/dashboard', '/assessment', '/report', '/goals',
-    '/signals', '/connect', '/service-request', '/profile', '/onboarding'
+    '/signals', '/connect', '/advisory', '/profile', '/onboarding'
   ]
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))

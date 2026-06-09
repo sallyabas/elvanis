@@ -25,7 +25,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'High churn needs a retention strategy — not just automation.',
   },
   ticket_volume_increase: {
@@ -37,7 +37,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI can automate triage, FAQs and saved replies to cut volume.',
   },
   response_time_increase: {
@@ -49,7 +49,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/service-advisory?type=roadmap',
     upsellCopy:   'AI auto-response can cut response time by 60% without extra headcount.',
   },
   repeat_complaint_pattern: {
@@ -61,7 +61,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI deflection and self-serve docs can eliminate repeat contacts.',
   },
   nps_decline: {
@@ -73,7 +73,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'NPS improvement needs a product and retention strategy.',
   },
   csat_decline: {
@@ -85,7 +85,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'CSAT recovery requires both product and operations strategy.',
   },
   velocity_drop: {
@@ -97,7 +97,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'Velocity recovery needs delivery prioritisation and process strategy.',
   },
   bug_backlog_growth: {
@@ -109,7 +109,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'A growing bug backlog signals a triage and process problem.',
   },
   cycle_time_increase: {
@@ -121,7 +121,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'Long cycle times need a workflow and dependency strategy.',
   },
   blocked_tickets_spike: {
@@ -133,7 +133,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'Blocked tickets signal team dependency and process issues.',
   },
   conversion_fall: {
@@ -145,7 +145,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI personalisation and funnel automation can recover conversion.',
   },
   engagement_drop: {
@@ -157,7 +157,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI content recommendations can lift engagement significantly.',
   },
   activation_drop: {
@@ -169,7 +169,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI-powered onboarding nudges can double activation rates.',
   },
   refund_spike: {
@@ -181,7 +181,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'High refunds signal a product quality or expectation problem — fix the root cause first.',
   },
   aov_decline: {
@@ -193,7 +193,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'AOV improvement needs a pricing and upsell strategy.',
   },
   traffic_source_shift: {
@@ -205,7 +205,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI content and SEO automation can rebuild organic traffic.',
   },
   session_duration_drop: {
@@ -217,7 +217,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'roadmap',
     serviceLabel: 'AI Implementation Roadmap',
     servicePrice: '£99',
-    serviceUrl:   '/service-request?type=roadmap',
+    serviceUrl:   '/advisory?type=roadmap',
     upsellCopy:   'AI personalisation can increase time-on-site significantly.',
   },
   rating_decline: {
@@ -229,7 +229,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'Rating recovery needs a brand and product response strategy.',
   },
 
@@ -246,7 +246,7 @@ export const SIGNAL_GOAL_MAP: Record<string, {
     service:      'cpo',
     serviceLabel: 'Fractional CPO Session',
     servicePrice: '£250',
-    serviceUrl:   '/service-request?type=cpo',
+    serviceUrl:   '/advisory?type=cpo',
     upsellCopy:   'Low repeat purchase rate signals a retention and loyalty problem.',
   },
 }

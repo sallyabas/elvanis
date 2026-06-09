@@ -20,7 +20,7 @@ const SERVICES = [
     bg: '#ECFDF5',
     border: '#A7F3D0',
     flow: 'stripe_direct' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? '/service-request',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? '/advisory',
     buttonLabel: 'Upgrade to Navigator →',
     successNote: null,
   },
@@ -35,7 +35,7 @@ const SERVICES = [
     bg: '#EFF6FF',
     border: '#BFDBFE',
     flow: 'pay_first' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_ROADMAP_LINK ?? '/service-request',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_ROADMAP_LINK ?? '/advisory',
     buttonLabel: 'Request & Pay £99 →',
     successNote: 'Complete your payment to confirm your order. Sally will deliver your roadmap within 24 hours.',
   },
@@ -50,7 +50,7 @@ const SERVICES = [
     bg: '#F5F3FF',
     border: '#DDD6FE',
     flow: 'calendly' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CPO_LINK ?? '/service-request',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CPO_LINK ?? '/advisory',
     buttonLabel: 'Request CPO Session →',
     successNote: 'Sally will send you a booking link within 24 hours to schedule your session and confirm payment.',
   },
@@ -65,7 +65,7 @@ const SERVICES = [
     bg: '#ECFEFF',
     border: '#A5F3FC',
     flow: 'discovery' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_WORKSHOP_LINK ?? '/service-request',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_WORKSHOP_LINK ?? '/advisory',
     buttonLabel: 'Request Workshop →',
     successNote: 'Sally will reach out within 24 hours to arrange a discovery call and understand your team\'s specific needs before confirming.',
   },
@@ -80,7 +80,7 @@ const SERVICES = [
     bg: '#FFFBEB',
     border: '#FDE68A',
     flow: 'pay_first' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CONFLICT_LINK ?? '/service-request',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CONFLICT_LINK ?? '/advisory',
     buttonLabel: 'Request & Pay £99 →',
     successNote: 'Complete your payment to confirm your review. Sally will analyse your signal data and respond within 24 hours.',
   },
@@ -139,7 +139,7 @@ function ServiceRequestPageContent() {
       // Fix 5: append founder ID so webhook can identify who paid
       const founderId = founder?.id ?? ''
       const baseLink  = service.stripeLink
-      // If env var not set, stripeLink is '/service-request' — route internally
+      // If env var not set, stripeLink is '/advisory' — route internally
       if (baseLink.startsWith('/')) {
         window.location.href = baseLink
         return
@@ -160,7 +160,7 @@ function ServiceRequestPageContent() {
   
     setLoading(true)
     try {
-      await fetch('/api/service-request', {
+      await fetch('/api/advisory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

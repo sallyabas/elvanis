@@ -276,7 +276,7 @@ function buildGoalEmail(params: {
     </div>
   </div>
   <div style="text-align:center;margin-bottom:24px">
-    <a href="${appUrl}/health-tracker" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+    <a href="${appUrl}/tracker" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
       ${isAchieved ? 'View your wins →' : 'Set a new target →'}
     </a>
   </div>

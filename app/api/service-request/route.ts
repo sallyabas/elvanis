@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
 
     // Guard: navigator should never reach this route — it redirects to Stripe directly
     if (type === 'navigator') {
-      console.warn('[service-request] navigator request reached API route — should redirect to Stripe directly')
+      console.warn('[advisory] navigator request reached API route — should redirect to Stripe directly')
       return NextResponse.json({ error: 'Navigator upgrades via Stripe directly' }, { status: 400 })
     }
 
     const adminEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
     if (!adminEmail) {
-      console.error('[service-request] ADMIN_EMAIL not set')
+      console.error('[advisory] ADMIN_EMAIL not set')
       return NextResponse.json({ error: 'Service request unavailable — please try again later' }, { status: 500 })
     }
 
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
       })
 
     if (dbErr) {
-      console.error('[service-request] DB insert failed:', dbErr.message)
+      console.error('[advisory] DB insert failed:', dbErr.message)
       return NextResponse.json({ error: 'Failed to save request — please try again' }, { status: 500 })
     }
 
-    console.log(`[service-request] saved to DB — type=${type} flow=${flow} founder=${founderId}`)
+    console.log(`[advisory] saved to DB — type=${type} flow=${flow} founder=${founderId}`)
 
     // ── Email to admin ──
     const { error: adminEmailErr } = await resend.emails.send({
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (adminEmailErr) {
-      console.error('[service-request] admin email failed:', adminEmailErr)
+      console.error('[advisory] admin email failed:', adminEmailErr)
       // Request already saved to DB — do not fail the response
     }
 
@@ -145,13 +145,13 @@ export async function POST(request: NextRequest) {
             <p style="color:#9CA3AF;font-size:12px;margin:24px 0 0">Elvanis · Know what to fix before you scale</p>
           </div>
         `,
-      }).catch(err => console.error('[service-request] founder email failed:', err))
+      }).catch(err => console.error('[advisory] founder email failed:', err))
     }
 
     return NextResponse.json({ success: true })
 
   } catch (err) {
-    console.error('[service-request] error:', err)
+    console.error('[advisory] error:', err)
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
 }

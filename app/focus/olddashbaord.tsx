@@ -273,7 +273,7 @@ export default async function DashboardPage() {
                 Upgrade — £29/mo →
               </a>
             ) : (
-              <a href="/service-request?type=upgrade"
+              <a href="/advisory?type=upgrade"
                 style={{ padding: '8px 18px', background: '#7C3AED', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Contact us to upgrade →
               </a>
@@ -375,16 +375,16 @@ export default async function DashboardPage() {
                     🎯 Active: {(activeGoals ?? []).length}
                   </span>
                   {achievedCount > 0 && (
-                    <a href="/health-tracker#goals" style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: '#ECFDF5', color: '#059669', textDecoration: 'none' }}>
+                    <a href="/tracker#goals" style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: '#ECFDF5', color: '#059669', textDecoration: 'none' }}>
                       ✓ Achieved: {achievedCount}
                     </a>
                   )}
                   {missedCount > 0 && (
-                    <a href="/health-tracker#goals" style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: '#FEF2F2', color: '#DC2626', textDecoration: 'none' }}>
+                    <a href="/tracker#goals" style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: '#FEF2F2', color: '#DC2626', textDecoration: 'none' }}>
                       ✗ Missed: {missedCount}
                     </a>
                   )}
-                  <a href="/health-tracker#goals" style={{ fontSize: 12, color: '#6B7280', textDecoration: 'none', marginLeft: 4 }}>
+                  <a href="/tracker#goals" style={{ fontSize: 12, color: '#6B7280', textDecoration: 'none', marginLeft: 4 }}>
                     Manage →
                   </a>
                 </div>
@@ -532,7 +532,7 @@ export default async function DashboardPage() {
                 </p>
                 <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
                   <a href="/signals" style={{ fontSize: 12, color: '#D97706', fontWeight: 600, textDecoration: 'none' }}>Resolve conflicts →</a>
-                  <a href="/service-request?type=conflict" style={{ fontSize: 12, color: '#92400E', fontWeight: 600, textDecoration: 'none' }}>Get expert help →</a>
+                  <a href="/advisory?type=conflict" style={{ fontSize: 12, color: '#92400E', fontWeight: 600, textDecoration: 'none' }}>Get expert help →</a>
                 </div>
               </div>
             </div>
@@ -772,7 +772,7 @@ export default async function DashboardPage() {
                   Upgrade — £29/mo →
                 </a>
               ) : (
-                <a href="/service-request?type=upgrade"
+                <a href="/advisory?type=upgrade"
                   style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   Contact us to upgrade →
                 </a>
@@ -823,8 +823,8 @@ export default async function DashboardPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <a href="/service-request?type=roadmap" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>✨ Request AI Roadmap →</a>
-                  <a href="/service-request?type=cpo"     style={{ padding: '10px 22px', background: '#F5F3FF', color: '#7C3AED', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Book CPO Session</a>
+                  <a href="/advisory?type=roadmap" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>✨ Request AI Roadmap →</a>
+                  <a href="/advisory?type=cpo"     style={{ padding: '10px 22px', background: '#F5F3FF', color: '#7C3AED', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Book CPO Session</a>
                 </div>
               </>
             ) : (
@@ -921,8 +921,8 @@ export default async function DashboardPage() {
               <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>Get an AI-generated 90-day roadmap or book a session with a fractional CPO.</p>
             </div>
             <div className="stack-mobile" style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-              <a href="/service-request?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>Get AI Roadmap</a>
-              <a href="/service-request?type=cpo"     style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}>Book CPO Session</a>
+              <a href="/advisory?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>Get AI Roadmap</a>
+              <a href="/advisory?type=cpo"     style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}>Book CPO Session</a>
             </div>
           </div>
         </div>

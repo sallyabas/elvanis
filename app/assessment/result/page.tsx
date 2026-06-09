@@ -124,7 +124,7 @@ export default async function AssessmentResultPage() {
               <p style={{ fontSize: 14, fontWeight: 700, color: '#15803D', margin: '0 0 4px' }}>View signals</p>
               <p style={{ fontSize: 12, color: '#16A34A', margin: 0 }}>See what your data is telling you right now</p>
             </a>
-            <a href="/service-request?type=roadmap" style={{ padding: '18px', background: '#F5F3FF', borderRadius: 14, textDecoration: 'none', display: 'block' }}>
+            <a href="/advisory?type=roadmap" style={{ padding: '18px', background: '#F5F3FF', borderRadius: 14, textDecoration: 'none', display: 'block' }}>
               <p style={{ fontSize: 20, marginBottom: 8 }}>🗺️</p>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#6D28D9', margin: '0 0 4px' }}>Get AI roadmap</p>
               <p style={{ fontSize: 12, color: '#7C3AED', margin: 0 }}>90-day plan based on your results</p>

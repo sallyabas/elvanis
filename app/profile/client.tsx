@@ -298,7 +298,7 @@ export default function ProfileClient({
           <span style={{ fontSize: 14, fontWeight: 600, color: tierColor }}>{tierLabel} plan</span>
         </div>
         {!isNavigator && subscriptionTier !== 'deactivated' && (
-          <a href="/service-request?type=navigator" style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none' }}>
+          <a href="/advisory?type=navigator" style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none' }}>
             Upgrade to Navigator →
           </a>
         )}
@@ -378,7 +378,7 @@ export default function ProfileClient({
             <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>
               {remaining !== null && remaining <= 7 ? '⚠️ Your plan is expiring soon — renew to keep Navigator access.' : 'Questions about your billing? Contact us anytime.'}
             </p>
-            <a href="/service-request?type=billing" style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 16 }}>Contact us →</a>
+            <a href="/advisory?type=billing"style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 16 }}>Contact us →</a>
           </div>
         </div>
       )}
@@ -465,6 +465,9 @@ export default function ProfileClient({
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Primary focus</label>
+          <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 10, marginTop: 2 }}>
+          Your focus metric determines which dimension appears as your primary focus on the Home page. Changing it recalculates your business priorities immediately.
+          </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {FOCUS_OPTIONS.map(opt => (
               <button key={opt.id} onClick={() => setFocusMetric(opt.id)}

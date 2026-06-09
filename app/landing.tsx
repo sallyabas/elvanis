@@ -100,7 +100,7 @@ const T = {
         { icon: '📈', label: 'Impact tracking', desc: 'See if your fixes actually worked', free: false, nav: true },
       ],
       free: { name: 'Free', price: '£0', period: 'forever', cta: 'Start free →', href: '/signup', desc: 'Everything you need to get your first diagnosis. Free forever, no time limit.' },
-      nav: { name: 'Navigator', price: '£29', period: '/mo', badge: 'Most popular', cta: 'Get Navigator →', href: '/service-request?type=navigator', desc: 'For founders with multiple tools that don\'t agree. Weekly scans, conflict resolution, and an AI that reads everything together and tells you the truth.' },
+      nav: { name: 'Navigator', price: '£29', period: '/mo', badge: 'Most popular', cta: 'Get Navigator →', href: '/advisory?type=navigator', desc: 'For founders with multiple tools that don\'t agree. Weekly scans, conflict resolution, and an AI that reads everything together and tells you the truth.' },
     },
     finalCta: {
       title: 'Stop guessing.\nStart fixing.',
@@ -112,7 +112,7 @@ const T = {
       help: 'Need hands-on help?',
       helpCta: 'Talk to Elvanis Expertise →',
       links: ['Dashboard', 'Signals', 'Connect tools', 'Services', 'Assessment'],
-      hrefs: ['/focus', '/signals', '/connect', '/service-request', '/assessment'],
+      hrefs: ['/focus', '/signals', '/connect', '/advisory', '/assessment'],
     },
   },
   ar: {
@@ -198,7 +198,7 @@ const T = {
         { icon: '📈', label: 'تتبع التأثير', desc: 'معرفة ما إذا نجحت إصلاحاتك', free: false, nav: true },
       ],
       free: { name: 'Free', price: '£0', period: 'للأبد', cta: 'ابدأ مجاناً →', href: '/signup', desc: 'كل ما تحتاجه للحصول على أول تشخيص. مجاني للأبد، بدون حد زمني.' },
-      nav: { name: 'Navigator', price: '£29', period: '/شهر', badge: 'الأكثر شيوعاً', cta: 'احصل على Navigator →', href: '/service-request?type=navigator', desc: 'للمؤسسين الذين لديهم أدوات متعددة لا تتفق. فحوصات أسبوعية، حل التعارضات، وذكاء اصطناعي يقرأ كل شيء معاً ويخبرك بالحقيقة.' },
+      nav: { name: 'Navigator', price: '£29', period: '/شهر', badge: 'الأكثر شيوعاً', cta: 'احصل على Navigator →', href: '/advisory?type=navigator', desc: 'للمؤسسين الذين لديهم أدوات متعددة لا تتفق. فحوصات أسبوعية، حل التعارضات، وذكاء اصطناعي يقرأ كل شيء معاً ويخبرك بالحقيقة.' },
     },
     finalCta: {
       title: 'توقف عن التخمين.\nابدأ الإصلاح.',
@@ -210,7 +210,7 @@ const T = {
       help: 'تحتاج مساعدة مباشرة؟',
       helpCta: 'تحدث مع خبراء Elvanis →',
       links: ['لوحة التحكم', 'الإشارات', 'ربط الأدوات', 'الخدمات', 'التقييم', 'الشروط', 'الخصوصية'],
-      hrefs: ['/focus', '/signals', '/connect', '/service-request', '/assessment', '/terms', '/privacy'],
+      hrefs: ['/focus', '/signals', '/connect', '/advisory', '/assessment', '/terms', '/privacy'],
     },
   },
 }
@@ -452,7 +452,7 @@ export default function LandingPage() {
               <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 16 }}>{t.navigator.eyebrow}</p>
               <h2 style={{ fontSize: 40, fontWeight: 900, color: '#0F172A', lineHeight: 1.15, letterSpacing: '-1.5px', marginBottom: 20, whiteSpace: 'pre-line' }}>{t.navigator.title}</h2>
               <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.8, marginBottom: 32 }}>{t.navigator.subtitle}</p>
-              <a href="/service-request?type=navigator" className="btn-blue" style={{ display: 'inline-block', padding: '13px 32px', background: '#2563EB', color: '#fff', borderRadius: 10, fontSize: 15, fontWeight: 700, transition: 'opacity 0.15s' }}>
+              <a href="/advisory?type=navigator" className="btn-blue" style={{ display: 'inline-block', padding: '13px 32px', background: '#2563EB', color: '#fff', borderRadius: 10, fontSize: 15, fontWeight: 700, transition: 'opacity 0.15s' }}>
                 {lang === 'en' ? 'Get Navigator →' : 'احصل على Navigator →'}
               </a>
             </div>

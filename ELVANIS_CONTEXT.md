@@ -31,7 +31,7 @@
 
 **Trial:** `founders.trial_ends_at` — full Navigator-style access until expiry if tier is still `free`.
 
-**Stripe:** Checkout via `NEXT_PUBLIC_STRIPE_PAYMENT_LINK` and per-service links on `/service-request`.
+**Stripe:** Checkout via `NEXT_PUBLIC_STRIPE_PAYMENT_LINK` and per-service links on `/advisory`.
 
 ### Free vs Navigator — enforced in code
 
@@ -63,10 +63,10 @@ flowchart LR
   subgraph core [Core app]
     DB["/dashboard"]
     SIG["/signals"]
-    HT["/health-tracker"]
+    HT["/tracker"]
     PL["/plan Action Digest"]
     CON["/connect"]
-    SR["/service-request"]
+    SR["/advisory"]
   end
   LP --> Auth --> OB
   OB --> AS
@@ -94,15 +94,15 @@ flowchart LR
 | `/assessment/result` | Score breakdown, roadmap | `scores`, `assessments` | — |
 | `/dashboard` | Command centre: health score, top signals, goals, AI readiness, digest teaser | signals, scores, goals, sources, digests | Links only |
 | `/signals` | Signal feed, filters, conflicts, scan button | `diagnostic_signals`, `conflict_resolutions` | Scan, acknowledge, resolve, dismiss, feedback, Jira |
-| `/health-tracker` | Impact tracking: trends, scan history, goals | `scans`, `health_score_history`, signals, goals | Goals via API |
+| `/tracker` | Impact tracking: trends, scan history, goals | `scans`, `health_score_history`, signals, goals | Goals via API |
 | `/plan` | **Action Digest** (90-day plan, 3 phases) | `action_digests` | Navigator only; digest from cron/API |
 | `/connect` | Integrations hub | `data_sources` | OAuth routes, CSV upload |
 | `/connect/ga/select`, `/connect/jira/select`, etc. | Post-OAuth property/project selection | `data_sources` | Select-property APIs |
 | `/connect/csv`, `/connect/shopify`, `/connect/trustpilot`, `/connect/intercom` | Source-specific connect UX | — | Upload / domain entry |
 | `/profile` | Account, tier, language, deactivate | `founders` | Profile client |
-| `/service-request` | Paid services + Navigator upgrade | `founders` | `POST /api/service-request` |
+| `/advisory` | Paid services + Navigator upgrade | `founders` | `POST /api/advisory` |
 
-**Legacy URL:** Emails and some routes still link to `/measure` — **replaced by `/health-tracker`** (no `app/measure` route).
+**Legacy URL:** Emails and some routes still link to `/measure` — **replaced by `/tracker`** (no `app/measure` route).
 
 **Nav** (`components/GlobalHeader.tsx`): Dashboard → Signals → Business Health Tracker → Action Digest → Connect → Request Service.
 
@@ -133,7 +133,7 @@ flowchart LR
 | `lib/supabase.ts` | Browser Supabase client | Client components, auth pages |
 | `lib/supabase-server.ts` | `createServerComponentClient()` (RLS session), `createAdminClient()` (service role) | Server pages, APIs |
 | `lib/signal-analysis.ts` | `SIGNAL_DIRECTION`, `CSV_CONFIRMATION_SOURCES`, `analyseSignalConflicts()`, `calculatePriorityScore()`, `SIGNAL_CASCADES` | `/signals`, `/dashboard` |
-| `lib/signal-goal-map.ts` | **`SIGNAL_GOAL_MAP`** — metric labels, units, lower/higher better, upsell service | Goals API, dashboard, scan goal check, health-tracker |
+| `lib/signal-goal-map.ts` | **`SIGNAL_GOAL_MAP`** — metric labels, units, lower/higher better, upsell service | Goals API, dashboard, scan goal check, tracker |
 | `lib/scan-recorder.ts` | `recordScan()`, `determineTrend()` — scan row + snapshots; **does not** increment `scan_count` | All scrape routes, CSV upload |
 | `lib/conflict-reset.ts` | `resetStaleConflictPreferences()` — delete resolutions when values move &gt;2× or &lt;0.5× | Scan + scrape routes |
 | `lib/token-refresh.ts` | `getValidToken()` for ga4/jira/shopify/intercom | Scrape + Jira create |
@@ -236,8 +236,8 @@ Maps to `DimensionKey` in types: `revenue_financial`, `product_market_fit`, `tea
 - Create: `POST /api/goals` — validates against `SIGNAL_GOAL_MAP`; one active goal per signal type.
 - Status helpers: `getGoalStatus()`, `getGoalProgress()` in `signal-goal-map.ts`.
 - **After every scan:** `app/api/scan/route.ts` updates `current_value`, sets `achieved` or `missed`, emails founder.
-- UI: dashboard goal cards; **Business Health Tracker** (`/health-tracker`) goals section.
-- Upsell on failing goals: `service: 'roadmap' | 'cpo'` from map → `/service-request?type=...`
+- UI: dashboard goal cards; **Business Health Tracker** (`/tracker`) goals section.
+- Upsell on failing goals: `service: 'roadmap' | 'cpo'` from map → `/advisory?type=...`
 
 ---
 
@@ -372,7 +372,7 @@ Based on **calendar day of first `data_sources.created_at`**, adjusted for short
 
 ### Commercial
 
-- `POST /api/service-request` — Notifies admin (Resend)
+- `POST /api/advisory` — Notifies admin (Resend)
 - `POST /api/support`
 
 ---
@@ -425,7 +425,7 @@ Based on **calendar day of first `data_sources.created_at`**, adjusted for short
 
 ## 18. Services catalog (commercial)
 
-| ID | Offer | Price | Flow on `/service-request` |
+| ID | Offer | Price | Flow on `/advisory` |
 |----|-------|-------|------------------------------|
 | `navigator` | Monthly plan | £29/mo | Stripe direct |
 | `roadmap` | AI Implementation Roadmap | £99 | Pay first → form |
@@ -448,7 +448,7 @@ Mapped from `SIGNAL_GOAL_MAP.service` for in-app upsell cards.
 
 | Item | Notes |
 |------|-------|
-| `/measure` vs `/health-tracker` | Emails still link `/measure`; page is `/health-tracker` |
+| `/measure` vs `/tracker` | Emails still link `/measure`; page is `/tracker` |
 | `lib/goal-checker.ts` | Empty — logic in scan route |
 | Landing “1 tool” vs connect “3 slots” | Copy vs code mismatch |
 | `app/dashboard/page22.tsx` | Alternate/experimental dashboard |

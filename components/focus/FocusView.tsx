@@ -265,7 +265,7 @@ export default function FocusView({
             { label: 'All Signals',     href: '/signals'        },
             { label: 'Action Plan',     href: '/plan'           },
             { label: 'Connect Tools',   href: '/connect'        },
-            { label: 'Health Tracker',  href: '/health-tracker' },
+            { label: 'Health Tracker',  href: '/tracker' },
           ].map(({ label, href }) => (
               <a
               key={href}
