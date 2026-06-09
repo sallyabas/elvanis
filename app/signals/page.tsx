@@ -13,13 +13,13 @@ import { getSourceFrequency, SOURCE_CONFIG } from '@/lib/source-config'
 export default async function SignalsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; connected?: string }>
+  searchParams: Promise<{ filter?: string; connected?: string; dimension?: string }>
 }) {
   const supabase = await createServerComponentClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { filter, connected } = await searchParams
+    const { filter, connected, dimension } = await searchParams
 
   const { data: founder } = await supabase
     .from('founders')
@@ -103,15 +103,21 @@ export default async function SignalsPage({
 
   // Filter logic — conflicts filter shows ALL conflicted signals (resolved + unresolved)
   // Count card shows total conflicts — intentional so founder sees full picture
-  let signals: SignalWithFlags[] = allAnalysed
-  if (filter === 'critical') signals = allAnalysed.filter(s => s.severity === 'critical')
-  else if (filter === 'warning') signals = allAnalysed.filter(s => s.severity === 'warning')
-  else if (filter === 'working') signals = allAnalysed.filter(s => s.status === 'acknowledged')
-  else if (filter === 'resolved') signals = []
-  else if (filter === 'conflicts') signals = allAnalysed.filter(s => s.flags.some(f => f.type === 'conflict'))
-  else if (SOURCE_FILTERS.map(s => s.id).includes(filter ?? '')) {
-    signals = allAnalysed.filter(s => s.source === filter)
-  }
+  // Apply dimension filter first if present
+// Apply dimension filter first if present
+const dimensionFiltered = dimension
+  ? allAnalysed.filter(s => s.dimension === dimension)
+  : allAnalysed
+
+let signals: SignalWithFlags[] = dimensionFiltered
+if (filter === 'critical') signals = dimensionFiltered.filter(s => s.severity === 'critical')
+else if (filter === 'warning') signals = dimensionFiltered.filter(s => s.severity === 'warning')
+else if (filter === 'working') signals = dimensionFiltered.filter(s => s.status === 'acknowledged')
+else if (filter === 'resolved') signals = []
+else if (filter === 'conflicts') signals = dimensionFiltered.filter(s => s.flags.some(f => f.type === 'conflict'))
+else if (SOURCE_FILTERS.map(s => s.id).includes(filter ?? '')) {
+  signals = dimensionFiltered.filter(s => s.source === filter)
+}
 
   const { data: notApplicable } = await supabase
     .from('diagnostic_signals')
@@ -258,6 +264,42 @@ export default async function SignalsPage({
             )
           })}
         </div>
+
+        {/* ── Dimension filter tabs ── */}
+<div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' as const }}>
+  {[
+    { id: '',          label: 'All',                    icon: '📊' },
+    { id: 'revenue',   label: 'Revenue Engine',         icon: '💰' },
+    { id: 'customer',  label: 'Customer Health',        icon: '👥' },
+    { id: 'marketing', label: 'Growth & Acquisition',   icon: '📈' },
+    { id: 'team',      label: 'Execution Capacity',     icon: '⚙️' },
+    { id: 'product',   label: 'Product-Market Fit',     icon: '🎯' },
+    { id: 'strategy',  label: 'Strategic Clarity',      icon: '🧭' },
+  ].map(dim => {
+    const count = dim.id ? allAnalysed.filter(s => s.dimension === dim.id).length : total
+    if (dim.id && count === 0) return null
+    const isSelected = dimension === dim.id || (!dimension && dim.id === '')
+    const href = dim.id
+      ? `/signals?dimension=${dim.id}${filter ? `&filter=${filter}` : ''}`
+      : `/signals${filter ? `?filter=${filter}` : ''}`
+    return (
+      <a key={dim.id} href={href} style={{
+        padding:        '6px 14px',
+        borderRadius:   20,
+        fontSize:       12,
+        fontWeight:     600,
+        background:     isSelected ? '#111827' : '#F3F4F6',
+        color:          isSelected ? '#fff' : '#6B7280',
+        textDecoration: 'none',
+        display:        'flex',
+        alignItems:     'center',
+        gap:            4,
+      }}>
+        {dim.icon} {dim.label} {dim.id ? `(${count})` : ''}
+      </a>
+    )
+  })}
+</div>
 
         {/* ── Source filter tabs ── */}
         {total > 0 && (
