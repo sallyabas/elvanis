@@ -288,7 +288,7 @@ export default function ProfileClient({
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 24px' }}>
-      <a href="/focus" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Back to dashboard</a>
+      <a href="/" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Back to dashboard</a>
       <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 28 }}>Your profile</h1>
 
       {/* ── Plan badge ── */}
@@ -487,13 +487,13 @@ export default function ProfileClient({
       <div style={sectionStyle}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <p style={sectionTitle}>Service requests</p>
-          <a href="/service-request" style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', textDecoration: 'none' }}>+ New request</a>
+          <a href="/advisory" style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', textDecoration: 'none' }}>+ New request</a>
         </div>
         {serviceRequests.length === 0 ? (
           <div style={{ background: '#F9FAFB', borderRadius: 12, padding: '24px', textAlign: 'center' }}>
             <p style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 6 }}>No service requests yet</p>
             <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>Request an AI Roadmap, CPO session, or hands-on implementation help.</p>
-            <a href="/service-request" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Browse services →</a>
+            <a href="/advisory" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Browse services →</a>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

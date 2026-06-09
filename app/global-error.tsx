@@ -46,7 +46,7 @@ export default function GlobalError({
                 </button>
 
                 <a
-                  href="/focus"
+                  href="/"
                   style={{
                     display: 'block', padding: '13px',
                     background: '#F9FAFB', color: '#374151',

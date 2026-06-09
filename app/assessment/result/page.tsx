@@ -134,7 +134,7 @@ export default async function AssessmentResultPage() {
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-          <a href="/focus" style={{ padding: '12px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+          <a href="/" style={{ padding: '12px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
             Go to dashboard →
           </a>
           <a href="/assessment" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', padding: '8px 16px', border: '1px solid #E5E7EB', borderRadius: 8 }}>

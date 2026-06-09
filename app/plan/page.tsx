@@ -166,7 +166,7 @@ export default async function PlanPage() {
                   Contact us to upgrade →
                 </a>
               )}
-              <a href="/service-request"
+              <a href="/advisory"
                 style={{ display: 'inline-block', padding: '13px 24px', background: '#EDE9FE', color: '#7C3AED', borderRadius: 12, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
                 Talk to us first
               </a>

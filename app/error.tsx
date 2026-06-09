@@ -47,7 +47,7 @@ export default function ErrorPage({
             </button>
 
             <Link
-              href="/focus"
+              href="/"
               style={{
                 display: 'block', padding: '13px',
                 background: '#F9FAFB', color: '#374151',

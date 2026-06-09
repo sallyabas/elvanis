@@ -65,7 +65,7 @@ export default function LoginPage() {
       }
     }
 
-    router.push('/focus')
+    router.push('/')
     router.refresh()
   }
 

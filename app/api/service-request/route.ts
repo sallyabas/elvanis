@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
               <p style="color:#1D4ED8;margin:0;font-size:14px;line-height:1.6">${founderNextStep}</p>
             </div>
 
-            <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/focus"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/"
               style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
               Back to dashboard →
             </a>

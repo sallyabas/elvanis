@@ -66,14 +66,14 @@ function buildMonthlyEmailHtml(params: {
   <div style="background:#F5F3FF;border-radius:16px;border:1px solid #DDD6FE;padding:24px;margin-bottom:20px;text-align:center">
     <p style="font-size:16px;font-weight:700;color:#4C1D95;margin:0 0 8px">✨ Your Action Digest is waiting</p>
     <p style="font-size:14px;color:#6D28D9;margin:0 0 20px;line-height:1.6">Upgrade to Navigator to get a monthly AI-generated Action Digest — prioritised steps based on your signals.</p>
-    <a href="${appUrl}/service-request?type=navigator" style="display:inline-block;padding:13px 32px;background:#7C3AED;color:#fff;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Upgrade to Navigator →</a>
+    <a href="${appUrl}/advisory?type=navigator" style="display:inline-block;padding:13px 32px;background:#7C3AED;color:#fff;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Upgrade to Navigator →</a>
   </div>` : ''}
 
   <div style="text-align:center;margin-bottom:16px">
     <a href="${appUrl}/measure" style="display:inline-block;padding:12px 28px;background:#2563EB;color:#fff;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;margin-bottom:10px">View impact tracking →</a>
   </div>
   <div style="text-align:center;margin-bottom:24px">
-    <a href="${appUrl}/focus" style="display:inline-block;padding:12px 28px;background:#F9FAFB;color:#6B7280;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid #E5E7EB">View full dashboard →</a>
+    <a href="${appUrl}/" style="display:inline-block;padding:12px 28px;background:#F9FAFB;color:#6B7280;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid #E5E7EB">View full dashboard →</a>
   </div>
 
   <div style="text-align:center;border-top:1px solid #E5E7EB;padding-top:20px">

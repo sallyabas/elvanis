@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
       return
     }
 
-    setTimeout(() => router.push('/focus'), 2000)
+    setTimeout(() => router.push('/'), 2000)
   }
 
   if (done) {

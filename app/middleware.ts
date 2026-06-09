@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
+  '/',
   '/focus',
   '/overview',
   '/signals',
@@ -11,16 +12,17 @@ const PROTECTED_ROUTES = [
   '/connect',
   '/measure',
   '/health-tracker',
+  '/tracker',
   '/assessment',
   '/profile',
   '/service-request',
+  '/advisory',
   '/onboarding',
   '/admin',
 ]
 
 // Routes always accessible without auth
 const PUBLIC_ROUTES = [
-  '/',
   '/login',
   '/signup',
   '/forgot-password',
@@ -30,6 +32,7 @@ const PUBLIC_ROUTES = [
   '/terms',
   '/privacy',
 ]
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -82,14 +85,14 @@ export async function middleware(request: NextRequest) {
       .select('onboarding_completed, account_status')
       .eq('user_id', user.id)
       .maybeSingle()
-      
-      if (!founder || !founder.onboarding_completed) {
-        return NextResponse.redirect(new URL('/onboarding', request.url))
-      }
-      
-      if (founder.account_status === 'suspended' && pathname !== '/suspended') {
-        return NextResponse.redirect(new URL('/suspended', request.url))
-      }
+
+    if (!founder || !founder.onboarding_completed) {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
+
+    if (founder.account_status === 'suspended' && pathname !== '/suspended') {
+      return NextResponse.redirect(new URL('/suspended', request.url))
+    }
   }
 
   return response

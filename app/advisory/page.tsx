@@ -224,7 +224,7 @@ function ServiceRequestPageContent() {
                 </a>
               )}
               <a
-                href="/focus"
+                href="/"
                 style={{ padding: '12px 24px', background: '#F3F4F6', color: '#374151', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}
               >
                 Back to dashboard
