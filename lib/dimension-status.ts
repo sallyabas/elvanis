@@ -90,7 +90,7 @@ export function calculateDimensionStatuses(params: {
 
       // Score — use manual signals if assessment_only
       const liveScore       = getDimensionScore(id, activeSignals)
-      const assessmentScore = getDimensionScore(id, manualSignals)
+      const assessmentScore = getDimensionScore(id, manualSignals, true)
 
       // Trend — from live signals only
       let trend: 'improving' | 'worsening' | 'unchanged' | null = null
