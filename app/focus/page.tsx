@@ -84,6 +84,7 @@ export default async function FocusPage() {
           hasEverScanned={!!latestScan}
           overallScore={overallScore}
           connectedSourceTypes={connectedSourceTypes}
+          subscriptionTier={founder.subscription_tier}
         />
       </main>
     </div>

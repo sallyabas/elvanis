@@ -1,23 +1,24 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DimensionId, DIMENSIONS, getDimensionOrder, FounderStage, FocusMetric } from '@/lib/gravity-engine'
+
 type OnboardingStage = 'no_sources' | 'has_sources' | 'ready_to_scan'
 
 interface OnboardingProps {
-  stage:          OnboardingStage
-  connectedCount: number
-  hasAssessment:  boolean
-  founderId:      string
-  founderName:    string
-  founderStage:   string | null
-  focusMetric:    string | null
+  stage:            OnboardingStage
+  connectedCount:   number
+  hasAssessment:    boolean
+  founderId:        string
+  founderName:      string
+  founderStage:     string | null
+  focusMetric:      string | null
+  subscriptionTier: string | null
 }
 
-// Faded dimension grid shown behind onboarding surface
 function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: string | null, focusMetric: string | null }) {
-  const ids = getDimensionOrder(founderStage as FounderStage | null, focusMetric as FocusMetric | null)
+  const ids     = getDimensionOrder(founderStage as FounderStage | null, focusMetric as FocusMetric | null)
   const [heroId, ...restIds] = ids
 
   return (
@@ -41,9 +42,7 @@ function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: strin
             </h2>
           </div>
         </div>
-        <div style={{ fontSize: 56, fontWeight: 900, color: '#9CA3AF', lineHeight: 1, marginBottom: 8 }}>
-          —
-        </div>
+        <div style={{ fontSize: 56, fontWeight: 900, color: '#9CA3AF', lineHeight: 1, marginBottom: 8 }}>—</div>
         <p style={{ fontSize: 14, color: '#9CA3AF' }}>Awaiting data</p>
       </div>
 
@@ -82,9 +81,21 @@ export default function OnboardingSurface({
   founderName,
   founderStage,
   focusMetric,
+  subscriptionTier,
 }: OnboardingProps) {
-  const router  = useRouter()
-  const [scanning, setScanning] = useState(false)
+  const router = useRouter()
+  const [scanning,  setScanning]  = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    const isDismissed = localStorage.getItem('elvanis_onboarding_dismissed')
+    if (isDismissed) setDismissed(true)
+  }, [])
+
+  function handleDismiss() {
+    localStorage.setItem('elvanis_onboarding_dismissed', 'true')
+    setDismissed(true)
+  }
 
   async function handleFirstScan() {
     setScanning(true)
@@ -100,7 +111,7 @@ export default function OnboardingSurface({
     }
   }
 
-  const firstName = founderName.split(' ')[0] || 'there'
+  if (dismissed) return null
 
   return (
     <div style={{ position: 'relative' }}>
@@ -110,12 +121,12 @@ export default function OnboardingSurface({
 
       {/* Overlay surface */}
       <div style={{
-        position:      'absolute',
-        inset:         0,
-        display:       'flex',
-        alignItems:    'center',
-        justifyContent:'center',
-        zIndex:        10,
+        position:       'absolute',
+        inset:          0,
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'center',
+        zIndex:         10,
       }}>
         <div style={{
           background:   '#FFFFFF',
@@ -142,27 +153,27 @@ export default function OnboardingSurface({
               {/* Checklist */}
               <div style={{ textAlign: 'left', marginBottom: 32 }}>
                 {[
-                  { label: 'Take assessment',    done: hasAssessment,    href: '/assessment' },
-                  { label: 'Connect first tool', done: connectedCount > 0, href: '/connect' },
-                  { label: 'Run first scan',     done: false,            href: null },
+                  { label: 'Take assessment',    done: hasAssessment,      href: '/assessment' },
+                  { label: 'Connect first tool', done: connectedCount > 0, href: '/connect'    },
+                  { label: 'Run first scan',     done: false,              href: null          },
                 ].map(({ label, done, href }) => (
                   <div key={label} style={{
-                    display:       'flex',
-                    alignItems:    'center',
-                    gap:           12,
-                    padding:       '10px 0',
-                    borderBottom:  '1px solid #F3F4F6',
+                    display:      'flex',
+                    alignItems:   'center',
+                    gap:          12,
+                    padding:      '10px 0',
+                    borderBottom: '1px solid #F3F4F6',
                   }}>
                     <span style={{
-                      width:        24,
-                      height:       24,
-                      borderRadius: '50%',
-                      background:   done ? '#10B981' : '#F3F4F6',
-                      display:      'flex',
-                      alignItems:   'center',
+                      width:          24,
+                      height:         24,
+                      borderRadius:   '50%',
+                      background:     done ? '#10B981' : '#F3F4F6',
+                      display:        'flex',
+                      alignItems:     'center',
                       justifyContent: 'center',
-                      fontSize:     13,
-                      flexShrink:   0,
+                      fontSize:       13,
+                      flexShrink:     0,
                     }}>
                       {done ? '✓' : '○'}
                     </span>
@@ -181,24 +192,42 @@ export default function OnboardingSurface({
                 ))}
               </div>
 
-              <a
+                <a
                 href="/connect"
                 style={{
-                  display:      'block',
-                  width:        '100%',
-                  padding:      '14px',
-                  background:   '#2563EB',
-                  color:        '#FFFFFF',
-                  borderRadius: 12,
-                  fontSize:     15,
-                  fontWeight:   700,
+                  display:        'block',
+                  width:          '100%',
+                  padding:        '14px',
+                  background:     '#2563EB',
+                  color:          '#FFFFFF',
+                  borderRadius:   12,
+                  fontSize:       15,
+                  fontWeight:     700,
                   textDecoration: 'none',
-                  textAlign:    'center',
-                  boxSizing:    'border-box' as const,
+                  textAlign:      'center',
+                  boxSizing:      'border-box' as const,
                 }}
               >
                 Connect a tool →
               </a>
+
+              <button
+                onClick={handleDismiss}
+                style={{
+                  background:  'none',
+                  border:      'none',
+                  fontSize:    13,
+                  color:       '#9CA3AF',
+                  cursor:      'pointer',
+                  marginTop:   12,
+                  fontFamily:  'inherit',
+                  display:     'block',
+                  width:       '100%',
+                  textAlign:   'center' as const,
+                }}
+              >
+                Explore the app first →
+              </button>
             </>
           )}
 
@@ -210,33 +239,51 @@ export default function OnboardingSurface({
                 Engine warming up
               </h2>
               <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.6, marginBottom: 12 }}>
-                {connectedCount} {connectedCount === 1 ? 'tool' : 'tools'} connected. Ready for your first diagnostic scan.
+                {connectedCount} {connectedCount === 1 ? 'tool' : 'tools'} connected.
               </p>
               <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 32 }}>
                 This takes 30–60 seconds. We read across all your sources simultaneously.
               </p>
 
-              <button
-                onClick={handleFirstScan}
-                disabled={scanning}
-                style={{
-                  width:        '100%',
-                  padding:      '14px',
-                  background:   scanning ? '#9CA3AF' : '#2563EB',
-                  color:        '#FFFFFF',
-                  border:       'none',
-                  borderRadius: 12,
-                  fontSize:     15,
-                  fontWeight:   700,
-                  cursor:       scanning ? 'not-allowed' : 'pointer',
+              {subscriptionTier === 'navigator' ? (
+                <button
+                  onClick={handleFirstScan}
+                  disabled={scanning}
+                  style={{
+                    width:        '100%',
+                    padding:      '14px',
+                    background:   scanning ? '#9CA3AF' : '#2563EB',
+                    color:        '#FFFFFF',
+                    border:       'none',
+                    borderRadius: 12,
+                    fontSize:     15,
+                    fontWeight:   700,
+                    cursor:       scanning ? 'not-allowed' : 'pointer',
+                    marginBottom: 12,
+                    fontFamily:   'inherit',
+                  }}
+                >
+                  {scanning ? 'Scanning your business...' : 'Run first scan →'}
+                </button>
+              ) : (
+                <div style={{
+                  background:   '#F0FDF4',
+                  border:       '1px solid #BBF7D0',
+                  borderRadius: 10,
+                  padding:      '14px 16px',
                   marginBottom: 12,
-                  fontFamily:   'inherit',
-                }}
-              >
-                {scanning ? 'Scanning your business...' : 'Run first scan →'}
-              </button>
+                  textAlign:    'left' as const,
+                }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#059669', margin: '0 0 4px' }}>
+                    ⚡ Your first scan runs automatically
+                  </p>
+                  <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
+                    This usually takes 1–2 minutes after connecting your first tool. No action needed.
+                  </p>
+                </div>
+              )}
 
-              <a
+                <a
                 href="/connect"
                 style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none' }}
               >
@@ -263,11 +310,11 @@ export default function OnboardingSurface({
                 overflow:     'hidden',
               }}>
                 <div style={{
-                  height:     '100%',
-                  background: '#2563EB',
+                  height:      '100%',
+                  background:  '#2563EB',
                   borderRadius: 2,
-                  animation:  'scan-progress 30s linear forwards',
-                  width:      '0%',
+                  animation:   'scan-progress 30s linear forwards',
+                  width:       '0%',
                 }} />
               </div>
               <style>{`

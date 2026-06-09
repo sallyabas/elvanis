@@ -50,6 +50,7 @@ interface FocusViewProps {
   hasEverScanned:       boolean
   overallScore:         number
   connectedSourceTypes: string[]
+  subscriptionTier:     string | null
 }
 
 export default function FocusView({
@@ -63,6 +64,7 @@ export default function FocusView({
   hasEverScanned,
   overallScore,
   connectedSourceTypes,
+  subscriptionTier,
 }: FocusViewProps) {
   const router      = useRouter()
   const [showReveal, setShowReveal] = useState(false)
@@ -172,6 +174,7 @@ export default function FocusView({
           founderName={founderName}
           founderStage={founderStage}
           focusMetric={focusMetric}
+          subscriptionTier={subscriptionTier}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
