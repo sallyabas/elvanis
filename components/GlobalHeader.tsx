@@ -22,7 +22,7 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinks = [
-    { href: '/',         label: 'Focus' },
+    { href: '/',         label: 'Home' },
     { href: '/overview', label: 'Overview' },
     { href: '/signals',  label: 'Signals' },
     { href: '/tracker',  label: 'Tracker' },
