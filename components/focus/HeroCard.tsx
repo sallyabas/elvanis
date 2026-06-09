@@ -197,7 +197,7 @@ export default function HeroCard({
         </div>
 
         {/* Score */}
-        {status.state === 'active' && (
+        {(status.state === 'active' || status.state === 'assessment_only') && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
             <span style={{ fontSize: 64, fontWeight: 900, color: getScoreColor(status.score), lineHeight: 1 }}>
