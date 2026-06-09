@@ -155,7 +155,10 @@ export default function OnboardingSurface({
                 {[
                   { label: 'Take assessment',    done: hasAssessment,      href: '/assessment' },
                   { label: 'Connect first tool', done: connectedCount > 0, href: '/connect'    },
-                  { label: 'Run first scan',     done: false,              href: null          },
+                  ...(subscriptionTier === 'navigator'
+                    ? [{ label: 'Run first scan', done: false, href: null }]
+                    : [{ label: 'First scan runs automatically', done: false, href: null }]
+                  ),
                 ].map(({ label, done, href }) => (
                   <div key={label} style={{
                     display:      'flex',
