@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { DimensionId, DIMENSIONS } from '@/lib/gravity-engine'
-
+import { DimensionId, DIMENSIONS, getDimensionOrder, FounderStage, FocusMetric } from '@/lib/gravity-engine'
 type OnboardingStage = 'no_sources' | 'has_sources' | 'ready_to_scan'
 
 interface OnboardingProps {
@@ -17,8 +16,8 @@ interface OnboardingProps {
 }
 
 // Faded dimension grid shown behind onboarding surface
-function FadedDimensionGrid() {
-  const ids: DimensionId[] = ['revenue', 'customer', 'marketing', 'team', 'product', 'strategy']
+function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: string | null, focusMetric: string | null }) {
+  const ids = getDimensionOrder(founderStage as FounderStage | null, focusMetric as FocusMetric | null)
   const [heroId, ...restIds] = ids
 
   return (
@@ -81,6 +80,8 @@ export default function OnboardingSurface({
   hasAssessment,
   founderId,
   founderName,
+  founderStage,
+  focusMetric,
 }: OnboardingProps) {
   const router  = useRouter()
   const [scanning, setScanning] = useState(false)
@@ -105,7 +106,7 @@ export default function OnboardingSurface({
     <div style={{ position: 'relative' }}>
 
       {/* Faded grid behind */}
-      <FadedDimensionGrid />
+      <FadedDimensionGrid founderStage={founderStage} focusMetric={focusMetric} />
 
       {/* Overlay surface */}
       <div style={{

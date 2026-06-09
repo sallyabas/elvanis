@@ -35,6 +35,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
   return (
     <div
       onClick={onClick}
+      title={status.description}
       style={{
         background:   '#FFFFFF',
         border:       `1.5px solid ${isDormant ? '#F3F4F6' : '#E5E7EB'}`,
