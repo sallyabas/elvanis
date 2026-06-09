@@ -29,7 +29,7 @@ function getTrendColor(trend: string | null): string {
 
 export default function DimensionCard({ status, onClick }: DimensionCardProps) {
   const { label, color: scoreColor } = getScoreLabel(status.score)
-  const isDormant = status.state === 'locked'
+  const isDormant = status.state === 'locked' && !status.isReconnect
   const opacity   = isDormant ? 0.5 : 1
 
   return (
@@ -78,7 +78,7 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           overflow:     'hidden',
           textOverflow: 'ellipsis',
         }}>
-          {status.state === 'locked'  ? status.ctaText  :
+          {status.state === 'locked'  ? (status.isReconnect ? `⚠️ Reconnect` : status.ctaText) :
            status.state === 'pending' ? 'Scan needed'   :
            status.state === 'healthy' ? '✓ No issues'   :
            status.state === 'assessment_only' ? '📋 Assessment only'  :
@@ -106,11 +106,13 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           margin:     0,
           fontWeight: 600,
         }}>
-          {isDormant ? '' :
+           {isDormant ? (status.isReconnect ? status.hadSourceIcons.join(' ') : '') :
            status.state === 'healthy' ? 'Healthy' :
            status.state === 'pending' ? 'Pending' :
            status.state === 'assessment_only' ? 'Provisional' :
-           `${getTrendArrow(status.trend)} ${label}`}
+           status.state === 'active' && status.sourceIcons.length > 0
+            ? `${getTrendArrow(status.trend)} ${status.sourceIcons.join(' ')}`
+            : `${getTrendArrow(status.trend)} ${label}`}
         </p>
       </div>
     </div>

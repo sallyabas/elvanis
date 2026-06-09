@@ -95,3 +95,19 @@ export function hasDimensionTool(
   return req.tools.some(t => connectedSourceTypes.includes(t)) ||
          connectedSourceTypes.includes('csv')
 }
+
+// ── Source icon map ───────────────────────────────────────────
+export const SOURCE_ICONS: Record<string, string> = {
+    shopify:    '🛍️',
+    jira:       '🔧',
+    ga4:        '📊',
+    intercom:   '💬',
+    trustpilot: '⭐',
+    csv:        '📄',
+    manual:     '📋',
+  }
+  
+  // ── Helper: get icons for a list of source types ──────────────
+  export function getSourceIcons(sources: string[]): string[] {
+    return sources.map(s => SOURCE_ICONS[s] ?? '🔗')
+  }

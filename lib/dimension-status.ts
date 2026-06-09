@@ -4,7 +4,7 @@
 
 import type { DimensionId } from './gravity-engine'
 import { DIMENSIONS } from './gravity-engine'
-import { DIMENSION_REQUIREMENTS, hasDimensionTool } from './dimension-requirements'
+import { DIMENSION_REQUIREMENTS, hasDimensionTool, getSourceIcons } from './dimension-requirements'
 import { getDimensionScore } from './gravity-engine'
 
 export type DimensionState = 'active' | 'locked' | 'pending' | 'healthy' | 'assessment_only'
@@ -16,7 +16,14 @@ export interface DimensionStatus {
   trend:              'improving' | 'worsening' | 'unchanged' | null
   isUnlocked:         boolean
   isProvisional:      boolean
+  isReconnect:        boolean
+  sourcesContributed: string[]
+  hadSources:         string[]
+  sourceIcons:        string[]
+  hadSourceIcons:     string[]
   assessmentOnlyText: string
+  reconnectText:      string
+  topManualInsight:   string
   missingTools:       string[]
   ctaText:            string
   ctaHref:            string
@@ -37,12 +44,13 @@ export interface DimensionStatusResult {
 }
 
 interface Signal {
-  dimension:   string
-  severity:    string
-  status:      string
-  source:      string
-  signal_type: string
-  trend:       string | null
+  dimension:       string
+  severity:        string
+  status:          string
+  source:          string
+  signal_type:     string
+  trend:           string | null
+  insight_summary: string
 }
 
 export function calculateDimensionStatuses(params: {
@@ -72,15 +80,15 @@ export function calculateDimensionStatuses(params: {
       const dim      = DIMENSIONS[id]
       const hasTools = hasDimensionTool(id, connectedSourceTypes, hasAssessment)
 
-      // Missing tools for this dimension
+      // Missing tools
       const missingTools = req.tools.filter(
         t => !connectedSourceTypes.includes(t)
       )
 
-      // Live signals for this dimension (excludes manual/assessment)
+      // Live signals for this dimension
       const dimSignals = activeSignals.filter(s => s.dimension === id)
 
-      // Manual/assessment signals for this dimension
+      // Manual/assessment signals
       const manualSignals = signals.filter(
         s => s.dimension === id &&
              s.source === 'manual' &&
@@ -88,11 +96,11 @@ export function calculateDimensionStatuses(params: {
       )
       const hasManualSignals = manualSignals.length > 0
 
-      // Score — use manual signals if assessment_only
+      // Scores
       const liveScore       = getDimensionScore(id, activeSignals)
       const assessmentScore = getDimensionScore(id, manualSignals, true)
 
-      // Trend — from live signals only
+      // Trend
       let trend: 'improving' | 'worsening' | 'unchanged' | null = null
       if (dimSignals.length > 0) {
         if (dimSignals.some(s => s.trend === 'worsening'))      trend = 'worsening'
@@ -100,8 +108,27 @@ export function calculateDimensionStatuses(params: {
         else                                                      trend = 'unchanged'
       }
 
-      // State
+      // Sources currently contributing active signals
+      const sourcesContributed = [...new Set(dimSignals.map(s => s.source))]
+
+      // Sources that ever had signals (for reconnect)
+      const hadSources = [...new Set(
+        signals
+          .filter(s => s.dimension === id && s.source !== 'manual')
+          .map(s => s.source)
+      )]
+
+      // Source icons
+      const sourceIcons    = getSourceIcons(sourcesContributed)
+      const hadSourceIcons = getSourceIcons(hadSources)
+
+      // Top manual insight for amber box
+      const topManualSignal  = manualSignals[0]
+      const topManualInsight = topManualSignal?.insight_summary ?? ''
+
+      // ── State resolution ──────────────────────────────────
       let state: DimensionState
+
       if (hasManualSignals && !hasDimensionTool(id, connectedSourceTypes, false)) {
         state = 'assessment_only'
         unlockedCount++
@@ -117,6 +144,9 @@ export function calculateDimensionStatuses(params: {
         unlockedCount++
       }
 
+      // isReconnect: was previously connected but now disconnected
+      const isReconnect = state === 'locked' && hadSources.length > 0
+
       const status: DimensionStatus = {
         id,
         state,
@@ -124,7 +154,16 @@ export function calculateDimensionStatuses(params: {
         trend,
         isUnlocked:         state === 'active' || state === 'healthy' || state === 'assessment_only',
         isProvisional:      state === 'assessment_only',
-        assessmentOnlyText: `This score is based on your assessment only. Connect ${req.ctaText.toLowerCase()} to validate with live data.`,
+        isReconnect,
+        sourcesContributed,
+        hadSources,
+        sourceIcons,
+        hadSourceIcons,
+        assessmentOnlyText: topManualInsight
+          ? `Your assessment signals: "${topManualInsight}"`
+          : `This score is based on your assessment only.`,
+        reconnectText:      `Reconnect ${req.ctaText.replace('Connect ', '')} to sync your latest data.`,
+        topManualInsight,
         missingTools,
         ctaText:            req.ctaText,
         ctaHref:            req.ctaHref,

@@ -218,14 +218,19 @@ export default function HeroCard({
 )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 4 }}>
-              <span style={{ fontSize: 20, color: getTrendColor(status.trend), fontWeight: 700 }}>
-                {getTrendArrow(status.trend)}
+             <span style={{ fontSize: 20, color: getTrendColor(status.trend), fontWeight: 700 }}>
+               {getTrendArrow(status.trend)}
               </span>
               <span style={{ fontSize: 13, color: getTrendColor(status.trend), fontWeight: 600 }}>
                 {status.trend === 'improving'  ? 'Improving'  :
                  status.trend === 'worsening'  ? 'Worsening'  :
                  status.trend === 'unchanged'  ? 'Stable'     : ''}
               </span>
+              {status.state === 'active' && status.sourceIcons.length > 0 && (
+               <span style={{ fontSize: 14, marginLeft: 4 }}>
+                {status.sourceIcons.join(' ')}
+              </span>
+             )}
             </div>
           </div>
         )}
@@ -236,31 +241,45 @@ export default function HeroCard({
 
       {/* ── STATE: LOCKED ── */}
       {status.state === 'locked' && (
-        <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-          <p style={{ fontSize: 32, marginBottom: 12 }}>🔒</p>
-          <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
-            {status.label} not yet activated
-          </p>
-          <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
-            {status.unlockText}
-          </p>
-            <a
-            href={status.ctaHref}
-            style={{
-              display:        'inline-block',
-              padding:        '12px 24px',
-              background:     status.color,
-              color:          '#FFFFFF',
-              borderRadius:   10,
-              fontSize:       14,
-              fontWeight:     700,
-              textDecoration: 'none',
-            }}
-          >
-            {status.ctaText} →
-          </a>
-        </div>
-      )}
+  <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
+    <p style={{ fontSize: 32, marginBottom: 12 }}>
+      {status.isReconnect ? '⚠️' : '🔒'}
+    </p>
+    <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
+      {status.isReconnect
+        ? `${status.label} disconnected`
+        : `${status.label} not yet activated`}
+    </p>
+    <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
+      {status.isReconnect ? status.reconnectText : status.unlockText}
+    </p>
+    <a
+      href={status.ctaHref}
+      style={{
+        display:        'inline-block',
+        padding:        '12px 24px',
+        background:     status.color,
+        color:          '#FFFFFF',
+        borderRadius:   10,
+        fontSize:       14,
+        fontWeight:     700,
+        textDecoration: 'none',
+      }}
+    >
+      {status.isReconnect
+        ? `Reconnect ${status.shortLabel} →`
+        : `${status.ctaText} →`}
+    </a>
+    {status.isReconnect && status.hadSourceIcons.length > 0 && (
+      <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 12 }}>
+        Previously connected:{' '}
+        <span style={{ opacity: 0.5 }}>
+          {status.hadSourceIcons.join(' ')}
+        </span>
+      </p>
+    )}
+  </div>
+)}
 
       {/* ── STATE: PENDING ── */}
       {status.state === 'pending' && (
@@ -319,12 +338,15 @@ export default function HeroCard({
     }}>
       <span style={{ fontSize: 16, flexShrink: 0 }}>📋</span>
       <div>
-        <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
-          Assessment data only
-        </p>
-        <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
-          {status.assessmentOnlyText}
-        </p>
+      <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 4px' }}>
+  📋 Assessment data only — {status.score}* provisional
+</p>
+<p style={{ fontSize: 13, color: '#92400E', margin: '0 0 4px' }}>
+  {status.assessmentOnlyText}
+</p>
+<p style={{ fontSize: 12, color: '#92400E', margin: 0, fontStyle: 'italic' }}>
+  Connect tools to confirm or challenge this baseline.
+</p>
       </div>
     </div>
     <a
