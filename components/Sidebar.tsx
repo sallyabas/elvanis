@@ -20,6 +20,7 @@ const NAV_GROUPS = [
       { href: '/overview', icon: '📊', label: 'Overview' },
       { href: '/signals',  icon: '⚡', label: 'Signals', badge: 'signals' },
       { href: '/tracker',  icon: '📈', label: 'Tracker'  },
+      { href: '/assessment/result', icon: '🎯', label: 'Assessment' },
     ],
   },
   {

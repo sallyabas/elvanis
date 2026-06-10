@@ -185,42 +185,60 @@ export default function OnboardingSurface({
                 ))}
               </div>
 
-                <a
-                href="/connect"
-                style={{
-                  display:        'block',
-                  width:          '100%',
-                  padding:        '14px',
-                  background:     '#2563EB',
-                  color:          '#FFFFFF',
-                  borderRadius:   12,
-                  fontSize:       15,
-                  fontWeight:     700,
-                  textDecoration: 'none',
-                  textAlign:      'center',
-                  boxSizing:      'border-box' as const,
-                }}
-              >
-                Connect a tool →
-              </a>
-
-              <button
-                onClick={onDismiss}
-                style={{
-                  background:  'none',
-                  border:      'none',
-                  fontSize:    13,
-                  color:       '#9CA3AF',
-                  cursor:      'pointer',
-                  marginTop:   12,
-                  fontFamily:  'inherit',
-                  display:     'block',
-                  width:       '100%',
-                  textAlign:   'center' as const,
-                }}
-              >
-                Explore the app first →
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                {!hasAssessment ? (
+                  <>
+                    <a href="/assessment" style={{
+                      display: 'block', width: '100%', padding: '14px',
+                      background: '#2563EB', color: '#fff', borderRadius: 12,
+                      fontSize: 15, fontWeight: 700, textDecoration: 'none',
+                      textAlign: 'center', boxSizing: 'border-box' as const,
+                    }}>
+                      📋 Take assessment — 10 min, no tools needed →
+                    </a>
+                    <a href="/connect" style={{
+                      display: 'block', width: '100%', padding: '14px',
+                      background: '#F9FAFB', color: '#374151', borderRadius: 12,
+                      fontSize: 15, fontWeight: 600, textDecoration: 'none',
+                      textAlign: 'center', boxSizing: 'border-box' as const,
+                      border: '1px solid #E5E7EB',
+                    }}>
+                      🔌 Connect a tool instead →
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <a href="/connect" style={{
+                      display: 'block', width: '100%', padding: '14px',
+                      background: '#2563EB', color: '#fff', borderRadius: 12,
+                      fontSize: 15, fontWeight: 700, textDecoration: 'none',
+                      textAlign: 'center', boxSizing: 'border-box' as const,
+                    }}>
+                      🔌 Connect a tool for live data →
+                    </a>
+                    <a href="/assessment" style={{
+                      display: 'block', width: '100%', padding: '14px',
+                      background: '#F9FAFB', color: '#374151', borderRadius: 12,
+                      fontSize: 15, fontWeight: 600, textDecoration: 'none',
+                      textAlign: 'center', boxSizing: 'border-box' as const,
+                      border: '1px solid #E5E7EB',
+                    }}>
+                      📋 Retake assessment →
+                    </a>
+                  </>
+                )}
+                <button
+                  onClick={onDismiss}
+                  style={{
+                    background: 'none', border: 'none', fontSize: 13,
+                    color: '#9CA3AF', cursor: 'pointer', marginTop: 4,
+                    fontFamily: 'inherit', display: 'block',
+                    width: '100%', textAlign: 'center' as const,
+                  }}
+                >
+                  Explore the app first →
+                </button>
+              </div>
             </>
           )}
 

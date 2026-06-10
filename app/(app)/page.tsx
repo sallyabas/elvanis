@@ -4,14 +4,63 @@ import FocusView from '@/components/focus/FocusView'
 import { calculateHealthScore } from '@/lib/health-scoring'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
 
-export default async function FocusPage() {
+const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
+
+const AI_OPPORTUNITY_SIGNALS: Record<string, { title: string; description: string; saving: string; complexity: 'low' | 'medium' | 'high' }> = {
+  ticket_volume_increase:   { title: 'AI Support Agent',           description: 'Automate responses to repetitive support tickets',                             saving: '10-15 hrs/week', complexity: 'low'    },
+  response_time_increase:   { title: 'AI Ticket Triage',           description: 'Auto-categorise and prioritise incoming tickets',                              saving: '5-8 hrs/week',   complexity: 'low'    },
+  repeat_complaint_pattern: { title: 'AI Knowledge Base',          description: 'Answer common complaints automatically',                                       saving: '8-12 hrs/week',  complexity: 'low'    },
+  velocity_drop:            { title: 'AI Sprint Planning',         description: 'AI-assisted estimation and dependency detection',                              saving: '3-5 hrs/sprint', complexity: 'medium' },
+  bug_backlog_growth:       { title: 'AI Code Review',             description: 'Catch bugs before they ship',                                                 saving: '6-10 hrs/week',  complexity: 'medium' },
+  engagement_drop:          { title: 'AI Personalisation',         description: 'Tailor user journeys by behaviour',                                           saving: 'Revenue impact', complexity: 'high'   },
+  conversion_fall:          { title: 'AI Conversion Optimisation', description: 'Automatically test and optimise conversion paths',                            saving: 'Revenue impact', complexity: 'high'   },
+  activation_drop:          { title: 'AI Onboarding Agent',        description: 'Automate activation sequences for new users',                                 saving: '8-12 hrs/week',  complexity: 'medium' },
+  nps_decline:              { title: 'AI Feedback Analysis',       description: 'Automatically analyse and categorise NPS responses',                          saving: '4-6 hrs/week',   complexity: 'low'    },
+  csat_decline:             { title: 'AI Support Optimisation',    description: 'Identify root causes of low satisfaction automatically',                      saving: '5-8 hrs/week',   complexity: 'low'    },
+  cycle_time_increase:      { title: 'AI Workflow Automation',     description: 'Identify bottlenecks and automate handoffs',                                  saving: '6-10 hrs/week',  complexity: 'medium' },
+  traffic_source_shift:     { title: 'AI SEO & Content Engine',    description: 'Reduce paid traffic dependency with AI-generated organic content',            saving: 'Revenue impact', complexity: 'high'   },
+  session_duration_drop:    { title: 'AI Personalisation',         description: 'Dynamically adapt content to keep users engaged',                             saving: 'Revenue impact', complexity: 'high'   },
+  blocked_tickets_spike:    { title: 'AI Workflow Automation',     description: 'Detect and resolve common blockers before they stall the team',               saving: '4-6 hrs/week',   complexity: 'medium' },
+}
+
+function calculateAIReadiness(signals: Array<{ status: string; signal_type: string; severity: string; source: string }>, assessment: Record<string, unknown> | null) {
+  const activeSignals     = signals.filter(s => s.status === 'new' || s.status === 'acknowledged')
+  const activeSignalTypes = activeSignals.map(s => s.signal_type)
+  const severityRank: Record<string, number> = { critical: 3, warning: 2, watch: 1 }
+
+  const opportunities = Object.entries(AI_OPPORTUNITY_SIGNALS)
+    .filter(([type]) => activeSignalTypes.includes(type))
+    .map(([type, data]) => {
+      const highestSeverity = activeSignals
+        .filter(s => s.signal_type === type)
+        .reduce((highest, s) => (severityRank[s.severity] ?? 0) > (severityRank[highest] ?? 0) ? s.severity : highest, 'watch' as string)
+      return { signal_type: type, severity: highestSeverity, ...data }
+    })
+    .sort((a, b) => (severityRank[b.severity] ?? 0) - (severityRank[a.severity] ?? 0))
+
+  const hasEnoughData = activeSignals.length >= 2
+  if (!hasEnoughData) return { score: 0, opportunities: [], hasEnoughData: false }
+
+  const baseScore = Math.min(opportunities.length * 15, 60)
+  let capacityBonus = 0
+  if (assessment) {
+    const runway            = assessment.runway as string
+    const technicalCapacity = assessment.technical_capacity as string
+    const teamSize          = assessment.team_size as string
+    const investmentStatus  = assessment.investment_status as string
+    if (investmentStatus && !['Bootstrapped — self-funded'].includes(investmentStatus)) capacityBonus += 15
+    if (runway && ['More than 18 months', '12–18 months', 'Not applicable — profitable'].includes(runway)) capacityBonus += 10
+    if (technicalCapacity === 'Yes — strong technical team' || technicalCapacity === 'Yes — limited technical capacity' || (teamSize && ['6–15 people', '16–50 people', '50+ people'].includes(teamSize))) capacityBonus += 15
+  }
+  return { score: Math.min(baseScore + capacityBonus, 100), opportunities, hasEnoughData: true }
+}
+
+export default async function HomePage() {
   const supabase = await createServerComponentClient()
 
-  // ── Auth ────────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // ── Founder ─────────────────────────────────────────────────
   const { data: founder } = await supabase
     .from('founders')
     .select('id, full_name, business_name, founder_stage, focus_metric, subscription_tier, logo_url, guide_dismissed')
@@ -20,7 +69,6 @@ export default async function FocusPage() {
 
   if (!founder) redirect('/onboarding')
 
-  // ── Signals ─────────────────────────────────────────────────
   const { data: signals } = await supabase
     .from('diagnostic_signals')
     .select('id, signal_type, dimension, severity, status, source, insight_summary, recommended_action, value, trend, scan_count')
@@ -28,23 +76,31 @@ export default async function FocusPage() {
     .in('status', ['new', 'acknowledged', 'resolved'])
     .order('created_at', { ascending: false })
 
-  // ── Data sources ─────────────────────────────────────────────
   const { data: dataSources } = await supabase
     .from('data_sources')
     .select('id, source_type, status, last_synced_at')
     .eq('founder_id', founder.id)
-    const connectedSourceTypes = (dataSources ?? [])
+
+  const connectedSourceTypes = (dataSources ?? [])
     .filter(s => s.status === 'active')
     .map(s => s.source_type)
 
-  // ── Assessment ───────────────────────────────────────────────
   const { data: assessment } = await supabase
     .from('assessments')
-    .select('id')
+    .select('*')
     .eq('founder_id', founder.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .maybeSingle()
 
-  // ── Scans ────────────────────────────────────────────────────
+  const { data: score } = await supabase
+    .from('scores')
+    .select('*')
+    .eq('founder_id', founder.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   const { data: latestScan } = await supabase
     .from('scans')
     .select('id')
@@ -54,31 +110,214 @@ export default async function FocusPage() {
     .limit(1)
     .maybeSingle()
 
-  // ── Health score ─────────────────────────────────────────────
+  const { data: latestDigest } = await supabase
+    .from('action_digests')
+    .select('id, digest, generated_at, status')
+    .eq('founder_id', founder.id)
+    .eq('status', 'active')
+    .maybeSingle()
+
   const activeSignals = (signals ?? []).filter(
     s => (s.status === 'new' || s.status === 'acknowledged') && s.source !== 'manual'
   )
-  const overallScore = calculateHealthScore(
-    activeSignals.map(s => ({
-      signal_type: s.signal_type,
-      severity:    s.severity,
-      dimension:   s.dimension,
-    }))
+  const overallScore  = calculateHealthScore(
+    activeSignals.map(s => ({ signal_type: s.signal_type, severity: s.severity, dimension: s.dimension }))
   )
 
+  const allActiveSignals = (signals ?? []).filter(s => s.status === 'new' || s.status === 'acknowledged')
+  const aiReadiness      = calculateAIReadiness(allActiveSignals, assessment as Record<string, unknown> | null)
+
+  const isFreeTier      = !founder || founder.subscription_tier === 'free'
+  const isNavigator     = founder?.subscription_tier === 'navigator'
+  const overallScoreColor = score
+    ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
+    : '#6B7280'
+  const complexityColor = (c: string) => c === 'low' ? '#059669' : c === 'medium' ? '#D97706' : '#7C3AED'
+
   return (
-    <FocusView
-      founderId={founder.id}
-      founderName={founder.full_name ?? 'Founder'}
-      founderStage={(founder.founder_stage as FounderStage) ?? null}
-      focusMetric={(founder.focus_metric as FocusMetric) ?? null}
-      signals={signals ?? []}
-      dataSources={dataSources ?? []}
-      hasAssessment={!!assessment}
-      hasEverScanned={!!latestScan}
-      overallScore={overallScore}
-      connectedSourceTypes={connectedSourceTypes}
-      subscriptionTier={founder.subscription_tier}
-    />
+    <div style={{ background: '#F9FAFB', minHeight: '100vh' }}>
+      <FocusView
+        founderId={founder.id}
+        founderName={founder.full_name ?? 'Founder'}
+        founderStage={(founder.founder_stage as FounderStage) ?? null}
+        focusMetric={(founder.focus_metric as FocusMetric) ?? null}
+        signals={signals ?? []}
+        dataSources={dataSources ?? []}
+        hasAssessment={!!assessment}
+        hasEverScanned={!!latestScan}
+        overallScore={overallScore}
+        connectedSourceTypes={connectedSourceTypes}
+        subscriptionTier={founder.subscription_tier}
+      />
+
+      {/* ── Below fold — only shown after onboarding dismissed ── */}
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 48px' }}>
+
+        {/* ── Overview cross-link ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 8 }}>
+          <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>More business intelligence</p>
+          <a href="/overview" style={{ fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
+            See full business health →
+          </a>
+        </div>
+
+        {/* ── Assessment card ── */}
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: score ? 16 : 0 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+              🎯 Assessment Score
+            </p>
+            {score && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <a href="/assessment/result" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', padding: '6px 14px', border: '1px solid #BFDBFE', borderRadius: 8, fontWeight: 600 }}>
+                  Full report →
+                </a>
+                <a href="/assessment" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
+                  Retake
+                </a>
+              </div>
+            )}
+          </div>
+          {!score ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '20px', background: '#F9FAFB', borderRadius: 12 }}>
+              <div style={{ width: 52, height: 52, background: '#EFF6FF', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>🎯</div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>No assessment taken yet</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px', lineHeight: 1.5 }}>Answer 26 questions and get a scored diagnosis across 6 dimensions. Takes 10 minutes.</p>
+                <a href="/assessment" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                  Start assessment →
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB' }}>
+              <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                <p style={{ fontSize: 10, color: '#6B7280', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Overall</p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2 }}>
+                  <span style={{ fontSize: 40, fontWeight: 900, color: overallScoreColor, lineHeight: 1 }}>{score.overall_score as number}</span>
+                  <span style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 3 }}>/100</span>
+                </div>
+              </div>
+              <div style={{ width: 1, height: 48, background: '#E5E7EB', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{score.overall_status as string}</p>
+                <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.5 }}>
+                  {(score.overall_summary as string)?.substring(0, 120)}...
+                </p>
+                {score.primary_constraint_summary && (
+                  <span style={{ fontSize: 11, color: '#DC2626', fontWeight: 600 }}>
+                    ⚠ {(score.primary_constraint_summary as string)?.substring(0, 80)}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── AI Readiness ── */}
+        <div style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>✨ AI Readiness</p>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
+                {allActiveSignals.length > 0 ? 'Based on your active signals' : 'Based on your business profile and assessment'}
+              </p>
+            </div>
+            {aiReadiness.hasEnoughData && aiReadiness.opportunities.length > 0 && (
+              <div style={{ background: '#fff', borderRadius: 12, padding: '8px 16px', flexShrink: 0 }}>
+                <span style={{ fontSize: 28, fontWeight: 900, color: '#7C3AED', lineHeight: 1 }}>{aiReadiness.score}</span>
+                <span style={{ fontSize: 13, color: '#7C3AED' }}>/100</span>
+              </div>
+            )}
+          </div>
+          {!aiReadiness.hasEnoughData ? (
+            <div style={{ background: '#EDE9FE', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+              <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>Take the assessment or connect tools to detect AI automation opportunities.</p>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                {!assessment && <a href="/assessment" style={{ padding: '8px 16px', background: '#7C3AED', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Take assessment →</a>}
+                <a href="/connect" style={{ padding: '8px 16px', background: '#fff', color: '#7C3AED', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Connect tools →</a>
+              </div>
+            </div>
+          ) : aiReadiness.opportunities.length === 0 ? (
+            <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>No AI opportunities in current data.</p>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10, marginBottom: 16 }}>
+                {aiReadiness.opportunities.slice(0, 3).map(opp => (
+                  <div key={opp.signal_type} style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', border: '1px solid #EDE9FE' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: 0 }}>{opp.title}</p>
+                      <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: '#F5F3FF', color: complexityColor(opp.complexity), fontWeight: 700 }}>{opp.complexity}</span>
+                    </div>
+                    <p style={{ fontSize: 12, color: '#6D28D9', margin: '0 0 6px', lineHeight: 1.5 }}>{opp.description}</p>
+                    <p style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, margin: 0 }}>⏱ {opp.saving}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <a href="/advisory?type=roadmap" style={{ padding: '9px 20px', background: '#7C3AED', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>✨ Request AI Roadmap →</a>
+                <a href="/advisory?type=cpo" style={{ padding: '9px 20px', background: '#fff', color: '#7C3AED', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Book CPO Session</a>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── Action Digest ── */}
+        {!isFreeTier ? (
+          <div style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: latestDigest ? 14 : 0 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: latestDigest ? '#7C3AED' : '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>✨ Action Digest</p>
+                {latestDigest ? (
+                  <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
+                    Generated {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>Your first digest will be generated on your monthly anniversary date.</p>
+                )}
+              </div>
+              <a href="/plan" style={{ padding: '8px 18px', background: latestDigest ? '#7C3AED' : '#E5E7EB', color: latestDigest ? '#fff' : '#9CA3AF', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                {latestDigest ? 'View digest →' : 'No digest yet'}
+              </a>
+            </div>
+            {latestDigest && (
+              <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, margin: 0, paddingTop: 14, borderTop: '1px solid #EDE9FE' }}>
+                {String(((latestDigest as Record<string, unknown>).digest as Record<string, unknown>)?.summary ?? '').substring(0, 200)}
+                {String(((latestDigest as Record<string, unknown>).digest as Record<string, unknown>)?.summary ?? '').length > 200 ? '...' : ''}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' as const }}>
+            <div>
+              <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>Your AI-generated 90-day action plan</p>
+              <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>Upgrade to get an action plan built from your signals, updated each scan cycle.</p>
+            </div>
+            {STRIPE_PAYMENT_LINK ? (
+              <a href={STRIPE_PAYMENT_LINK} target="_blank" rel="noopener noreferrer" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Upgrade — £49/mo →
+              </a>
+            ) : (
+              <a href="/advisory?type=upgrade" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Contact us to upgrade →
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ── Service CTA ── */}
+        <div style={{ background: '#1E1B4B', borderRadius: 16, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' as const }}>
+          <div>
+            <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Need a strategic plan or hands-on help?</p>
+            <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>Get an AI-generated 90-day roadmap or book a session with a fractional CPO.</p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' as const }}>
+            <a href="/advisory?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>Get AI Roadmap</a>
+            <a href="/advisory?type=cpo" style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}>Book CPO Session</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
   )
 }

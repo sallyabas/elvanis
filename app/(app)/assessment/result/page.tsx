@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import HeaderUser from '@/components/header-user'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
