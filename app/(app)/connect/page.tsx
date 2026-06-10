@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import GlobalHeader from '@/components/GlobalHeader'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? 'https://buy.stripe.com/test_00wdR9cnMfpubZkeWGdUY00'
@@ -118,7 +117,6 @@ export default async function ConnectPage({
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
         <div style={{ marginBottom: 28 }}>

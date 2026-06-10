@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import HeaderUser from '@/components/header-user'
-import GlobalHeader from '@/components/GlobalHeader'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -28,7 +27,6 @@ export default async function AssessmentResultPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
 

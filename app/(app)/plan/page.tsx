@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import GlobalHeader from '@/components/GlobalHeader'
 
 
 const effortColor = (e: string) => e === 'low' ? '#059669' : e === 'medium' ? '#D97706' : '#DC2626'
@@ -117,7 +116,6 @@ export default async function PlanPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
         <div style={{ marginBottom: 28 }}>

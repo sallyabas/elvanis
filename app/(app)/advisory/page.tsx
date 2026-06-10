@@ -5,7 +5,6 @@ import { Suspense } from 'react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import GlobalHeader from '@/components/GlobalHeader'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 const SERVICES = [
@@ -186,7 +185,6 @@ function ServiceRequestPageContent() {
   if (submitted && submittedService) {
     return (
       <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-        <GlobalHeader founder={founder} />
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)' }}>
           <div style={{ textAlign: 'center', maxWidth: 520, padding: 24 }}>
             <div style={{ fontSize: 56, marginBottom: 20 }}>✅</div>
@@ -239,7 +237,6 @@ function ServiceRequestPageContent() {
   // ── Main page ──
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>Strategy & Services</h1>

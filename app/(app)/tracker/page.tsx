@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import GlobalHeader from '@/components/GlobalHeader'
 import GoalsSection from './goals-section'
 import SignalsTabs from './signals-tabs'
 
@@ -132,7 +131,6 @@ export default async function BusinessHealthTrackerPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
 

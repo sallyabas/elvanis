@@ -6,7 +6,6 @@ import ScanButton from './scan-button'
 import ConnectedBanner from './connected-banner'
 import AssessmentBanner from './assessment-banner'
 import ConflictTrustButton from '@/components/conflict-trust-button'
-import GlobalHeader from '@/components/GlobalHeader'
 import { getSourceFrequency, SOURCE_CONFIG } from '@/lib/source-config'
 
 export default async function SignalsPage({
@@ -199,7 +198,6 @@ export default async function SignalsPage({
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
         <div style={{ marginBottom: 28 }}>

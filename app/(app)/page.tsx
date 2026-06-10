@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import GlobalHeader from '@/components/GlobalHeader'
 import FocusView from '@/components/focus/FocusView'
 import { calculateHealthScore } from '@/lib/health-scoring'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
@@ -68,25 +67,18 @@ export default async function FocusPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F9FAFB' }}>
-      <GlobalHeader
-        founder={founder}
-      />
-      <main style={{ paddingTop: 72 }}>
-        <FocusView
-          founderId={founder.id}
-          founderName={founder.full_name ?? 'Founder'}
-          founderStage={(founder.founder_stage as FounderStage) ?? null}
-          focusMetric={(founder.focus_metric as FocusMetric) ?? null}
-          signals={signals ?? []}
-          dataSources={dataSources ?? []}
-          hasAssessment={!!assessment}
-          hasEverScanned={!!latestScan}
-          overallScore={overallScore}
-          connectedSourceTypes={connectedSourceTypes}
-          subscriptionTier={founder.subscription_tier}
-        />
-      </main>
-    </div>
+    <FocusView
+      founderId={founder.id}
+      founderName={founder.full_name ?? 'Founder'}
+      founderStage={(founder.founder_stage as FounderStage) ?? null}
+      focusMetric={(founder.focus_metric as FocusMetric) ?? null}
+      signals={signals ?? []}
+      dataSources={dataSources ?? []}
+      hasAssessment={!!assessment}
+      hasEverScanned={!!latestScan}
+      overallScore={overallScore}
+      connectedSourceTypes={connectedSourceTypes}
+      subscriptionTier={founder.subscription_tier}
+    />
   )
 }

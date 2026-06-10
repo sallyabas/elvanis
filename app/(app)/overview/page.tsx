@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { analyseSignalConflicts, calculatePriorityScore } from '@/lib/signal-analysis'
 import type { SignalWithFlags } from '@/lib/signal-analysis'
-import GlobalHeader from '@/components/GlobalHeader'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health-scoring'
 
@@ -243,7 +242,6 @@ export default async function DashboardPage() {
 
   return (
     <main  style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
         <div style={{ marginBottom: 28 }}>

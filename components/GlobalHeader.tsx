@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import HeaderUser from './header-user'
-import { DashboardTour } from '@/app/overview/guide'
 import { HelpPanel } from './HelpPanel'
 import styles from './GlobalHeader.module.css'
 
@@ -113,15 +112,4 @@ export default function GlobalHeader({ founder }: GlobalHeaderProps) {
 
     </>
   )
-}
-
-function TourWithRestart({ guideDismissed }: { guideDismissed: boolean }) {
-  const { useEffect, useState } = require('react')
-  const [key, setKey] = useState(0)
-  useEffect(() => {
-    function handle() { setKey((k: number) => k + 1) }
-    document.addEventListener('elvanis:restart-tour', handle)
-    return () => document.removeEventListener('elvanis:restart-tour', handle)
-  }, [])
-  return <DashboardTour key={key} guideDismissed={guideDismissed} />
 }

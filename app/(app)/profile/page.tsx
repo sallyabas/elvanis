@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import GlobalHeader from '@/components/GlobalHeader'
 import ProfileClient from './client'
 
 export default async function ProfilePage() {
@@ -34,7 +33,6 @@ export default async function ProfilePage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-      <GlobalHeader founder={founder} />
       <ProfileClient
         founderId={founder.id}
         initialEmail={user.email ?? ''}
