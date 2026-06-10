@@ -39,7 +39,6 @@ export default function ScanButton({
     : null
 
     const effectiveCooldown = isNaN(cooldownHours) ? 168 : cooldownHours
-    console.log('ScanButton debug:', { cooldownHours, effectiveCooldown, hoursSinceLastScan, canScan: isFirstScan || hoursSinceLastScan === null || hoursSinceLastScan >= effectiveCooldown })
 
     const canScan = isFirstScan ||
     hoursSinceLastScan === null ||
@@ -104,7 +103,6 @@ export default function ScanButton({
     }
     setScanning(false)
   }
-  console.log('ScanButton early return check:', { hasConnectedSources, isFreeTier })
 if (!hasConnectedSources || isFreeTier) return null
   return (
     <>

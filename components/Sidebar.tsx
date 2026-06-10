@@ -233,6 +233,20 @@ export default function Sidebar({
           </div>
           <span style={{ fontSize: 13, color: '#4B5563' }}>⚙️</span>
         </Link>
+        <a href="/api/signout" title="Sign out" style={{
+          display:        'flex',
+          alignItems:     'center',
+          gap:            8,
+          padding:        '6px 10px',
+          borderRadius:   8,
+          textDecoration: 'none',
+          marginTop:      4,
+          width:          '100%',
+          boxSizing:      'border-box' as const,
+        }}>
+          <span style={{ fontSize: 14, width: 20, textAlign: 'center', opacity: 0.5 }}>⏻</span>
+          <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>Sign out</span>
+        </a>
       </div>
       <HelpPanel onRestartTour={() => {}} />
     </aside>
