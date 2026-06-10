@@ -7,7 +7,6 @@ const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? 'http
 
 // UI Cooldown: Prevents button spam while backend enforces real rate limits via 429
 // This is NOT the system scan frequency — server enforces that independently
-const COOLDOWN_HOURS = 168
 
 export default function ScanButton({
   founderId,
@@ -17,6 +16,7 @@ export default function ScanButton({
   isFreeTier,
   daysUntilNextScan,
   tooltipText,
+  cooldownHours,
 }: {
   founderId:           string
   lastScannedAt:       string | null
@@ -25,6 +25,7 @@ export default function ScanButton({
   isFreeTier:          boolean
   daysUntilNextScan:   number | null
   tooltipText:         string
+  cooldownHours:       number
 }) {
   const router = useRouter()
   const [scanning,         setScanning]         = useState(false)
@@ -39,7 +40,7 @@ export default function ScanButton({
 
   const canScan = isFirstScan ||
     hoursSinceLastScan === null ||
-    hoursSinceLastScan >= COOLDOWN_HOURS
+    hoursSinceLastScan >= cooldownHours
 
     async function handleClick() {
       if (isFreeTier) {

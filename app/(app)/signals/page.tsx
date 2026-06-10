@@ -139,6 +139,14 @@ export default async function SignalsPage({
     .eq('status', 'dismissed')
     .order('updated_at', { ascending: false })
 
+    const { data: cooldownSetting } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'scan_cooldown_hours')
+    .maybeSingle()
+
+  const cooldownHours = parseInt(cooldownSetting?.value ?? '168', 10)
+
   const total     = allAnalysed.length
   const critical  = allAnalysed.filter(s => s.severity === 'critical').length
   const warning   = allAnalysed.filter(s => s.severity === 'warning').length
@@ -223,6 +231,7 @@ export default async function SignalsPage({
               isFreeTier={isFreeTier}
               daysUntilNextScan={daysUntilNextScan}
               tooltipText={tooltipText}
+              cooldownHours={cooldownHours}
             />
           </div>
 
