@@ -39,7 +39,7 @@ const TOUR_STEPS = [
   {
     id:    'tour-done',
     title: 'Ready to start',
-    body:  'Select a dimension to explore your signals, or take your assessment to generate your first diagnosis. Your business OS is ready.',
+    body:  'Select a dimension to explore your signals, or take your assessment to generate your first diagnosis. Need the full picture? Check Overview in the sidebar. Your business OS is ready.',
   },
 ]
 
@@ -278,13 +278,16 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
           {active && (
             <>
               {/* Dark Layout Clip-Mask Overlay */}
-              {rect ? (
+              {isLast ? (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.75)', backdropFilter: 'blur(4px)', zIndex: 10001, pointerEvents: 'none' }} />
+              ) : rect ? (
                 <>
-                  <div style={{ position: 'fixed', top: 0,              left: 0,             right: 0,  height: Math.max(0, rect.top - PAD),                       background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: rect.bottom+PAD, left: 0,            right: 0,  bottom: 0,                                                  background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: 0,  width: Math.max(0, rect.left-PAD), height: rect.height+PAD*2,           background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: rect.right+PAD, right: 0, height: rect.height+PAD*2,                        background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
-                  <div style={{ position: 'fixed', top: Math.max(0,rect.top-PAD), left: Math.max(0,rect.left-PAD), width: rect.width+PAD*2, height: rect.height+PAD*2, border: '2px solid #3B82F6', borderRadius: 14, boxShadow: '0 0 0 4px rgba(37,99,235,0.2)', outline: '9999px solid rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />                </>
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: Math.max(0, rect.top - PAD), background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: rect.bottom + PAD, left: 0, right: 0, bottom: 0, background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2, background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: Math.max(0, rect.top - PAD), left: rect.right + PAD, right: 0, height: rect.height + PAD * 2, background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
+                  <div style={{ position: 'fixed', top: Math.max(0, rect.top - PAD), left: Math.max(0, rect.left - PAD), width: rect.width + PAD * 2, height: rect.height + PAD * 2, border: '2px solid #3B82F6', borderRadius: 14, boxShadow: '0 0 0 4px rgba(37,99,235,0.2)', outline: '9999px solid rgba(2,6,23,0.82)', zIndex: 10001, pointerEvents: 'none' }} />
+                  </>
               ) : (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.55)', zIndex: 10001, pointerEvents: 'none' }} />
               )}
@@ -293,7 +296,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
               {rect && (
                 <div
                   key={`card-${step}`}
-                  style={{ position: 'fixed', top: cardTop, left: cardLeft, width: CARD_W, zIndex: 10002, background: '#0F172A', borderRadius: 14, border: '1px solid #334155', padding: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.8)', fontFamily: 'Inter, -apple-system, sans-serif', animation: 'tourIn 0.22s ease' }}
+                  style={{ position: 'fixed', top: isLast ? '50%' : cardTop, left: isLast ? '50%' : cardLeft, transform: isLast ? 'translate(-50%, -50%)' : 'none', width: CARD_W, zIndex: 10002, background: '#0F172A', borderRadius: 14, border: '1px solid #334155', padding: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.8)', fontFamily: 'Inter, -apple-system, sans-serif', animation: 'tourIn 0.22s ease' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{step + 1} / {TOUR_STEPS.length}</span>
