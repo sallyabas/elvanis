@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { HelpPanel } from './HelpPanel'
 import Link from 'next/link'
 
@@ -16,10 +17,10 @@ const NAV_GROUPS = [
   {
     label: 'Intelligence',
     items: [
-      { href: '/',         icon: '🏠', label: 'Home'     },
-      { href: '/overview', icon: '📊', label: 'Overview' },
-      { href: '/signals',  icon: '⚡', label: 'Signals', badge: 'signals' },
-      { href: '/tracker',  icon: '📈', label: 'Tracker'  },
+      { href: '/',                  icon: '🏠', label: 'Home'       },
+      { href: '/overview',          icon: '📊', label: 'Overview'   },
+      { href: '/signals',           icon: '⚡', label: 'Signals',   badge: 'signals' },
+      { href: '/tracker',           icon: '📈', label: 'Tracker'    },
       { href: '/assessment/result', icon: '🎯', label: 'Assessment' },
     ],
   },
@@ -39,7 +40,19 @@ export default function Sidebar({
   subscriptionTier,
   criticalCount = 0,
 }: SidebarProps) {
-  const pathname = usePathname()
+  const pathname                = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMobile,   setIsMobile]   = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  // Close drawer on route change
+  useEffect(() => { setMobileOpen(false) }, [pathname])
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
@@ -51,28 +64,23 @@ export default function Sidebar({
     document.dispatchEvent(new CustomEvent('elvanis:open-help'))
   }
 
-  return (
-    <aside id="tour-sidebar" style={{
-      width:          220,
-      minWidth:       220,
-      height:         '100vh',
-      background:     '#0F0D1F',
-      display:        'flex',
-      flexDirection:  'column',
-      borderRight:    '1px solid #1E1B33',
-      position:       'sticky',
-      top:            0,
-      overflow:       'hidden',
-    }}>
-
+  const sidebarContent = (
+    <>
       {/* Brand */}
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1E1B33' }}>
-        <span style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', display: 'block' }}>
-          Elvanis
-        </span>
-        <span style={{ fontSize: 10, color: '#4B5563', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          AI Business OS
-        </span>
+      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1E1B33', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', display: 'block' }}>
+            Elvanis
+          </span>
+          <span style={{ fontSize: 10, color: '#4B5563', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            AI Business OS
+          </span>
+        </div>
+        {isMobile && (
+          <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 20, cursor: 'pointer', padding: 4 }}>
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -183,24 +191,22 @@ export default function Sidebar({
 
       {/* Bottom */}
       <div style={{ borderTop: '1px solid #1E1B33', padding: 12 }}>
-        {/* Help */}
         <button onClick={openHelp} style={{
-          display:        'flex',
-          alignItems:     'center',
-          gap:            10,
-          padding:        '8px 10px',
-          borderRadius:   8,
-          background:     'none',
-          border:         'none',
-          cursor:         'pointer',
-          width:          '100%',
-          marginBottom:   4,
+          display:     'flex',
+          alignItems:  'center',
+          gap:         10,
+          padding:     '8px 10px',
+          borderRadius: 8,
+          background:  'none',
+          border:      'none',
+          cursor:      'pointer',
+          width:       '100%',
+          marginBottom: 4,
         }}>
           <span style={{ fontSize: 15, width: 20, textAlign: 'center', opacity: 0.6 }}>❓</span>
           <span style={{ fontSize: 13, color: '#9CA3AF', fontWeight: 500 }}>Help</span>
         </button>
 
-        {/* User row */}
         <Link href="/profile" style={{
           display:        'flex',
           alignItems:     'center',
@@ -233,22 +239,120 @@ export default function Sidebar({
           </div>
           <span style={{ fontSize: 13, color: '#4B5563' }}>⚙️</span>
         </Link>
+
         <a href="/api/signout" title="Sign out" style={{
-          display:        'flex',
-          alignItems:     'center',
-          gap:            8,
-          padding:        '6px 10px',
-          borderRadius:   8,
+          display:     'flex',
+          alignItems:  'center',
+          gap:         8,
+          padding:     '6px 10px',
+          borderRadius: 8,
           textDecoration: 'none',
-          marginTop:      4,
-          width:          '100%',
-          boxSizing:      'border-box' as const,
+          marginTop:   4,
+          width:       '100%',
+          boxSizing:   'border-box' as const,
         }}>
           <span style={{ fontSize: 14, width: 20, textAlign: 'center', opacity: 0.5 }}>⏻</span>
           <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>Sign out</span>
         </a>
       </div>
       <HelpPanel onRestartTour={() => {}} />
+    </>
+  )
+
+  // ── Mobile hamburger button ──
+  const hamburger = (
+    <button
+      onClick={() => setMobileOpen(true)}
+      style={{
+        position:   'fixed',
+        top:        12,
+        left:       12,
+        zIndex:     9998,
+        background: '#0F0D1F',
+        border:     '1px solid #1E1B33',
+        borderRadius: 8,
+        width:      40,
+        height:     40,
+        display:    'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap:        5,
+        cursor:     'pointer',
+      }}
+    >
+      <span style={{ width: 18, height: 2, background: '#9CA3AF', borderRadius: 2, display: 'block' }} />
+      <span style={{ width: 18, height: 2, background: '#9CA3AF', borderRadius: 2, display: 'block' }} />
+      <span style={{ width: 18, height: 2, background: '#9CA3AF', borderRadius: 2, display: 'block' }} />
+      {criticalCount > 0 && (
+        <span style={{
+          position:   'absolute',
+          top:        6,
+          right:      6,
+          width:      8,
+          height:     8,
+          background: '#DC2626',
+          borderRadius: '50%',
+        }} />
+      )}
+    </button>
+  )
+
+  if (isMobile) {
+    return (
+      <>
+        {hamburger}
+
+        {/* Backdrop */}
+        {mobileOpen && (
+          <div
+            onClick={() => setMobileOpen(false)}
+            style={{
+              position:   'fixed',
+              inset:      0,
+              background: 'rgba(0,0,0,0.6)',
+              zIndex:     9998,
+              backdropFilter: 'blur(2px)',
+            }}
+          />
+        )}
+
+        {/* Drawer */}
+        <aside id="tour-sidebar" style={{
+          position:   'fixed',
+          top:        0,
+          left:       0,
+          height:     '100vh',
+          width:      260,
+          background: '#0F0D1F',
+          display:    'flex',
+          flexDirection: 'column',
+          borderRight: '1px solid #1E1B33',
+          zIndex:     9999,
+          transform:  mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.25s ease',
+          overflow:   'hidden',
+        }}>
+          {sidebarContent}
+        </aside>
+      </>
+    )
+  }
+
+  return (
+    <aside id="tour-sidebar" style={{
+      width:          220,
+      minWidth:       220,
+      height:         '100vh',
+      background:     '#0F0D1F',
+      display:        'flex',
+      flexDirection:  'column',
+      borderRight:    '1px solid #1E1B33',
+      position:       'sticky',
+      top:            0,
+      overflow:       'hidden',
+    }}>
+      {sidebarContent}
     </aside>
   )
 }
