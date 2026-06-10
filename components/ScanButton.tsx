@@ -29,7 +29,8 @@ export default function ScanButton({
   const router = useRouter()
   const [scanning,         setScanning]         = useState(false)
   const [result,           setResult]           = useState('')
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showUpgradeModal,  setShowUpgradeModal]  = useState(false)
+  const [showConfirmModal,  setShowConfirmModal]  = useState(false)
 
   // UI cooldown only — server enforces the real 7-day rolling limit via 429
   const hoursSinceLastScan = lastScannedAt
@@ -40,14 +41,14 @@ export default function ScanButton({
     hoursSinceLastScan === null ||
     hoursSinceLastScan >= COOLDOWN_HOURS
 
-  async function handleClick() {
-    if (isFreeTier) {
-      setShowUpgradeModal(true)
-      return
+    async function handleClick() {
+      if (isFreeTier) {
+        setShowUpgradeModal(true)
+        return
+      }
+      if (!canScan) return
+      setShowConfirmModal(true)
     }
-    if (!canScan) return
-    await runScan()
-  }
 
   async function runScan() {
     setScanning(true)
@@ -219,4 +220,71 @@ if (!hasConnectedSources || isFreeTier) return null
       )}
     </>
   )
+  {showConfirmModal && (
+    <div
+      onClick={() => setShowConfirmModal(false)}
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, padding: 24,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#fff', borderRadius: 20, padding: '36px 32px',
+          maxWidth: 420, width: '100%', fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <div style={{
+          width: 52, height: 52, borderRadius: 14, background: '#F9FAFB',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 26, marginBottom: 20, border: '1px solid #E5E7EB',
+        }}>🔍</div>
+
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 10px' }}>
+          Confirm Manual Scan
+        </h2>
+
+        <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, margin: '0 0 12px' }}>
+          You have <strong style={{ color: '#111827' }}>1 manual scan</strong> available this week.
+          This will refresh all connected sources and cannot be undone once started.
+        </p>
+
+        {lastScannedAt && (
+          <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '10px 14px', marginBottom: 20, fontSize: 13, color: '#6B7280' }}>
+            Last scanned: <strong style={{ color: '#374151' }}>
+            {Math.floor((Date.now() - new Date(lastScannedAt!).getTime()) / (1000 * 60 * 60 * 24))} days ago
+            </strong>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button
+            onClick={async () => {
+              setShowConfirmModal(false)
+              await runScan()
+            }}
+            style={{
+              padding: '13px', background: '#111827', color: '#fff',
+              border: 'none', borderRadius: 12,
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            Proceed with Scan →
+          </button>
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            style={{
+              padding: '13px', background: '#F9FAFB', color: '#6B7280',
+              border: '1px solid #E5E7EB', borderRadius: 12,
+              fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 }

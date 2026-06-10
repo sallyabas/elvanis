@@ -528,6 +528,23 @@ export default async function OverviewPage() {
                   )
                 })}
                 <a href="/connect" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', fontWeight: 600, marginTop: 4 }}>+ Add source</a>
+                <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 12, paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: '#9CA3AF' }}>
+                    🔄 Next scan: {(() => {
+                      const activeSources = (sources ?? []).filter(s => s.status === 'active' && s.source_type !== 'csv' && s.last_synced_at)
+                      if (activeSources.length === 0) return 'Connect tools to schedule scans'
+                      const minDays = Math.min(...activeSources.map(s => {
+                        const days = (Date.now() - new Date(s.last_synced_at!).getTime()) / (24 * 60 * 60 * 1000)
+                        const freq = ['jira','intercom'].includes(s.source_type) ? (founder?.subscription_tier === 'navigator' ? 7 : 30) : 30
+                        return Math.max(0, Math.ceil(freq - days))
+                      }))
+                      return minDays === 0 ? 'Ready now' : `in ${minDays} days`
+                    })()}
+                  </span>
+                  <a href="/signals" style={{ fontSize: 12, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
+                    ↻ Run manual scan →
+                  </a>
+                </div>
               </div>
             ) : (
               <div>
