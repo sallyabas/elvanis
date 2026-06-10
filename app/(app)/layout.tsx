@@ -4,6 +4,7 @@ import Sidebar from '@/components/Sidebar'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerComponentClient()
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -13,7 +14,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('user_id', user.id)
     .maybeSingle()
 
-  // Fetch critical signal count for badge
   const { count: criticalCount } = await supabase
     .from('diagnostic_signals')
     .select('*', { count: 'exact', head: true })
@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .in('status', ['new', 'acknowledged'])
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar
         founderName={founder?.full_name ?? null}
         businessName={founder?.business_name ?? null}
@@ -30,7 +30,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         logoUrl={founder?.logo_url ?? null}
         criticalCount={criticalCount ?? 0}
       />
-         <div style={{ flex: 1, overflowY: 'auto', background: '#F9FAFB' }} className="app-main">
+      <div style={{ flex: 1, overflowY: 'auto', background: '#F9FAFB' }} className="app-main">
+        {children}
       </div>
     </div>
   )
