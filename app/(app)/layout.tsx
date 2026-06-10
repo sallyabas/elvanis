@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/Sidebar'
-import { HelpPanel } from '@/components/HelpPanel'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerComponentClient()
@@ -34,7 +33,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <div style={{ flex: 1, overflowY: 'auto', background: '#F9FAFB' }}>
         {children}
       </div>
-      <HelpPanel onRestartTour={() => {}} />
     </div>
   )
 }

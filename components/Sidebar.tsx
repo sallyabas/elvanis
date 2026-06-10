@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { HelpPanel } from './HelpPanel'
 import Link from 'next/link'
 
 interface SidebarProps {
@@ -232,6 +233,7 @@ export default function Sidebar({
           <span style={{ fontSize: 13, color: '#4B5563' }}>⚙️</span>
         </Link>
       </div>
+      <HelpPanel onRestartTour={() => {}} />
     </aside>
   )
 }
