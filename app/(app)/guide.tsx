@@ -92,7 +92,25 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
   // Measure element on step change
   const measure = useCallback(() => {
     const el = document.getElementById(TOUR_STEPS[step]?.id ?? '')
-    if (!el) return
+    if (!el) {
+      setRect({
+        top: window.innerHeight / 2 - 120,
+        left: window.innerWidth / 2 - 150,
+        right: window.innerWidth / 2 + 150,
+        bottom: window.innerHeight / 2 + 120,
+        width: 300, height: 240,
+        x: window.innerWidth / 2 - 150,
+        y: window.innerHeight / 2 - 120,
+        toJSON: () => ({}),
+      } as DOMRect)
+      return
+    }
+    const position = getComputedStyle(el).position
+    if (position === 'fixed' || position === 'sticky') {
+      const r = el.getBoundingClientRect()
+      setRect({ top: r.top, left: r.left, right: r.right, bottom: r.bottom, width: r.width, height: r.height, x: r.x, y: r.y, toJSON: r.toJSON } as DOMRect)
+      return
+    }
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     setTimeout(() => {
       const r = el.getBoundingClientRect()
