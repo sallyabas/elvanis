@@ -127,7 +127,7 @@ export default async function PlanPage() {
           </p>
         </div>
 
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }} className="plan-inner">
 
         {/* Fix 2+3: Header copy — Rolling 90-Day Action Plan */}
         <div style={{ marginBottom: 28 }}>
