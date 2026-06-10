@@ -42,7 +42,6 @@ const TOUR_STEPS = [
     body:  'Select a dimension to explore your signals, or take your assessment to generate your first diagnosis. Your business OS is ready.',
   },
 ]
-]
 
 // ── Section tooltip ───────────────────────────────────────────
 export function SectionTooltip({ text }: { text: string }) {
