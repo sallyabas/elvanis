@@ -183,5 +183,12 @@ body {
 @media (max-width: 767px) {
   .app-main {
     padding-top: 56px;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent any inner content from overflowing */
+  .app-main > * {
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
