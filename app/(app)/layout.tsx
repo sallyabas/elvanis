@@ -30,8 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         logoUrl={founder?.logo_url ?? null}
         criticalCount={criticalCount ?? 0}
       />
-      <div style={{ flex: 1, overflowY: 'auto', background: '#F9FAFB' }}>
-        {children}
+         <div style={{ flex: 1, overflowY: 'auto', background: '#F9FAFB' }} className="app-main">
       </div>
     </div>
   )

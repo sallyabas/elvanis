@@ -179,3 +179,9 @@ body {
   .grid-3-col-csv { grid-template-columns: 1fr !important; }
   .signal-filter-card { min-width: 100%; flex: 1 1 100%; }
 }
+
+@media (max-width: 767px) {
+  .app-main {
+    padding-top: 56px;
+  }
+}
