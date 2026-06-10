@@ -5,18 +5,43 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { dismissGuide } from './actions'
-
 const TOUR_STEPS = [
-  { id: 'tour-header',       title: 'Your navigation',         body: 'Signals — live diagnosed issues. Connect — link your tools. Plan — AI action digest. Measure — track fixes. Health Tracker — score trends. Profile — account settings.' },
-  { id: 'tour-health',       title: 'Business Health Score',   body: 'Your overall score from 0–100 across 6 dimensions. Below 40 means critical issues. Above 70 means healthy operating range. Updates every scan cycle.' },
-  { id: 'tour-ai-readiness', title: 'AI Readiness Score',      body: 'How ready your business is for AI automation based on active signals and team capacity. Higher score = more hours AI could save you right now.' },
-  { id: 'tour-signals',      title: 'Active Signals',          body: 'Total issues detected across your connected tools. Each signal has a root cause and a specific recommended fix. Critical = act now. Warning = plan this week.' },
-  { id: 'tour-fix-first',    title: 'Fix This First',          body: 'Your top 3 signals ranked by impact and severity. Start here every time you open the dashboard. Each card shows the root cause and exact action to take.' },
-  { id: 'tour-sources',      title: 'Connected Sources',       body: 'Every tool connected and when it was last scanned. Green = live. Add more sources to get more precise signals across more dimensions.' },
-  { id: 'tour-impact',       title: 'Impact Tracking',         body: 'After fixing a signal and running another scan, Elvanis shows whether the metric improved, worsened, or stayed the same. Proof your fix worked.' },
-  { id: 'tour-digest',       title: 'Action Digest',           body: 'Your monthly AI-generated 90-day action plan built from all your signals. Shows exactly what to prioritise and why. Navigator plan only.' },
-  { id: 'tour-ai-opps',      title: 'AI Opportunities',        body: 'Where AI automation would save the most time or revenue based on your signals. Shows complexity, implementation time, and estimated saving.' },
-  { id: 'tour-assessment',   title: 'Assessment Score',        body: 'Your scored diagnosis from the 26-question assessment across Revenue, PMF, Team, Customer, Marketing, and Strategy. Retake after major changes.' },
+  {
+    id:    'tour-sidebar',
+    title: 'Your OS Command Centre',
+    body:  'Intelligence — diagnose your business. Execution — act on what matters. Advisory — get expert help when you need it. Everything you need to run your business OS.',
+  },
+  {
+    id:    'tour-focus-hero',
+    title: 'Your Primary Strategic Lever',
+    body:  'This is the dimension that matters most right now — based on your focus metric and business stage. Elvanis recalculates this automatically as your data changes.',
+  },
+  {
+    id:    'tour-dim-grid',
+    title: 'All 6 Dimensions',
+    body:  'Revenue, Customer, Growth, Execution, PMF, Strategy. Click any card to drill into its signals. Each dimension has a live score and status driven by your connected tools.',
+  },
+  {
+    id:    'tour-assessment-card',
+    title: 'Assessment Score',
+    body:  'Your baseline businessis across 6 dimensions. Takes 10 minutes. No tools needed. Retake it after major business changes.',
+  },
+  {
+    id:    'tour-ai-card',
+    title: 'AI Readiness',
+    body:  'Where your biggest automation opportunities lie right now. Based on your active signals and business profile. Higher score means more hours or revenue AI could recover.',
+  },
+  {
+    id:    'tour-digest-card',
+    title: 'Action Digest',
+    body:  'Your AI-generated 90-day action plan — built from every signal across all your tools. Updated each scan cycle. Navigator plan only.',
+  },
+  {
+    id:    'tour-done',
+    title: 'Ready to start',
+    body:  'Select a dimension to explore your signals, or take your assessment to generate your first diagnosis. Your business OS is ready.',
+  },
+]
 ]
 
 // ── Section tooltip ───────────────────────────────────────────
