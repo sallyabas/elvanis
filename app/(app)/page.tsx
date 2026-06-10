@@ -1,29 +1,33 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import FocusView from '@/components/focus/FocusView'
+import { DashboardTour } from './guide'
 import { calculateHealthScore } from '@/lib/health-scoring'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
 const AI_OPPORTUNITY_SIGNALS: Record<string, { title: string; description: string; saving: string; complexity: 'low' | 'medium' | 'high' }> = {
-  ticket_volume_increase:   { title: 'AI Support Agent',           description: 'Automate responses to repetitive support tickets',                             saving: '10-15 hrs/week', complexity: 'low'    },
-  response_time_increase:   { title: 'AI Ticket Triage',           description: 'Auto-categorise and prioritise incoming tickets',                              saving: '5-8 hrs/week',   complexity: 'low'    },
-  repeat_complaint_pattern: { title: 'AI Knowledge Base',          description: 'Answer common complaints automatically',                                       saving: '8-12 hrs/week',  complexity: 'low'    },
-  velocity_drop:            { title: 'AI Sprint Planning',         description: 'AI-assisted estimation and dependency detection',                              saving: '3-5 hrs/sprint', complexity: 'medium' },
-  bug_backlog_growth:       { title: 'AI Code Review',             description: 'Catch bugs before they ship',                                                 saving: '6-10 hrs/week',  complexity: 'medium' },
-  engagement_drop:          { title: 'AI Personalisation',         description: 'Tailor user journeys by behaviour',                                           saving: 'Revenue impact', complexity: 'high'   },
-  conversion_fall:          { title: 'AI Conversion Optimisation', description: 'Automatically test and optimise conversion paths',                            saving: 'Revenue impact', complexity: 'high'   },
-  activation_drop:          { title: 'AI Onboarding Agent',        description: 'Automate activation sequences for new users',                                 saving: '8-12 hrs/week',  complexity: 'medium' },
-  nps_decline:              { title: 'AI Feedback Analysis',       description: 'Automatically analyse and categorise NPS responses',                          saving: '4-6 hrs/week',   complexity: 'low'    },
-  csat_decline:             { title: 'AI Support Optimisation',    description: 'Identify root causes of low satisfaction automatically',                      saving: '5-8 hrs/week',   complexity: 'low'    },
-  cycle_time_increase:      { title: 'AI Workflow Automation',     description: 'Identify bottlenecks and automate handoffs',                                  saving: '6-10 hrs/week',  complexity: 'medium' },
-  traffic_source_shift:     { title: 'AI SEO & Content Engine',    description: 'Reduce paid traffic dependency with AI-generated organic content',            saving: 'Revenue impact', complexity: 'high'   },
-  session_duration_drop:    { title: 'AI Personalisation',         description: 'Dynamically adapt content to keep users engaged',                             saving: 'Revenue impact', complexity: 'high'   },
-  blocked_tickets_spike:    { title: 'AI Workflow Automation',     description: 'Detect and resolve common blockers before they stall the team',               saving: '4-6 hrs/week',   complexity: 'medium' },
+  ticket_volume_increase:   { title: 'AI Support Agent',           description: 'Automate responses to repetitive support tickets',                          saving: '10-15 hrs/week', complexity: 'low'    },
+  response_time_increase:   { title: 'AI Ticket Triage',           description: 'Auto-categorise and prioritise incoming tickets',                           saving: '5-8 hrs/week',   complexity: 'low'    },
+  repeat_complaint_pattern: { title: 'AI Knowledge Base',          description: 'Answer common complaints automatically',                                    saving: '8-12 hrs/week',  complexity: 'low'    },
+  velocity_drop:            { title: 'AI Sprint Planning',         description: 'AI-assisted estimation and dependency detection',                           saving: '3-5 hrs/sprint', complexity: 'medium' },
+  bug_backlog_growth:       { title: 'AI Code Review',             description: 'Catch bugs before they ship',                                              saving: '6-10 hrs/week',  complexity: 'medium' },
+  engagement_drop:          { title: 'AI Personalisation',         description: 'Tailor user journeys by behaviour',                                        saving: 'Revenue impact', complexity: 'high'   },
+  conversion_fall:          { title: 'AI Conversion Optimisation', description: 'Automatically test and optimise conversion paths',                         saving: 'Revenue impact', complexity: 'high'   },
+  activation_drop:          { title: 'AI Onboarding Agent',        description: 'Automate activation sequences for new users',                              saving: '8-12 hrs/week',  complexity: 'medium' },
+  nps_decline:              { title: 'AI Feedback Analysis',       description: 'Automatically analyse and categorise NPS responses',                       saving: '4-6 hrs/week',   complexity: 'low'    },
+  csat_decline:             { title: 'AI Support Optimisation',    description: 'Identify root causes of low satisfaction automatically',                   saving: '5-8 hrs/week',   complexity: 'low'    },
+  cycle_time_increase:      { title: 'AI Workflow Automation',     description: 'Identify bottlenecks and automate handoffs',                               saving: '6-10 hrs/week',  complexity: 'medium' },
+  traffic_source_shift:     { title: 'AI SEO & Content Engine',    description: 'Reduce paid traffic dependency with AI-generated organic content',         saving: 'Revenue impact', complexity: 'high'   },
+  session_duration_drop:    { title: 'AI Personalisation',         description: 'Dynamically adapt content to keep users engaged',                          saving: 'Revenue impact', complexity: 'high'   },
+  blocked_tickets_spike:    { title: 'AI Workflow Automation',     description: 'Detect and resolve common blockers before they stall the team',            saving: '4-6 hrs/week',   complexity: 'medium' },
 }
 
-function calculateAIReadiness(signals: Array<{ status: string; signal_type: string; severity: string; source: string }>, assessment: Record<string, unknown> | null) {
+function calculateAIReadiness(
+  signals: Array<{ status: string; signal_type: string; severity: string; source: string }>,
+  assessment: Record<string, unknown> | null
+) {
   const activeSignals     = signals.filter(s => s.status === 'new' || s.status === 'acknowledged')
   const activeSignalTypes = activeSignals.map(s => s.signal_type)
   const severityRank: Record<string, number> = { critical: 3, warning: 2, watch: 1 }
@@ -50,7 +54,11 @@ function calculateAIReadiness(signals: Array<{ status: string; signal_type: stri
     const investmentStatus  = assessment.investment_status as string
     if (investmentStatus && !['Bootstrapped — self-funded'].includes(investmentStatus)) capacityBonus += 15
     if (runway && ['More than 18 months', '12–18 months', 'Not applicable — profitable'].includes(runway)) capacityBonus += 10
-    if (technicalCapacity === 'Yes — strong technical team' || technicalCapacity === 'Yes — limited technical capacity' || (teamSize && ['6–15 people', '16–50 people', '50+ people'].includes(teamSize))) capacityBonus += 15
+    if (
+      technicalCapacity === 'Yes — strong technical team' ||
+      technicalCapacity === 'Yes — limited technical capacity' ||
+      (teamSize && ['6–15 people', '16–50 people', '50+ people'].includes(teamSize))
+    ) capacityBonus += 15
   }
   return { score: Math.min(baseScore + capacityBonus, 100), opportunities, hasEnoughData: true }
 }
@@ -120,7 +128,7 @@ export default async function HomePage() {
   const activeSignals = (signals ?? []).filter(
     s => (s.status === 'new' || s.status === 'acknowledged') && s.source !== 'manual'
   )
-  const overallScore  = calculateHealthScore(
+  const overallScore = calculateHealthScore(
     activeSignals.map(s => ({ signal_type: s.signal_type, severity: s.severity, dimension: s.dimension }))
   )
 
@@ -128,7 +136,6 @@ export default async function HomePage() {
   const aiReadiness      = calculateAIReadiness(allActiveSignals, assessment as Record<string, unknown> | null)
 
   const isFreeTier      = !founder || founder.subscription_tier === 'free'
-  const isNavigator     = founder?.subscription_tier === 'navigator'
   const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
@@ -136,6 +143,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: '#F9FAFB', minHeight: '100vh' }}>
+
       <FocusView
         founderId={founder.id}
         founderName={founder.full_name ?? 'Founder'}
@@ -150,7 +158,6 @@ export default async function HomePage() {
         subscriptionTier={founder.subscription_tier}
       />
 
-      {/* ── Below fold — only shown after onboarding dismissed ── */}
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 48px' }}>
 
         {/* ── Overview cross-link ── */}
@@ -162,7 +169,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── Assessment card ── */}
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
+        <div id="tour-assessment-card" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: score ? 16 : 0 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
               🎯 Assessment Score
@@ -215,7 +222,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── AI Readiness ── */}
-        <div style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16 }}>
+        <div id="tour-ai-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>✨ AI Readiness</p>
@@ -264,7 +271,7 @@ export default async function HomePage() {
 
         {/* ── Action Digest ── */}
         {!isFreeTier ? (
-          <div style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
+          <div id="tour-digest-card" style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: latestDigest ? 14 : 0 }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, color: latestDigest ? '#7C3AED' : '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>✨ Action Digest</p>
@@ -288,7 +295,7 @@ export default async function HomePage() {
             )}
           </div>
         ) : (
-          <div style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' as const }}>
+          <div id="tour-digest-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' as const }}>
             <div>
               <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>Your AI-generated 90-day action plan</p>
               <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>Upgrade to get an action plan built from your signals, updated each scan cycle.</p>
@@ -318,6 +325,10 @@ export default async function HomePage() {
         </div>
 
       </div>
+
+      {/* ── Tour ── */}
+      <DashboardTour guideDismissed={founder.guide_dismissed ?? false} />
+
     </div>
   )
 }

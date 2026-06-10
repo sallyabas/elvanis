@@ -199,6 +199,7 @@ export default function FocusView({
 
   {/* OS view always rendered */}
   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+  <div id="tour-focus-hero">
     <HeroCard
       status={statuses[primaryId]}
       signals={primarySignals}
@@ -207,12 +208,15 @@ export default function FocusView({
       focusMetric={focusMetric}
       isUpdating={focusChanging}
     />
+    </div>
+    <div id="tour-dim-grid">
     <DimensionGrid
       orderedIds={orderedIds.slice(1)}
       statuses={statuses}
       onDimensionClick={(id) => router.push(`/signals?dimension=${id}`)}
     />
   </div>
+</div>
 
 </div>
 

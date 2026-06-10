@@ -52,7 +52,7 @@ export default function Sidebar({
   }
 
   return (
-    <aside style={{
+    <aside id="tour-sidebar" style={{
       width:          220,
       minWidth:       220,
       height:         '100vh',
