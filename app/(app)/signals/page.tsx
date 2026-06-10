@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { analyseSignalConflicts } from '@/lib/signal-analysis'
 import type { SignalWithFlags } from '@/lib/signal-analysis'
-import ScanButton from './scan-button'
+import ScanButton from '@/components/ScanButton'
 import ConnectedBanner from './connected-banner'
 import AssessmentBanner from './assessment-banner'
 import ConflictTrustButton from '@/components/conflict-trust-button'
@@ -373,6 +373,28 @@ export default async function SignalsPage({
               </div>
             )}
           </div>
+
+          {/* ── Scan frequency strip ── */}
+          {hasConnectedSources && sources && sources.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB', marginBottom: 16, flexWrap: 'wrap' as const }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#6B7280' }}>🔄 Next scan:</span>
+              {sources.filter(s => s.source_type !== 'csv' && s.last_synced_at).map(s => {
+                const freq = getSourceFrequency(s.source_type, subscriptionTier, s.scan_frequency_days ?? null)
+                const daysSince = (Date.now() - new Date(s.last_synced_at!).getTime()) / (24 * 60 * 60 * 1000)
+                const daysLeft = Math.max(0, Math.ceil(freq - daysSince))
+                const label: Record<string, string> = { ga4: 'GA4', jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', trustpilot: 'Trustpilot' }
+                return (
+                  <span key={s.id} style={{ fontSize: 12, color: daysLeft === 0 ? '#059669' : '#374151', fontWeight: daysLeft === 0 ? 700 : 500, background: daysLeft === 0 ? '#ECFDF5' : '#fff', border: '1px solid #E5E7EB', borderRadius: 20, padding: '2px 10px' }}>
+                    {label[s.source_type] ?? s.source_type}: {daysLeft === 0 ? 'Ready now ✓' : `in ${daysLeft}d`}
+                  </span>
+                )
+              })}
+              {!isFreeTier && daysUntilNextScan === 0 && (
+                <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 'auto' }}>Run scan to refresh →</span>
+              )}
+            </div>
+          )}
+
 
           {/* ── Section title ── */}
           {filter !== 'resolved' && (
