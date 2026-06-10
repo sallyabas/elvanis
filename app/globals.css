@@ -185,6 +185,17 @@ body {
     padding-top: 56px;
     overflow-x: hidden;
   }
+  .hero-card {
+    padding: 20px 16px !important;
+  }
+
+  .hero-card h2 {
+    font-size: 20px !important;
+  }
+  
+  .hero-score {
+    font-size: 40px !important;
+  }
 
   .plan-inner {
     padding: 16px !important;

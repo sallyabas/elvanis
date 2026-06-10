@@ -316,8 +316,8 @@ export default async function PlanPage() {
                       const globalIndex = (action._globalIndex as number) ?? index
                       return (
                         <div key={index} style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px' }}>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, gap: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, gap: 16, flexWrap: 'wrap' as const }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                               <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#111827', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 {globalIndex + 1}
                               </div>

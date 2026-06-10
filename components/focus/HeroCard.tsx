@@ -143,7 +143,7 @@ export default function HeroCard({
     : []
 
   return (
-    <div style={{
+    <div className="hero-card" style={{
       background:   '#FFFFFF',
       border:       `2px solid ${status.color}`,
       borderRadius: 20,
@@ -200,7 +200,7 @@ export default function HeroCard({
         {(status.state === 'active' || status.state === 'assessment_only') && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
-            <span style={{ fontSize: 64, fontWeight: 900, color: getScoreColor(status.score), lineHeight: 1 }}>
+            <span className="hero-score" style={{ fontSize: 64, fontWeight: 900, color: getScoreColor(status.score), lineHeight: 1 }}>
             {status.score === -1 ? '—' : status.score}
            { status.isProvisional && (
               <span style={{ fontSize: 32, color: '#F59E0B', fontWeight: 700 }}>*</span>
