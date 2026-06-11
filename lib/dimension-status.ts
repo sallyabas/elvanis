@@ -51,6 +51,9 @@ interface Signal {
   signal_type:     string
   trend:           string | null
   insight_summary: string
+  insight_summary_ar: string
+  recommended_action: string
+  recommended_action_ar: string
 }
 
 export function calculateDimensionStatuses(params: {

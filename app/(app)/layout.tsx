@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/Sidebar'
+import DirProvider from '@/components/DirProvider'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerComponentClient()
@@ -10,7 +11,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: founder } = await supabase
     .from('founders')
-    .select('id, full_name, business_name, subscription_tier, logo_url')
+    .select('id, full_name, business_name, subscription_tier, logo_url, language')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -23,6 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <DirProvider lang={founder?.language ?? 'en'} />
       <Sidebar
         founderName={founder?.full_name ?? null}
         businessName={founder?.business_name ?? null}

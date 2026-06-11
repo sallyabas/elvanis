@@ -190,14 +190,22 @@ VALUE FIELD RULES:
 
 ⚠️ CRITICAL LLM INSTRUCTION: Under no circumstances whatsoever may the \`value\` property contain a \`null\` or \`undefined\` data type. A valid numeric representation must be compiled for every single generated signal object.
 
+LANGUAGE REQUIREMENT:
+Provide insight_summary and recommended_action as JSON objects with "en" and "ar" keys.
+- "en": Professional English
+- "ar": Professional Modern Standard Arabic for GCC business leaders
+- Keep all metrics, numbers, percentages in international format (e.g., 18%, 1000) regardless of language
+- Never translate tool names (GA4, Shopify, Jira, Intercom, Trustpilot stay as-is)
+
 Respond with JSON only — no preamble, no markdown formatting blocks, no backticks. Output a raw parsable string matching this exact shape:
+
 {
   "signals": [
     {
       "signal_type": "repeat_complaint_pattern",
       "dimension": "customer",
-      "insight_summary": "specific insight referencing actual review themes with exact data parameters",
-      "recommended_action": "specific actionable next step",
+      "insight_summary": { "en": "specific insight referencing actual review themes with exact data parameters", "ar": "نص عربي محدد يشير إلى مواضيع التقييمات الفعلية" },
+      "recommended_action": { "en": "specific actionable next step", "ar": "خطوة عملية محددة" },
       "severity": "critical|warning|watch",
       "confidence_score": 0.85,
       "value": 14,
@@ -232,8 +240,8 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
     return {
       signals: [{
         signal_type: 'rating_decline', dimension: 'customer',
-        insight_summary: `${data.domain} has a ${data.rating}/5 rating with ${data.oneStar ?? 'unknown'}% one-star reviews`,
-        recommended_action: 'Review recent customer feedback and identify top complaint themes to address immediately',
+        insight_summary:    { en: `${data.domain} has a ${data.rating}/5 rating with ${data.oneStar ?? 'unknown'}% one-star reviews`, ar: `${data.domain} حصل على تقييم ${data.rating}/5 مع ${data.oneStar ?? 'غير معروف'}% من التقييمات بنجمة واحدة` },
+        recommended_action: { en: 'Review recent customer feedback and identify top complaint themes to address immediately', ar: 'مراجعة تعليقات العملاء الأخيرة وتحديد أبرز موضوعات الشكاوى لمعالجتها فوراً' },
         severity: data.rating !== null && data.rating < 3.5 ? 'critical' : 'warning',
         confidence_score: 0.7, value: data.rating, change_percent: null,
         evidence: 'Based on overall Trustpilot rating analysis',
@@ -417,8 +425,10 @@ export async function POST(request: NextRequest) {
       const signalRow = {
         founder_id: founderId, source_id: source?.id ?? null,
         signal_type: n.signal_type, dimension: n.dimension,
-        insight_summary:    (n.insight_summary    as string) ?? 'Signal detected',
-        recommended_action: (n.recommended_action as string) ?? 'Review and take action',
+        insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
+        insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
+        recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
+        recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
         severity:        n.severity,
         confidence_score: (n.confidence_score as number) ?? 0.85,
         value:           parsedValue,
@@ -449,10 +459,17 @@ export async function POST(request: NextRequest) {
 
         touchedSignals.push({
           id: prev.id, signal_type: n.signal_type, source: 'trustpilot',
-          severity: n.severity, dimension: n.dimension,
-          value: signalRow.value, change_percent: signalRow.change_percent,
-          trend, insight_summary: signalRow.insight_summary,
-          previous_value: prev.value ?? null, scan_count: prevScanCount + 1,
+          severity: n.severity, 
+          dimension: n.dimension,
+          value: signalRow.value, 
+          change_percent: signalRow.change_percent,
+          trend, 
+          insight_summary:       signalRow.insight_summary,
+          insight_summary_ar:    signalRow.insight_summary_ar,
+          recommended_action:    signalRow.recommended_action,
+          recommended_action_ar: signalRow.recommended_action_ar,
+          previous_value: prev.value ?? null, 
+          scan_count: prevScanCount + 1,
         })
         updated++
       } else {
@@ -470,7 +487,10 @@ export async function POST(request: NextRequest) {
             value:           signalRow.value,
             change_percent:  signalRow.change_percent,
             trend:           'new',
-            insight_summary: signalRow.insight_summary,
+            insight_summary:       signalRow.insight_summary,
+            insight_summary_ar:    signalRow.insight_summary_ar,
+            recommended_action:    signalRow.recommended_action,
+            recommended_action_ar: signalRow.recommended_action_ar,
             previous_value:  null,
             scan_count:      1,
           })

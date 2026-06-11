@@ -310,18 +310,25 @@ VALUE FIELD RULES — never return null for value:
 
 \u26a0\ufe0f CRITICAL LLM INSTRUCTION: Under no circumstances whatsoever may the \`value\` property contain a \`null\` or \`undefined\` data type. A valid numeric representation must be compiled for every single generated signal object.
 
+LANGUAGE REQUIREMENT:
+Provide insight_summary and recommended_action as JSON objects with "en" and "ar" keys.
+- "en": Professional English
+- "ar": Professional Modern Standard Arabic for GCC business leaders
+- Keep all metrics, numbers, percentages in international format (e.g., 18%, 1000) regardless of language
+- Never translate tool names (GA4, Shopify, Jira, Intercom stay as-is)
+
 Respond with JSON only — no preamble, no markdown formatting blocks, no backticks. Output a raw parsable string matching this exact shape:
 {
   "signals": [
     {
       "signal_type": "ticket_volume_increase",
       "dimension": "customer",
-      "insight_summary": "specific insight with exact calculated numbers from the data",
-      "recommended_action": "specific action based on the actual data patterns",
+      "insight_summary": { "en": "specific insight with exact calculated numbers from the data", "ar": "نص عربي محدد بالأرقام المحسوبة الفعلية" },
+      "recommended_action": { "en": "specific action based on the actual data patterns", "ar": "إجراء محدد بناءً على أنماط البيانات الفعلية" },
       "severity": "critical|warning|watch",
       "confidence_score": 0.85,
       "value": 45,
-      "change_percent": null,
+      "change_percent": null,  
       "evidence": "calculated from actual data rows"
     }
   ],
@@ -359,10 +366,18 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
                      templateType === 'orders' ? 'refund_spike' :
                      templateType === 'velocity' ? 'velocity_drop' : 'csat_decline',
         dimension: templateType === 'orders' ? 'revenue' : templateType === 'velocity' ? 'team' : 'customer',
-        insight_summary: templateType === 'support'
-          ? `${rows.length} tickets analysed — ${unresolvedCount} unresolved, ${resolvedCount} resolved`
-          : `${rows.length} records analysed from ${templateType} data`,
-        recommended_action: 'Review the data and address the most critical issues immediately',
+        insight_summary: {
+          en: templateType === 'support'
+            ? `${rows.length} tickets analysed — ${unresolvedCount} unresolved, ${resolvedCount} resolved`
+            : `${rows.length} records analysed from ${templateType} data`,
+          ar: templateType === 'support'
+            ? `تم تحليل ${rows.length} تذكرة — ${unresolvedCount} غير محلولة، ${resolvedCount} محلولة`
+            : `تم تحليل ${rows.length} سجل من بيانات ${templateType}`,
+        },
+        recommended_action: {
+          en: 'Review the data and address the most critical issues immediately',
+          ar: 'مراجعة البيانات ومعالجة أكثر المشكلات حرجاً فوراً',
+        },
         severity: 'warning',
         confidence_score: 0.6,
         value: rows.length,
@@ -528,8 +543,10 @@ export async function POST(request: NextRequest) {
           source_id:          savedSource.id,
           signal_type:        n.signal_type,
           dimension:          n.dimension,
-          insight_summary:    (n.insight_summary as string) ?? 'Signal detected',
-          recommended_action: (n.recommended_action as string) ?? 'Review and take action',
+          insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
+          insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
+          recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
+          recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
           severity:           n.severity,
           confidence_score:   (n.confidence_score as number) ?? 0.85,
           value:              n.value ?? null,
@@ -563,8 +580,7 @@ export async function POST(request: NextRequest) {
       const { data: insertedRows, error: insertErr } = await admin
         .from('diagnostic_signals')
         .insert(signalsToInsert)
-        .select('id, signal_type, value, severity, dimension, change_percent, insight_summary, previous_value, scan_count, trend')
-
+        .select('id, signal_type, value, severity, dimension, change_percent, insight_summary, insight_summary_ar, recommended_action, recommended_action_ar, previous_value, scan_count, trend')
       if (insertErr) {
         console.error('[csv] batch insert failed:', insertErr.message)
       } else if (insertedRows) {
@@ -581,7 +597,10 @@ export async function POST(request: NextRequest) {
             value:           row.value,
             change_percent:  row.change_percent,
             trend:           row.trend,
-            insight_summary: row.insight_summary,
+            insight_summary:       row.insight_summary,
+            insight_summary_ar:    row.insight_summary_ar,
+            recommended_action:    row.recommended_action,
+            recommended_action_ar: row.recommended_action_ar,
             previous_value:  row.previous_value ?? null,
             scan_count:      row.scan_count,
           })

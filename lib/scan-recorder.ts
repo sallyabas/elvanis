@@ -41,6 +41,9 @@ export type SignalUpsertResult = {
   change_percent:  number | null
   trend:           string          // 'new' | 'improving' | 'worsening' | 'unchanged'
   insight_summary: string
+  recommended_action:    string 
+  insight_summary_ar:    string
+  recommended_action_ar: string
   previous_value:  number | null
   scan_count:      number
 }

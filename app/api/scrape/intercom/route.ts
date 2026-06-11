@@ -331,14 +331,22 @@ VALUE FIELD RULES:
 
 ⚠️ CRITICAL LLM INSTRUCTION: Under no circumstances whatsoever may the \`value\` property contain a \`null\` or \`undefined\` data type. A valid numeric representation must be compiled for every single generated signal object.
 
+LANGUAGE REQUIREMENT:
+Provide insight_summary and recommended_action as JSON objects with "en" and "ar" keys.
+- "en": Professional English
+- "ar": Professional Modern Standard Arabic for GCC business leaders
+- Keep all metrics, numbers, percentages in international format (e.g., 18%, 1000) regardless of language
+- Never translate tool names (GA4, Shopify, Jira, Intercom stay as-is)
+
 Respond with JSON only — no preamble, no markdown formatting blocks, no backticks. Output a raw parsable string matching this exact shape:
+
 {
   "signals": [
     {
       "signal_type": "response_time_increase",
       "dimension": "customer",
-      "insight_summary": "specific insight with exact numbers from the data",
-      "recommended_action": "specific action this week",
+      "insight_summary": { "en": "specific insight with exact numbers from the data", "ar": "نص عربي محدد بالأرقام الفعلية" },
+      "recommended_action": { "en": "specific action this week", "ar": "إجراء محدد هذا الأسبوع" },
       "severity": "critical|warning|watch",
       "confidence_score": 0.85,
       "value": 6.5,
@@ -378,9 +386,8 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
             ? 'repeat_complaint_pattern'
             : 'ticket_volume_increase',
           dimension: 'customer',
-          insight_summary: `${intercomData.totalConversations} conversations with ${intercomData.avgFirstResponseHours}h avg first response and ${intercomData.repeatContactRate}% repeat contact rate`,
-          recommended_action: 'Review open conversations older than 48 hours and identify recurring complaint themes',
-          severity: intercomData.avgFirstResponseHours > 24 ? 'critical' : 'warning',
+          insight_summary:    { en: `${intercomData.totalConversations} conversations with ${intercomData.avgFirstResponseHours}h avg first response and ${intercomData.repeatContactRate}% repeat contact rate`, ar: `${intercomData.totalConversations} محادثة بمتوسط وقت استجابة أول ${intercomData.avgFirstResponseHours} ساعة ومعدل تواصل متكرر ${intercomData.repeatContactRate}%` },
+          recommended_action: { en: 'Review open conversations older than 48 hours and identify recurring complaint themes', ar: 'مراجعة المحادثات المفتوحة منذ أكثر من 48 ساعة وتحديد أنماط الشكاوى المتكررة' },
           confidence_score: 0.75,
           value: intercomData.avgFirstResponseHours,
           change_percent: intercomData.responseTimeChange,
@@ -413,8 +420,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source_id: source.id as string,
         signal_type: n.signal_type,
         dimension: n.dimension,
-        insight_summary: (n.insight_summary as string) ?? 'Signal detected',
-        recommended_action: (n.recommended_action as string) ?? 'Review and take action',
+        insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
+        insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
+        recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
+        recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
         severity: n.severity,
         confidence_score: (n.confidence_score as number) ?? 0.85,
         value: n.value ?? null,
@@ -453,7 +462,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           value: signalRow.value,
           change_percent: signalRow.change_percent,
           trend,
-          insight_summary: signalRow.insight_summary,
+          insight_summary:       signalRow.insight_summary,
+          insight_summary_ar:    signalRow.insight_summary_ar,
+          recommended_action:    signalRow.recommended_action,
+          recommended_action_ar: signalRow.recommended_action_ar,
           previous_value: prev.value ?? null,
           scan_count: prevScanCount + 1,
         })
@@ -477,7 +489,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
             value:           signalRow.value,
             change_percent:  signalRow.change_percent,
             trend:           'new',
-            insight_summary: signalRow.insight_summary,
+            insight_summary:       signalRow.insight_summary,
+            insight_summary_ar:    signalRow.insight_summary_ar,
+            recommended_action:    signalRow.recommended_action,
+            recommended_action_ar: signalRow.recommended_action_ar,
             previous_value:  null,
             scan_count:      1,
           })

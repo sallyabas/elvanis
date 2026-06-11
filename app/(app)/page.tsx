@@ -79,7 +79,7 @@ export default async function HomePage() {
 
   const { data: signals } = await supabase
     .from('diagnostic_signals')
-    .select('id, signal_type, dimension, severity, status, source, insight_summary, recommended_action, value, trend, scan_count')
+    .select('id, signal_type, dimension, severity, status, source, insight_summary, insight_summary_ar, recommended_action, recommended_action_ar, value, trend, scan_count')
     .eq('founder_id', founder.id)
     .in('status', ['new', 'acknowledged', 'resolved'])
     .order('created_at', { ascending: false })

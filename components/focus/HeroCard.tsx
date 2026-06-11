@@ -9,7 +9,9 @@ interface Signal {
   signal_type:        string
   severity:           string
   insight_summary:    string
+  insight_summary_ar:    string
   recommended_action: string
+  recommended_action_ar: string
   value:              number | null
   trend:              string | null
 }

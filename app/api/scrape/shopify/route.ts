@@ -332,14 +332,22 @@ VALUE FIELD RULES — never return null for value:
 
 ⚠️ CRITICAL LLM INSTRUCTION: Under no circumstances whatsoever may the \`value\` property contain a \`null\` or \`undefined\` data type. A valid numeric representation must be compiled for every single generated signal object.
 
+LANGUAGE REQUIREMENT:
+Provide insight_summary and recommended_action as JSON objects with "en" and "ar" keys.
+- "en": Professional English
+- "ar": Professional Modern Standard Arabic for GCC business leaders
+- Keep all metrics, numbers, percentages in international format (e.g., 18%, £1,000) regardless of language
+- Never translate tool names (GA4, Shopify, Jira stay as-is)
+
 Respond with JSON only — no preamble, no markdown formatting blocks, no backticks. Output a raw parsable string matching this exact shape:
+
 {
   "signals": [
     {
       "signal_type": "refund_spike",
       "dimension": "revenue",
-      "insight_summary": "specific insight with exact numbers",
-      "recommended_action": "specific action this week",
+      "insight_summary": { "en": "specific insight with exact numbers", "ar": "نص عربي محدد بالأرقام الفعلية" },
+      "recommended_action": { "en": "specific action this week", "ar": "إجراء محدد هذا الأسبوع" },
       "severity": "critical|warning|watch",
       "confidence_score": 0.85,
       "value": 8.5,
@@ -376,8 +384,8 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
             : shopifyData.repeatPurchaseRate < 20 ? 'repeat_purchase_drop'
             : 'conversion_fall',
           dimension: 'revenue',
-          insight_summary: `${shopifyData.totalOrders} orders with £${shopifyData.aov} AOV and ${shopifyData.refundRate}% refund rate in last 30 days`,
-          recommended_action: 'Review refund reasons and identify patterns in returned products',
+          insight_summary:    { en: `${shopifyData.totalOrders} orders with £${shopifyData.aov} AOV and ${shopifyData.refundRate}% refund rate in last 30 days`, ar: `${shopifyData.totalOrders} طلب بمتوسط قيمة £${shopifyData.aov} ومعدل استرداد ${shopifyData.refundRate}% خلال آخر 30 يوماً` },
+          recommended_action: { en: 'Review refund reasons and identify patterns in returned products', ar: 'مراجعة أسباب الاسترداد وتحديد الأنماط في المنتجات المُعادة' },
           severity: shopifyData.refundRate > 10 ? 'critical' : 'warning',
           confidence_score: 0.75,
           value: shopifyData.refundRate,
@@ -411,8 +419,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source_id: source.id as string,
         signal_type: n.signal_type,
         dimension: n.dimension,
-        insight_summary: (n.insight_summary as string) ?? 'Signal detected',
-        recommended_action: (n.recommended_action as string) ?? 'Review and take action',
+        insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
+        insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
+        recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
+        recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
         severity: n.severity,
         confidence_score: (n.confidence_score as number) ?? 0.85,
         value: n.value ?? null,
@@ -451,7 +461,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           value: signalRow.value,
           change_percent: signalRow.change_percent,
           trend,
-          insight_summary: signalRow.insight_summary,
+          insight_summary:       signalRow.insight_summary,
+          insight_summary_ar:    signalRow.insight_summary_ar,
+          recommended_action:    signalRow.recommended_action,
+          recommended_action_ar: signalRow.recommended_action_ar,
           previous_value: prev.value ?? null,
           scan_count: prevScanCount + 1,
         })
@@ -475,7 +488,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
             value:           signalRow.value,
             change_percent:  signalRow.change_percent,
             trend:           'new',
-            insight_summary: signalRow.insight_summary,
+            insight_summary:       signalRow.insight_summary,
+            insight_summary_ar:    signalRow.insight_summary_ar,
+            recommended_action:    signalRow.recommended_action,
+            recommended_action_ar: signalRow.recommended_action_ar,
             previous_value:  null,
             scan_count:      1,
           })

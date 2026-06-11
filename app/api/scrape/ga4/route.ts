@@ -412,14 +412,22 @@ DATA QUALITY RULES:
 
 ⚠️ CRITICAL LLM INSTRUCTION: Under no circumstances whatsoever may the \`value\` property contain a \`null\` or \`undefined\` data type. A valid numeric representation must be compiled for every single generated signal object.
 
+LANGUAGE REQUIREMENT:
+Provide insight_summary and recommended_action as JSON objects with "en" and "ar" keys.
+- "en": Professional English
+- "ar": Professional Modern Standard Arabic for GCC business leaders
+- Keep all metrics, numbers, percentages in international format (e.g., 18%, 1000) regardless of language
+- Never translate tool names (GA4, Shopify, Jira stay as-is)
+
 Respond with JSON only — no preamble, no markdown formatting blocks, no backticks. Output a raw parsable string matching this exact shape:
+
 {
   "signals": [
     {
       "signal_type": "conversion_fall",
       "dimension": "marketing",
-      "insight_summary": "specific insight with actual numbers",
-      "recommended_action": "specific action",
+      "insight_summary": { "en": "specific insight with actual numbers", "ar": "نص عربي محدد بالأرقام الفعلية" },
+      "recommended_action": { "en": "specific action", "ar": "إجراء محدد" },
       "severity": "critical|warning|watch",
       "confidence_score": 0.85,
       "value": -18,
@@ -451,8 +459,8 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         signals: [{
           signal_type: 'engagement_drop',
           dimension: 'marketing',
-          insight_summary: `Engagement rate at ${ga4Data.engagementRate}% with ${ga4Data.bounceRate}% bounce rate over last 31 days`,
-          recommended_action: 'Review top exit pages and improve page load speed and content relevance',
+          insight_summary: { en: `Engagement rate at ${ga4Data.engagementRate}% with ${ga4Data.bounceRate}% bounce rate over last 31 days`, ar: `معدل التفاعل ${ga4Data.engagementRate}% مع معدل ارتداد ${ga4Data.bounceRate}% خلال آخر 31 يوماً` },
+          recommended_action: { en: 'Review top exit pages and improve page load speed and content relevance', ar: 'مراجعة أكثر صفحات الخروج زيارةً وتحسين سرعة التحميل وجودة المحتوى' },
           severity: ga4Data.bounceRate > 70 ? 'critical' : 'warning',
           confidence_score: 0.75,
           value: ga4Data.engagementRate,
@@ -486,8 +494,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source_id: ga4Source.id as string,
         signal_type: n.signal_type,
         dimension: n.dimension,
-        insight_summary: (n.insight_summary as string) ?? 'Signal detected',
-        recommended_action: (n.recommended_action as string) ?? 'Review and take action',
+        insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
+        insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
+        recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
+        recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
         severity: n.severity,
         confidence_score: (n.confidence_score as number) ?? 0.85,
         value: n.value ?? null,
@@ -524,7 +534,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           value: signalRow.value,
           change_percent: signalRow.change_percent,
           trend,
-          insight_summary: signalRow.insight_summary,
+          insight_summary:       signalRow.insight_summary,
+          insight_summary_ar:    signalRow.insight_summary_ar,
+          recommended_action:    signalRow.recommended_action,
+          recommended_action_ar: signalRow.recommended_action_ar,
           previous_value: prev.value ?? null,
           scan_count: prevScanCount + 1,
         })
@@ -549,7 +562,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
             value:           signalRow.value,
             change_percent:  signalRow.change_percent,
             trend:           'new',
-            insight_summary: signalRow.insight_summary,
+            insight_summary:       signalRow.insight_summary,
+            insight_summary_ar:    signalRow.insight_summary_ar,
+            recommended_action:    signalRow.recommended_action,
+            recommended_action_ar: signalRow.recommended_action_ar,
             previous_value:  null,
             scan_count:      1,
           })
