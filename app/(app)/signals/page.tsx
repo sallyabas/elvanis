@@ -182,6 +182,15 @@ export default async function SignalsPage({
   const tooltipText = `${weeklyNavigatorSources} scan every 7 days for Navigator. ${monthlySources} scan every 30 days. Available once per week for Navigator.`
 
   const name = founder?.full_name?.split(' ')[0] ?? ''
+  const lang = founder?.language ?? 'en'
+  const si = (signal: Record<string, unknown>) =>
+    lang === 'ar' && signal.insight_summary_ar
+      ? String(signal.insight_summary_ar)
+      : String(signal.insight_summary ?? '')
+  const ra = (signal: Record<string, unknown>) =>
+    lang === 'ar' && signal.recommended_action_ar
+      ? String(signal.recommended_action_ar)
+      : String(signal.recommended_action ?? '')
   const severityColor = (s: string) => s === 'critical' ? '#DC2626' : s === 'warning' ? '#D97706' : '#6B7280'
   const severityBg    = (s: string) => s === 'critical' ? '#FEF2F2' : s === 'warning' ? '#FFFBEB' : '#F9FAFB'
   const dimensionIcon = (d: string) => ({ customer: '👥', team: '⚙️', marketing: '📣', revenue: '💰', product: '🎯', strategy: '🧭' }[d] ?? '📊')
@@ -546,7 +555,7 @@ export default async function SignalsPage({
                     return (
                       <ConflictTrustButton
                         signalType={signal.signal_type}
-                        signalInsight={String(signal.insight_summary ?? '')}
+                        signalInsight={si(signal)}
                         initialChoice={initialChoice}
                         isDeprioritised={isDeprioritised}
                         trustedLabel={trustedLabel}
@@ -559,12 +568,12 @@ export default async function SignalsPage({
                   })()}
 
                   <p style={{ fontSize: 15, color: '#111827', fontWeight: 600, marginBottom: 10, lineHeight: 1.5 }}>
-                    {String(signal.insight_summary ?? '')}
+                  {si(signal)}
                   </p>
 
                   <div style={{ background: '#EFF6FF', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#2563EB' }}>Action: </span>
-                    <span style={{ fontSize: 13, color: '#1D4ED8', lineHeight: 1.5 }}>{String(signal.recommended_action ?? '')}</span>
+                    <span style={{ fontSize: 13, color: '#1D4ED8', lineHeight: 1.5 }}>{ra(signal)}</span>
                   </div>
 
                   {showEvidence && (
@@ -614,7 +623,7 @@ export default async function SignalsPage({
                 {notApplicable.map(signal => (
                   <div key={signal.id} style={{ background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB', padding: '14px 20px', opacity: 0.6, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span>{dimensionIcon(String(signal.dimension ?? ''))}</span>
-                    <p style={{ fontSize: 13, color: '#6B7280', margin: 0, flex: 1 }}>{String(signal.insight_summary ?? '')}</p>
+                    <p style={{ fontSize: 13, color: '#6B7280', margin: 0, flex: 1 }}>{si(signal)}</p>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, flexShrink: 0 }}>✗ Not applicable</span>
                   </div>
                 ))}
@@ -634,7 +643,7 @@ export default async function SignalsPage({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span>✅</span>
                       <div>
-                        <p style={{ fontSize: 14, color: '#065F46', fontWeight: 600, margin: '0 0 2px' }}>{String(signal.insight_summary ?? '')}</p>
+                        <p style={{ fontSize: 14, color: '#065F46', fontWeight: 600, margin: '0 0 2px' }}>{si(signal)}</p>
                         <p style={{ fontSize: 12, color: '#059669', margin: 0 }}>Marked as fixed · Elvanis will verify on next scan</p>
                       </div>
                     </div>
@@ -658,7 +667,7 @@ export default async function SignalsPage({
                   <div key={signal.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, opacity: 0.65 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span>{dimensionIcon(String(signal.dimension ?? ''))}</span>
-                      <p style={{ fontSize: 14, color: '#374151', margin: 0 }}>{String(signal.insight_summary ?? '')}</p>
+                      <p style={{ fontSize: 14, color: '#374151', margin: 0 }}>{si(signal)}</p>
                     </div>
                     <a href={`/api/signals/${signal.id}/acknowledge`} style={{ fontSize: 12, color: '#2563EB', textDecoration: 'none', flexShrink: 0, fontWeight: 600, whiteSpace: 'nowrap' }}>
                       Move to active
