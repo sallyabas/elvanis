@@ -273,8 +273,8 @@ export default function Sidebar({
       style={{
         position:   'fixed',
         top:        12,
-        left:       12,
-        zIndex:     9998,
+        left:       language === 'ar' ? 'auto' : 12,
+        right:      language === 'ar' ? 12 : 'auto',        zIndex:     9998,
         background: '#0F0D1F',
         border:     '1px solid #1E1B33',
         borderRadius: 8,
@@ -357,8 +357,8 @@ export default function Sidebar({
       flexDirection:  'column',
       borderRight:    '1px solid #1E1B33',
       position:       'fixed',
-      top:            0,
-      left:           0,
+      left:           language === 'ar' ? 'auto' : 0,
+      right:          language === 'ar' ? 0 : 'auto',
       overflow:       'hidden',
       zIndex:         100,
     }}>
