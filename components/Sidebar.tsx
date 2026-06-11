@@ -347,19 +347,23 @@ export default function Sidebar({
   }
 
   return (
+    <>
+    <div style={{ width: 220, minWidth: 220, flexShrink: 0 }} />
     <aside id="tour-sidebar" style={{
       width:          220,
-      minWidth:       220,
       height:         '100vh',
       background:     '#0F0D1F',
       display:        'flex',
       flexDirection:  'column',
       borderRight:    '1px solid #1E1B33',
-      position:       'sticky',
+      position:       'fixed',
       top:            0,
+      left:           0,
       overflow:       'hidden',
+      zIndex:         100,
     }}>
       {sidebarContent}
     </aside>
+     </>
   )
 }
