@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { HelpPanel } from './HelpPanel'
 import Link from 'next/link'
+import { getT } from '@/lib/translations'
+
 
 interface SidebarProps {
   founderName:       string | null
@@ -11,35 +13,40 @@ interface SidebarProps {
   subscriptionTier:  string | null
   logoUrl?:          string | null
   criticalCount?:    number
+  language?:         string
 }
 
-const NAV_GROUPS = [
-  {
-    label: 'Intelligence',
-    items: [
-      { href: '/',                  icon: '🏠', label: 'Home'       },
-      { href: '/overview',          icon: '📊', label: 'Overview'   },
-      { href: '/signals',           icon: '⚡', label: 'Signals',   badge: 'signals' },
-      { href: '/tracker',           icon: '📈', label: 'Tracker'    },
-      { href: '/assessment/result', icon: '🎯', label: 'Assessment' },
-    ],
-  },
-  {
-    label: 'Execution',
-    items: [
-      { href: '/plan',    icon: '🗂️', label: 'Plan'    },
-      { href: '/connect', icon: '🔌', label: 'Connect' },
-    ],
-  },
-]
-
-const STANDALONE = { href: '/advisory', icon: '🤝', label: 'Advisory' }
 
 export default function Sidebar({
   founderName,
   subscriptionTier,
   criticalCount = 0,
+  language,
+
 }: SidebarProps) {
+  const t = getT((language ?? 'en') as 'en' | 'ar')
+
+  const NAV_GROUPS = [
+    {
+      label: t('sidebar.intelligence'),
+      items: [
+        { href: '/',                  icon: '🏠', label: t('nav.home'),       badge: undefined },
+        { href: '/overview',          icon: '📊', label: t('nav.overview'),   badge: undefined },
+        { href: '/signals',           icon: '⚡', label: t('nav.signals'),    badge: 'signals' },
+        { href: '/tracker',           icon: '📈', label: t('nav.tracker'),    badge: undefined },
+        { href: '/assessment/result', icon: '🎯', label: t('nav.assessment'), badge: undefined },
+      ],
+    },
+    {
+      label: t('sidebar.execution'),
+      items: [
+        { href: '/plan',    icon: '🗂️', label: t('nav.plan'),    badge: undefined },
+        { href: '/connect', icon: '🔌', label: t('nav.connect'), badge: undefined },
+      ],
+    },
+  ]
+
+  const STANDALONE = { href: '/advisory', icon: '🤝', label: t('nav.advisory') }
   const pathname                = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isMobile,   setIsMobile]   = useState(false)
@@ -204,7 +211,7 @@ export default function Sidebar({
           marginBottom: 4,
         }}>
           <span style={{ fontSize: 15, width: 20, textAlign: 'center', opacity: 0.6 }}>❓</span>
-          <span style={{ fontSize: 13, color: '#9CA3AF', fontWeight: 500 }}>Help</span>
+          <span style={{ fontSize: 13, color: '#9CA3AF', fontWeight: 500 }}>{t('nav.help')}</span>
         </button>
 
         <Link href="/profile" style={{
@@ -252,7 +259,7 @@ export default function Sidebar({
           boxSizing:   'border-box' as const,
         }}>
           <span style={{ fontSize: 14, width: 20, textAlign: 'center', opacity: 0.5 }}>⏻</span>
-          <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>Sign out</span>
+          <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>{t('nav.signout')}</span>
         </a>
       </div>
       <HelpPanel onRestartTour={() => {}} />
