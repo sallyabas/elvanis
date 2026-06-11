@@ -50,6 +50,7 @@ export default async function ProfilePage() {
         subscriptionEndsAt={founder.subscription_ends_at ?? null}
         serviceRequests={serviceRequests ?? []}
         payments={payments ?? []}
+       initialLanguage={founder.language ?? 'en'}
       />
     </main>
   )

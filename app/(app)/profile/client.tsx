@@ -91,6 +91,7 @@ interface Props {
   subscriptionEndsAt:    string | null
   serviceRequests:       ServiceRequest[]
   payments:              Payment[]
+  initialLanguage:       string
 }
 
 const inputStyle = {
@@ -144,7 +145,7 @@ function MsgBox({ msg, msgColor, msgBg }: { msg: string; msgColor: string; msgBg
 }
 
 export default function ProfileClient({
-  founderId, initialEmail, initialFullName, initialBusinessName,
+  founderId, initialEmail, initialFullName, initialBusinessName, initialLanguage,
   initialLogoUrl, initialIndustry, initialIndustryOther, initialMarket,
   initialBrandUrl, initialFocusMetric, subscriptionTier, subscriptionStatus,
   subscriptionStartedAt, subscriptionEndsAt, serviceRequests, payments,
@@ -160,7 +161,9 @@ export default function ProfileClient({
   const [savedBizName, setSavedBizName]       = useState(initialBusinessName)
   const [saving, setSaving]                   = useState(false)
   const [personalMsg, setPersonalMsg]         = useState('')   // shown only in personal info section
-  const hasPersonalChanges                    = fullName.trim() !== savedFullName || businessName.trim() !== savedBizName
+  const [language, setLanguage]               = useState(initialLanguage)
+  const [savedLanguage, setSavedLanguage]     = useState(initialLanguage)
+  const hasPersonalChanges                    = fullName.trim() !== savedFullName || businessName.trim() !== savedBizName || language !== savedLanguage
 
   // ── Logo ──
   const [logoUrl, setLogoUrl]                 = useState<string | null>(initialLogoUrl)
@@ -198,13 +201,15 @@ export default function ProfileClient({
     setSaving(true); setPersonalMsg('')
     const supabase = createClient()
     const { error } = await supabase.from('founders')
-      .update({ full_name: fullName.trim(), business_name: businessName.trim() })
+      .update({ full_name: fullName.trim(), business_name: businessName.trim() , language })
       .eq('id', founderId)
     if (!error) {
       // Update saved baseline so button dims again
       setSavedFullName(fullName.trim())
       setSavedBizName(businessName.trim())
+      setSavedLanguage(language)
       setPersonalMsg('Saved successfully')
+      setTimeout(() => window.location.reload(), 500)
     } else {
       setPersonalMsg(`Save failed: ${error.message}`)
     }
@@ -420,6 +425,38 @@ export default function ProfileClient({
           <label style={labelStyle}>Email</label>
           <input value={initialEmail} disabled style={{ ...inputStyle, background: '#F9FAFB', color: '#9CA3AF', cursor: 'default' }} />
           <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>Email cannot be changed. Contact support if needed.</p>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Language / اللغة</label>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              onClick={() => setLanguage('en')}
+              style={{
+                flex: 1, padding: '10px 16px', borderRadius: 9, fontSize: 14, fontWeight: 600,
+                border: `2px solid ${language === 'en' ? '#2563EB' : '#E5E7EB'}`,
+                background: language === 'en' ? '#EFF6FF' : '#fff',
+                color: language === 'en' ? '#2563EB' : '#6B7280',
+                cursor: 'pointer',
+              }}
+            >
+              English
+            </button>
+            <button
+              type="button"
+              onClick={() => setLanguage('ar')}
+              style={{
+                flex: 1, padding: '10px 16px', borderRadius: 9, fontSize: 14, fontWeight: 600,
+                border: `2px solid ${language === 'ar' ? '#2563EB' : '#E5E7EB'}`,
+                background: language === 'ar' ? '#EFF6FF' : '#fff',
+                color: language === 'ar' ? '#2563EB' : '#6B7280',
+                cursor: 'pointer',
+              }}
+            >
+              العربية
+            </button>
+          </div>
         </div>
         {/* personalMsg ONLY — never logoMsg */}
         <MsgBox msg={personalMsg} msgColor={getColor(personalMsg)} msgBg={getBg(personalMsg)} />
