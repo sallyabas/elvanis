@@ -25,13 +25,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <DirProvider lang={founder?.language ?? 'en'} />
-      <Sidebar
-        founderName={founder?.full_name ?? null}
-        businessName={founder?.business_name ?? null}
-        subscriptionTier={founder?.subscription_tier ?? null}
-        logoUrl={founder?.logo_url ?? null}
-        criticalCount={criticalCount ?? 0}
-      />
+      <div style={{ position: 'sticky', top: 0, height: '100vh', flexShrink: 0 }}>
+        <Sidebar
+          founderName={founder?.full_name ?? null}
+          businessName={founder?.business_name ?? null}
+          subscriptionTier={founder?.subscription_tier ?? null}
+          logoUrl={founder?.logo_url ?? null}
+          criticalCount={criticalCount ?? 0}
+        />
+      </div>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#F9FAFB' }} className="app-main">
         {children}
       </div>
