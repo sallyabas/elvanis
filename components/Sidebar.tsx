@@ -348,8 +348,7 @@ export default function Sidebar({
 
   return (
     <>
-    <div style={{ width: 220, minWidth: 220, flexShrink: 0 }} />
-    <aside id="tour-sidebar" style={{
+      <aside id="tour-sidebar" style={{
       width:          220,
       height:         '100vh',
       background:     '#0F0D1F',

@@ -180,11 +180,23 @@ body {
   .signal-filter-card { min-width: 100%; flex: 1 1 100%; }
 }
 
+.app-main {
+  margin-left: 220px;
+}
+
+[dir="rtl"] .app-main {
+  margin-left: 0;
+  margin-right: 220px;
+}
+
 @media (max-width: 767px) {
   .app-main {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     padding-top: 56px;
     overflow-x: hidden;
   }
+
   .hero-card {
     padding: 20px 16px !important;
   }
@@ -192,7 +204,7 @@ body {
   .hero-card h2 {
     font-size: 20px !important;
   }
-  
+
   .hero-score {
     font-size: 40px !important;
   }
