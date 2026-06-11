@@ -3,7 +3,9 @@ import { createServerComponentClient } from '@/lib/supabase-server'
 import FocusView from '@/components/focus/FocusView'
 import { DashboardTour } from './guide'
 import { calculateHealthScore } from '@/lib/health-scoring'
+import { getT } from '@/lib/translations'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
+
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
@@ -71,11 +73,12 @@ export default async function HomePage() {
 
   const { data: founder } = await supabase
     .from('founders')
-    .select('id, full_name, business_name, founder_stage, focus_metric, subscription_tier, logo_url, guide_dismissed')
+    .select('id, full_name, business_name, founder_stage, focus_metric, subscription_tier, logo_url, guide_dismissed, language')
     .eq('user_id', user.id)
     .maybeSingle()
 
   if (!founder) redirect('/onboarding')
+    const t = getT((founder.language ?? 'en') as 'en' | 'ar')
 
   const { data: signals } = await supabase
     .from('diagnostic_signals')
@@ -172,15 +175,15 @@ export default async function HomePage() {
         <div id="tour-assessment-card" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: score ? 16 : 0 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-              🎯 Assessment Score
-            </p>
+            {t('home.assessment_score')}
+           </p>
             {score && (
               <div style={{ display: 'flex', gap: 8 }}>
                 <a href="/assessment/result" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', padding: '6px 14px', border: '1px solid #BFDBFE', borderRadius: 8, fontWeight: 600 }}>
-                  Full report →
+                {t('home.full_report')}
                 </a>
                 <a href="/assessment" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
-                  Retake
+                {t('home.retake')}
                 </a>
               </div>
             )}
@@ -192,7 +195,7 @@ export default async function HomePage() {
                 <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>No assessment taken yet</p>
                 <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px', lineHeight: 1.5 }}>Answer 26 questions and get a scored diagnosis across 6 dimensions. Takes 10 minutes.</p>
                 <a href="/assessment" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                  Start assessment →
+                {t('home.start_assessment')}
                 </a>
               </div>
             </div>
@@ -225,8 +228,8 @@ export default async function HomePage() {
         <div id="tour-ai-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>✨ AI Readiness</p>
-              <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>{t('home.ai_readiness')}</p>
+            <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
                 {allActiveSignals.length > 0 ? 'Based on your active signals' : 'Based on your business profile and assessment'}
               </p>
             </div>
@@ -239,7 +242,7 @@ export default async function HomePage() {
           </div>
           {!aiReadiness.hasEnoughData ? (
             <div style={{ background: '#EDE9FE', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-              <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>Take the assessment or connect tools to detect AI automation opportunities.</p>
+              <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>{t('home.take_assessment')}</p>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 {!assessment && <a href="/assessment" style={{ padding: '8px 16px', background: '#7C3AED', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Take assessment →</a>}
                 <a href="/connect" style={{ padding: '8px 16px', background: '#fff', color: '#7C3AED', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Connect tools →</a>
@@ -262,8 +265,8 @@ export default async function HomePage() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <a href="/advisory?type=roadmap" style={{ padding: '9px 20px', background: '#7C3AED', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>✨ Request AI Roadmap →</a>
-                <a href="/advisory?type=cpo" style={{ padding: '9px 20px', background: '#fff', color: '#7C3AED', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Book CPO Session</a>
+              <a href="/advisory?type=roadmap" style={{ padding: '9px 20px', background: '#7C3AED', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>{t('home.request_roadmap')}</a>
+              <a href="/advisory?type=cpo" style={{ padding: '9px 20px', background: '#fff', color: '#7C3AED', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>{t('home.book_cpo')}</a>
               </div>
             </>
           )}
@@ -274,8 +277,8 @@ export default async function HomePage() {
           <div id="tour-digest-card" style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: latestDigest ? 14 : 0 }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: latestDigest ? '#7C3AED' : '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>✨ Action Digest</p>
-                {latestDigest ? (
+              <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
+              {latestDigest ? (
                   <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
                     Generated {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
@@ -284,7 +287,7 @@ export default async function HomePage() {
                 )}
               </div>
               <a href="/plan" style={{ padding: '8px 18px', background: latestDigest ? '#7C3AED' : '#E5E7EB', color: latestDigest ? '#fff' : '#9CA3AF', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                {latestDigest ? 'View digest →' : 'No digest yet'}
+              {latestDigest ? t('home.view_digest') : t('home.no_digest')}
               </a>
             </div>
             {latestDigest && (
@@ -302,11 +305,11 @@ export default async function HomePage() {
             </div>
             {STRIPE_PAYMENT_LINK ? (
               <a href={STRIPE_PAYMENT_LINK} target="_blank" rel="noopener noreferrer" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                Upgrade — £49/mo →
+                {t('home.upgrade_cta')}
               </a>
             ) : (
               <a href="/advisory?type=upgrade" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                Contact us to upgrade →
+                {t('home.upgrade_contact')}
               </a>
             )}
           </div>
@@ -316,11 +319,11 @@ export default async function HomePage() {
         <div style={{ background: '#1E1B4B', borderRadius: 16, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' as const }}>
           <div>
             <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Need a strategic plan or hands-on help?</p>
-            <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>Get an AI-generated 90-day roadmap or book a session with a fractional CPO.</p>
+            <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>{t('home.service_sub')}</p>
           </div>
           <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' as const }}>
-            <a href="/advisory?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>Get AI Roadmap</a>
-            <a href="/advisory?type=cpo" style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}>Book CPO Session</a>
+            <a href="/advisory?type=roadmap" style={{ padding: '12px 22px', background: '#4F46E5', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}> {t('home.get_roadmap')}</a>
+            <a href="/advisory?type=cpo" style={{ padding: '12px 22px', background: 'transparent', color: '#A5B4FC', borderRadius: 10, fontSize: 13, fontWeight: 600, textDecoration: 'none', border: '1px solid #4F46E5', whiteSpace: 'nowrap' }}> {t('home.book_cpo')}</a>
           </div>
         </div>
 
