@@ -31,7 +31,7 @@ export default async function AssessmentResultPage() {
     'Critical':        t('assessment.status_critical'),
   }
   const lang = founder?.language ?? 'en'
-  const name = founder?.full_name?.split(' ')[0] ?? ''
+  const name = founder?.business_name ?? ''
 
   const formattedDate = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', {
     day: 'numeric', month: 'long', year: 'numeric',
