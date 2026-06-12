@@ -74,7 +74,7 @@ function IntroScreen({ page, pageIndex, totalPages, onBegin, progress, t }: {
       <ProgressBar value={progress} />
       <Logo />
 
-      <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 280, fontWeight: 900, color: '#1c1c1c', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
+      <div style={{ position: 'fixed', insetInlineEnd: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 280, fontWeight: 900, color: '#1c1c1c', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
         {page.number}
       </div>
 
@@ -235,7 +235,7 @@ function QuestionScreen({ page, pageIndex, qIndex, totalQ, globalQ, answers, onA
         </span>
       </div>
 
-      <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
+      <div style={{ position: 'fixed', insetInlineEnd: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
         {String(qIndex + 1).padStart(2, '0')}
       </div>
 
@@ -366,7 +366,7 @@ function NumbersScreen({ fields, realNumbers, onChange, onSubmit, error, t }: {
       <ProgressBar value={100} />
       <Logo />
 
-      <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
+      <div style={{ position: 'fixed', insetInlineEnd: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
         04
       </div>
 
