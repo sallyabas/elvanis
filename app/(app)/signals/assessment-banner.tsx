@@ -1,8 +1,10 @@
 'use client'
 
+import { useT } from '@/app/context/LanguageContext'
 import { useState, useEffect } from 'react'
 
 export default function AssessmentBanner({ hasAssessment }: { hasAssessment: boolean }) {
+  const t = useT()
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -26,10 +28,10 @@ export default function AssessmentBanner({ hasAssessment }: { hasAssessment: boo
     }}>
       <span style={{ fontSize: 18, flexShrink: 0 }}>✨</span>
       <p style={{ fontSize: 13, color: '#5B21B6', margin: 0, flex: 1 }}>
-        Take the business assessment to unlock your full AI readiness score and get personalised recommendations.
+        {t('assessment.banner_text')}
       </p>
       <a href="/assessment" style={{ fontSize: 13, color: '#fff', background: '#7C3AED', borderRadius: 8, padding: '6px 14px', textDecoration: 'none', fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap' }}>
-        Start — 10 min
+        {t('assessment.banner_cta')}
       </a>
       <button
         onClick={dismiss}

@@ -7,6 +7,7 @@ import ConnectedBanner from './connected-banner'
 import AssessmentBanner from './assessment-banner'
 import ConflictTrustButton from '@/components/conflict-trust-button'
 import { getSourceFrequency, SOURCE_CONFIG } from '@/lib/source-config'
+import { getT } from '@/lib/translations'
 
 export default async function SignalsPage({
   searchParams,
@@ -24,6 +25,9 @@ export default async function SignalsPage({
     .select('*')
     .eq('user_id', user.id)
     .maybeSingle()
+
+  const t    = getT((founder?.language ?? 'en') as 'en' | 'ar')
+  const lang = founder?.language ?? 'en'
 
   const { data: assessment } = await supabase
     .from('assessments')
@@ -93,7 +97,7 @@ export default async function SignalsPage({
     if (!prefMap.has(r.signal_type)) prefMap.set(r.signal_type, r)
   }
 
-  // ── Filter logic ──────────────────────────────────────────
+  // ── Filter logic ──
   const SEVERITY_FILTERS = ['critical', 'warning', 'working', 'resolved', 'conflicts']
   const isSourceFilter   = SOURCE_FILTERS.map(s => s.id).includes(filter ?? '')
   const isSeverityFilter = SEVERITY_FILTERS.includes(filter ?? '')
@@ -139,7 +143,7 @@ export default async function SignalsPage({
     .eq('status', 'dismissed')
     .order('updated_at', { ascending: false })
 
-    const { data: cooldownSetting } = await supabase
+  const { data: cooldownSetting } = await supabase
     .from('app_settings')
     .select('value')
     .eq('key', 'scan_cooldown_hours')
@@ -152,8 +156,8 @@ export default async function SignalsPage({
   const warning   = allAnalysed.filter(s => s.severity === 'warning').length
   const working   = allAnalysed.filter(s => s.status === 'acknowledged').length
   const conflicts = allAnalysed.filter(s => s.flags.some(f => f.type === 'conflict')).length
-  const isFirstScan = hasConnectedSources && total === 0
-  const isFreeTier  = !founder || founder.subscription_tier === 'free'
+  const isFirstScan      = hasConnectedSources && total === 0
+  const isFreeTier       = !founder || founder.subscription_tier === 'free'
   const subscriptionTier = founder?.subscription_tier ?? 'free'
 
   const daysUntilNextScan = (() => {
@@ -182,7 +186,9 @@ export default async function SignalsPage({
   const tooltipText = `${weeklyNavigatorSources} scan every 7 days for Navigator. ${monthlySources} scan every 30 days. Available once per week for Navigator.`
 
   const name = founder?.full_name?.split(' ')[0] ?? ''
-  const lang = founder?.language ?? 'en'
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? t('greeting.morning') : hour < 17 ? t('greeting.afternoon') : t('greeting.evening')
+
   const si = (signal: Record<string, unknown>) =>
     lang === 'ar' && signal.insight_summary_ar
       ? String(signal.insight_summary_ar)
@@ -191,6 +197,7 @@ export default async function SignalsPage({
     lang === 'ar' && signal.recommended_action_ar
       ? String(signal.recommended_action_ar)
       : String(signal.recommended_action ?? '')
+
   const severityColor = (s: string) => s === 'critical' ? '#DC2626' : s === 'warning' ? '#D97706' : '#6B7280'
   const severityBg    = (s: string) => s === 'critical' ? '#FEF2F2' : s === 'warning' ? '#FFFBEB' : '#F9FAFB'
   const dimensionIcon = (d: string) => ({ customer: '👥', team: '⚙️', marketing: '📣', revenue: '💰', product: '🎯', strategy: '🧭' }[d] ?? '📊')
@@ -213,23 +220,39 @@ export default async function SignalsPage({
     jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', manual: 'Assessment',
   }
 
+  const getSectionTitle = () => {
+    if (dimension && DIMENSION_LABELS[dimension]) return `${DIMENSION_LABELS[dimension]} ${t('signals.suffix')}`
+    if (filter === 'critical')   return `${t('signals.critical')} ${t('signals.suffix')}`
+    if (filter === 'warning')    return `${t('signals.warning')} ${t('signals.suffix')}`
+    if (filter === 'working')    return t('signals.needs_strategy')
+    if (filter === 'conflicts')  return t('signals.conflicts')
+    if (filter === 'ga4')        return `Google Analytics ${t('signals.suffix')}`
+    if (filter === 'trustpilot') return `Trustpilot ${t('signals.suffix')}`
+    if (filter === 'csv')        return `CSV Upload ${t('signals.suffix')}`
+    if (filter === 'jira')       return `Jira ${t('signals.suffix')}`
+    if (filter === 'shopify')    return `Shopify ${t('signals.suffix')}`
+    if (filter === 'intercom')   return `Intercom ${t('signals.suffix')}`
+    if (filter === 'manual')     return `Assessment ${t('signals.suffix')}`
+    return `${t('signals.all_active')} ${t('signals.suffix')}`
+  }
+
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px' }}>
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>
-            {name ? `${new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, ${name}` : 'Your Command Centre'}
+            {name ? `${greeting}, ${name}` : t('signals.your_command')}
           </h1>
           <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
-            {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            {new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
 
         <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
             <div>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>Diagnostic Signals</h1>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>{t('signals.title')}</h1>
               {connected && <ConnectedBanner connected={connected} />}
             </div>
             <ScanButton
@@ -249,12 +272,12 @@ export default async function SignalsPage({
           {/* ── Status filter cards ── */}
           <div className="signal-filter-cards">
             {[
-              { label: 'All Active',     value: '',         count: total,                color: '#111827', bg: '#fff',     border: '#E5E7EB' },
-              { label: 'Critical',       value: 'critical', count: critical,             color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
-              { label: 'Warning',        value: 'warning',  count: warning,              color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-              { label: 'Needs Strategy', value: 'working',  count: working,              color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE' },
-              { label: 'Archived',       value: 'resolved', count: resolved?.length ?? 0,color: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
-              { label: '⚠ Conflicts',   value: 'conflicts',count: conflicts,            color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
+              { label: t('signals.all_active'),     value: '',          count: total,                color: '#111827', bg: '#fff',     border: '#E5E7EB' },
+              { label: t('signals.critical'),        value: 'critical',  count: critical,             color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
+              { label: t('signals.warning'),         value: 'warning',   count: warning,              color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
+              { label: t('signals.needs_strategy'),  value: 'working',   count: working,              color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE' },
+              { label: t('signals.archived'),        value: 'resolved',  count: resolved?.length ?? 0,color: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
+              { label: t('signals.conflicts'),       value: 'conflicts', count: conflicts,            color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
             ].map(card => {
               const isSelected = filter === card.value || (!filter && card.value === '')
               const href = card.value
@@ -281,7 +304,7 @@ export default async function SignalsPage({
             {/* By Output */}
             <div style={{ marginBottom: 10 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.1em', marginBottom: 8 }}>
-                By Output
+                {t('signals.by_output')}
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
                 {[
@@ -319,10 +342,10 @@ export default async function SignalsPage({
             {/* By Source */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.1em', marginBottom: 8 }}>
-                By Source
+                {t('signals.by_source')}
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
-                  <a
+                <a
                   href={`/signals${dimension ? `?dimension=${dimension}` : ''}${isSeverityFilter ? `${dimension ? '&' : '?'}filter=${filter}` : ''}`}
                   style={{
                     padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
@@ -330,7 +353,7 @@ export default async function SignalsPage({
                     color: !isSourceFilter ? '#fff' : '#6B7280',
                     textDecoration: 'none',
                   }}>
-                  All sources
+                  {t('signals.all_sources')}
                 </a>
                 {SOURCE_FILTERS.map(src => {
                   const count = (dimension
@@ -357,7 +380,7 @@ export default async function SignalsPage({
             {/* Active filter pills */}
             {(dimension || isSourceFilter || isSeverityFilter) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' as const }}>
-                <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 600 }}>Active filters:</span>
+                <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 600 }}>{t('signals.active_filters')}</span>
                 {dimension && (
                   <a href={`/signals${isSeverityFilter ? `?filter=${filter}` : ''}`} style={{
                     padding: '4px 10px', background: '#EFF6FF', color: '#2563EB',
@@ -379,14 +402,14 @@ export default async function SignalsPage({
                     padding: '4px 10px', background: '#FEF3C7', color: '#92400E',
                     borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none',
                   }}>
-                    {filter === 'critical'  ? '🔴 Critical'     :
-                     filter === 'warning'   ? '🟡 Warning'      :
-                     filter === 'working'   ? '🔵 In Progress'  :
-                     filter === 'conflicts' ? '⚠️ Conflicts'    : filter} ✕
+                    {filter === 'critical'  ? `🔴 ${t('signals.critical')}`    :
+                     filter === 'warning'   ? `🟡 ${t('signals.warning')}`     :
+                     filter === 'working'   ? `🔵 ${t('signals.needs_strategy')}` :
+                     filter === 'conflicts' ? `⚠️ ${t('signals.conflicts')}`   : filter} ✕
                   </a>
                 )}
                 <a href="/signals" style={{ fontSize: 12, color: '#9CA3AF', textDecoration: 'none', fontWeight: 600 }}>
-                  Clear all
+                  {t('signals.clear_all')}
                 </a>
               </div>
             )}
@@ -395,7 +418,7 @@ export default async function SignalsPage({
           {/* ── Scan frequency strip ── */}
           {hasConnectedSources && sources && sources.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB', marginBottom: 16, flexWrap: 'wrap' as const }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#6B7280' }}>🔄 Next scan:</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#6B7280' }}>{t('signals.next_scan')}</span>
               {sources.filter(s => s.source_type !== 'csv' && s.last_synced_at).map(s => {
                 const freq = getSourceFrequency(s.source_type, subscriptionTier, s.scan_frequency_days ?? null)
                 const daysSince = (Date.now() - new Date(s.last_synced_at!).getTime()) / (24 * 60 * 60 * 1000)
@@ -403,35 +426,21 @@ export default async function SignalsPage({
                 const label: Record<string, string> = { ga4: 'GA4', jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', trustpilot: 'Trustpilot' }
                 return (
                   <span key={s.id} style={{ fontSize: 12, color: daysLeft === 0 ? '#059669' : '#374151', fontWeight: daysLeft === 0 ? 700 : 500, background: daysLeft === 0 ? '#ECFDF5' : '#fff', border: '1px solid #E5E7EB', borderRadius: 20, padding: '2px 10px' }}>
-                    {label[s.source_type] ?? s.source_type}: {daysLeft === 0 ? 'Ready now ✓' : `in ${daysLeft}d`}
+                    {label[s.source_type] ?? s.source_type}: {daysLeft === 0 ? `${t('common.ready_now')} ✓` : `in ${daysLeft}d`}
                   </span>
                 )
               })}
               {!isFreeTier && daysUntilNextScan === 0 && (
-                <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 'auto' }}>Run scan to refresh →</span>
+                <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 'auto' }}>{t('signals.run_refresh')}</span>
               )}
             </div>
           )}
-
 
           {/* ── Section title ── */}
           {filter !== 'resolved' && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: 0 }}>
-                {dimension && DIMENSION_LABELS[dimension]
-                  ? `${DIMENSION_LABELS[dimension]} Signals`
-                  : filter === 'critical'   ? 'Critical Signals'
-                  : filter === 'warning'    ? 'Warning Signals'
-                  : filter === 'working'    ? 'Needs Strategy'
-                  : filter === 'ga4'        ? 'Google Analytics Signals'
-                  : filter === 'trustpilot' ? 'Trustpilot Signals'
-                  : filter === 'csv'        ? 'CSV Upload Signals'
-                  : filter === 'jira'       ? 'Jira Signals'
-                  : filter === 'shopify'    ? 'Shopify Signals'
-                  : filter === 'intercom'   ? 'Intercom Signals'
-                  : filter === 'manual'     ? 'Assessment Signals'
-                  : filter === 'conflicts'  ? 'Conflicting Signals'
-                  : 'Active Signals'}
+                {getSectionTitle()}
               </h2>
             </div>
           )}
@@ -440,7 +449,7 @@ export default async function SignalsPage({
           {signals.some(s => s.source === 'manual') && !sources?.length && (
             <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: '14px 20px', marginBottom: 20 }}>
               <p style={{ fontSize: 13, color: '#1D4ED8', margin: 0 }}>
-                📋 These signals are based on your assessment answers. <a href="/connect" style={{ color: '#2563EB', fontWeight: 600 }}>Connect tools</a> for higher confidence diagnosis from real data.
+                📋 {t('signals.assessment_only')} <a href="/connect" style={{ color: '#2563EB', fontWeight: 600 }}>{t('common.connect_tools')}</a> {t('signals.connect_higher')}
               </p>
             </div>
           )}
@@ -450,23 +459,24 @@ export default async function SignalsPage({
             <div style={{ textAlign: 'center', padding: '48px', background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', marginBottom: 24 }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>{connected ? '🔍' : '✅'}</div>
               <p style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>
-                {connected ? 'Scanning your data...' : filter ? 'No signals in this category' : 'No active signals'}
+                {connected ? t('signals.scanning_data') : filter ? t('signals.no_category') : t('signals.no_active')}
               </p>
               <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>
-                {connected ? 'Refresh in a few seconds to see your first signals' :
-                 filter ? 'Try a different filter' :
-                 hasConnectedSources ? 'Click Run new scan to check latest data' :
-                 hasAssessment ? 'Connect a tool to get live signals from your real data' : 'Take the assessment or connect a tool to get your first signals'}
+                {connected           ? t('signals.refresh_seconds')    :
+                 filter              ? t('signals.try_filter')          :
+                 hasConnectedSources ? t('signals.run_new_scan')        :
+                 hasAssessment       ? t('signals.connect_live')        :
+                                       t('signals.take_or_connect')}
               </p>
               {!connected && !hasConnectedSources && (
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
                   {!hasAssessment && (
                     <a href="/assessment" style={{ display: 'inline-block', padding: '10px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-                      Take assessment →
+                      {t('assessment.start')}
                     </a>
                   )}
                   <a href="/connect" style={{ display: 'inline-block', padding: '10px 24px', background: hasAssessment ? '#2563EB' : '#F9FAFB', color: hasAssessment ? '#fff' : '#374151', border: hasAssessment ? 'none' : '1px solid #E5E7EB', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-                    Connect a tool →
+                    {t('common.connect_tools')}
                   </a>
                 </div>
               )}
@@ -476,8 +486,8 @@ export default async function SignalsPage({
           {/* ── Signal cards ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40 }}>
             {signals.filter(s => String(s.founder_feedback ?? '') !== 'missed_the_mark').map(signal => {
-              const confirmFlag    = signal.flags.find(f => f.type === 'confirmed')
-              const conflictFlag   = signal.flags.find(f => f.type === 'conflict')
+              const confirmFlag      = signal.flags.find(f => f.type === 'confirmed')
+              const conflictFlag     = signal.flags.find(f => f.type === 'conflict')
               const conflictResolved = !!conflictFlag && !!prefMap.get(signal.signal_type)
               const borderColor = conflictFlag
                 ? (conflictResolved ? '#A7F3D0' : '#FDE68A')
@@ -512,46 +522,46 @@ export default async function SignalsPage({
                         {sourceLabel[signal.source] ?? signal.source}
                       </span>
                       <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-                        {Math.round((signal.confidence_score ?? 0) * 100)}% confidence
+                        {Math.round((signal.confidence_score ?? 0) * 100)}% {t('signals.confidence')}
                       </span>
                       {confirmFlag && (
                         <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600 }}>
-                          ✓ Confirmed by {sourceLabelShort[confirmFlag.bySource] ?? confirmFlag.bySource}
+                          ✓ {t('signals.confirmed_by')} {sourceLabelShort[confirmFlag.bySource] ?? confirmFlag.bySource}
                         </span>
                       )}
                       {conflictFlag && !prefMap.get(signal.signal_type) && (
                         <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FFFBEB', color: '#D97706', fontWeight: 600 }}>
-                          ⚠ Conflicts with {sourceLabelShort[conflictFlag.bySource] ?? conflictFlag.bySource}
+                          ⚠ {t('signals.conflicts_with')} {sourceLabelShort[conflictFlag.bySource] ?? conflictFlag.bySource}
                         </span>
                       )}
                       {signal.status === 'acknowledged' && (
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#EFF6FF', color: '#2563EB', fontWeight: 600 }}>🔧 In Progress</span>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#EFF6FF', color: '#2563EB', fontWeight: 600 }}>{t('signals.in_progress')}</span>
                       )}
                       {signal.trend === 'improving' && (
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600 }}>↑ Improving</span>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600 }}>↑ {t('common.improving')}</span>
                       )}
                       {signal.trend === 'worsening' && (
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FEF2F2', color: '#DC2626', fontWeight: 600 }}>↓ Worsening</span>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FEF2F2', color: '#DC2626', fontWeight: 600 }}>↓ {t('common.worsening')}</span>
                       )}
                       {signal.trend === 'unchanged' && signal.status === 'acknowledged' && (
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FFFBEB', color: '#D97706', fontWeight: 600 }}>→ No change yet</span>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FFFBEB', color: '#D97706', fontWeight: 600 }}>{t('signals.no_change')}</span>
                       )}
                       {String(signal.founder_feedback ?? '') === 'accurate' && (
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600 }}>✓ Signal confirmed</span>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600 }}>{t('signals.signal_confirmed')}</span>
                       )}
                     </div>
                     <span style={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
-                      {new Date(signal.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      {new Date(signal.created_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
 
                   {conflictFlag && (() => {
                     const pref = prefMap.get(signal.signal_type)
-                    const currentValue    = signal.value !== null && signal.value !== undefined ? Number(signal.value) : null
+                    const currentValue     = signal.value !== null && signal.value !== undefined ? Number(signal.value) : null
                     const conflictingValue = conflictingSignal?.value !== null && conflictingSignal?.value !== undefined ? Number(conflictingSignal.value) : null
-                    const initialChoice   = pref?.trusted_source ?? null
-                    const isDeprioritised = !!pref && pref.trusted_source !== signal.source
-                    const trustedLabel    = pref ? (sourceLabel[pref.trusted_source] ?? pref.trusted_source) : undefined
+                    const initialChoice    = pref?.trusted_source ?? null
+                    const isDeprioritised  = !!pref && pref.trusted_source !== signal.source
+                    const trustedLabel     = pref ? (sourceLabel[pref.trusted_source] ?? pref.trusted_source) : undefined
                     return (
                       <ConflictTrustButton
                         signalType={signal.signal_type}
@@ -568,11 +578,11 @@ export default async function SignalsPage({
                   })()}
 
                   <p style={{ fontSize: 15, color: '#111827', fontWeight: 600, marginBottom: 10, lineHeight: 1.5 }}>
-                  {si(signal)}
+                    {si(signal)}
                   </p>
 
                   <div style={{ background: '#EFF6FF', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#2563EB' }}>Action: </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#2563EB' }}>{t('signals.action')} </span>
                     <span style={{ fontSize: 13, color: '#1D4ED8', lineHeight: 1.5 }}>{ra(signal)}</span>
                   </div>
 
@@ -586,24 +596,24 @@ export default async function SignalsPage({
                     {signal.status === 'new' && (
                       <a href={`/api/signals/${signal.id}/acknowledge?return=${filter ?? ''}`}
                         style={{ padding: '8px 18px', background: '#2563EB', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                        I'm working on this →
+                        {t('signals.working')}
                       </a>
                     )}
                     {signal.status === 'acknowledged' && (
                       <a href={`/api/signals/${signal.id}/resolve?return=${filter ?? ''}`}
                         style={{ padding: '8px 18px', background: '#059669', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                        Mark as fixed ✓
+                        {t('signals.mark_fixed')}
                       </a>
                     )}
                     {!signal.founder_feedback && (
                       <>
                         <a href={`/api/signals/${signal.id}/feedback?type=accurate&return=${filter ?? ''}`}
                           style={{ padding: '8px 18px', background: '#ECFDF5', color: '#059669', borderRadius: 8, fontSize: 13, textDecoration: 'none' }}>
-                          ✓ Signal is correct
+                          {t('signals.correct')}
                         </a>
                         <a href={`/api/signals/${signal.id}/feedback?type=missed&return=${filter ?? ''}`}
                           style={{ padding: '8px 18px', background: '#FEF2F2', color: '#DC2626', borderRadius: 8, fontSize: 13, textDecoration: 'none' }}>
-                          ✗ Does not apply to us
+                          {t('signals.not_applicable')}
                         </a>
                       </>
                     )}
@@ -617,14 +627,14 @@ export default async function SignalsPage({
           {notApplicable && notApplicable.length > 0 && (
             <div style={{ marginBottom: 32 }}>
               <h3 style={{ fontSize: 13, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
-                Not applicable to us ({notApplicable.length}) — improving model accuracy
+                {t('signals.not_applicable_list').replace('{count}', String(notApplicable.length))}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {notApplicable.map(signal => (
                   <div key={signal.id} style={{ background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB', padding: '14px 20px', opacity: 0.6, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span>{dimensionIcon(String(signal.dimension ?? ''))}</span>
                     <p style={{ fontSize: 13, color: '#6B7280', margin: 0, flex: 1 }}>{si(signal)}</p>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, flexShrink: 0 }}>✗ Not applicable</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, flexShrink: 0 }}>✗ {t('signals.not_applicable')}</span>
                   </div>
                 ))}
               </div>
@@ -635,7 +645,7 @@ export default async function SignalsPage({
           {resolved && resolved.length > 0 && (
             <div style={{ marginBottom: 32 }}>
               <h3 style={{ fontSize: 13, fontWeight: 600, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
-                Archived — awaiting next scan ({resolved.length})
+                {t('signals.archived_list').replace('{count}', String(resolved.length))}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {resolved.map(signal => (
@@ -644,11 +654,11 @@ export default async function SignalsPage({
                       <span>✅</span>
                       <div>
                         <p style={{ fontSize: 14, color: '#065F46', fontWeight: 600, margin: '0 0 2px' }}>{si(signal)}</p>
-                        <p style={{ fontSize: 12, color: '#059669', margin: 0 }}>Marked as fixed · Elvanis will verify on next scan</p>
+                        <p style={{ fontSize: 12, color: '#059669', margin: 0 }}>{t('signals.marked_fixed')}</p>
                       </div>
                     </div>
                     <span style={{ fontSize: 12, color: '#059669', flexShrink: 0 }}>
-                      {new Date(signal.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      {new Date(signal.updated_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                 ))}
@@ -660,7 +670,7 @@ export default async function SignalsPage({
           {deprioritised && deprioritised.length > 0 && (
             <div>
               <h3 style={{ fontSize: 13, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
-                Not a priority right now ({deprioritised.length})
+                {t('signals.deprioritised_list').replace('{count}', String(deprioritised.length))}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {deprioritised.map(signal => (
@@ -670,7 +680,7 @@ export default async function SignalsPage({
                       <p style={{ fontSize: 14, color: '#374151', margin: 0 }}>{si(signal)}</p>
                     </div>
                     <a href={`/api/signals/${signal.id}/acknowledge`} style={{ fontSize: 12, color: '#2563EB', textDecoration: 'none', flexShrink: 0, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                      Move to active
+                      {t('signals.move_active')}
                     </a>
                   </div>
                 ))}

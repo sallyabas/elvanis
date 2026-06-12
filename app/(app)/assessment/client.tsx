@@ -1,8 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { useT } from '@/app/context/LanguageContext'
+import { OPTION_MAP } from '@/lib/assessment-answer-map'
+import {
+  FOUNDER_STAGE, EXECUTION_BLOCKER, ANALYTICS_MATURITY,
+  PMF, ICP_TARGETING, RUNWAY,
+} from '@/lib/assessment-ids'
 
 type Props = {
   founderId: string
@@ -17,119 +23,19 @@ type Props = {
 type UIState = 'intro' | 'question' | 'flash' | 'numbers' | 'submitting'
 
 // ── Color palette ─────────────────────────────────────────────
-const BG        = '#0F172A'
-const BG_FLASH  = '#090E1A'
-const BG_CARD   = 'rgba(255,255,255,0.05)'
+const BG          = '#0F172A'
+const BG_FLASH    = '#090E1A'
+const BG_CARD     = 'rgba(255,255,255,0.05)'
 const BG_SELECTED = 'rgba(59,130,246,0.15)'
-const BORDER    = 'rgba(255,255,255,0.1)'
+const BORDER      = 'rgba(255,255,255,0.1)'
 const BORDER_HOVER = 'rgba(255,255,255,0.25)'
-const BORDER_SEL = '#3B82F6'
-const ACCENT    = '#3B82F6'
-const TEXT      = '#FFFFFF'
-const TEXT_SUB  = '#AAAAAA'
-const TEXT_MUTED = '#8899AA'
-const TEXT_HINT = '#667788'
-const NUM_BG    = 'rgba(255,255,255,0.08)'
-
-// ── 4-page structure — original questions preserved ───────────
-const PAGES = [
-  {
-    number: '01',
-    title: 'Your Business Context',
-    objective: 'Establish your structural baseline before diagnosing any problem.',
-    indicators: 'Stage · Model · Investment · Team · Tech stack · Analytics maturity · Execution blocker',
-    time: '2 min',
-    questions: [
-      { id: 'founder_stage',      section: 'Context',  label: 'Where is your business right now?',                                                              why: 'This determines which signals matter most for your stage.',                type: 'choice' as const, options: ['We have a product and customers', 'We are early stage or pre-product'] },
-      { id: 'business_model',     section: 'Context',  label: 'What is your primary business model?',                                                           why: 'Revenue model shapes every diagnostic benchmark we use.',                 type: 'choice' as const, options: ['SaaS / Subscription', 'E-commerce', 'Marketplace', 'Services / Agency', 'D2C / Consumer brand', 'Other'] },
-      { id: 'investment_status',  section: 'Context',  label: 'What is your investment situation?',                                                             why: 'Runway constraints change which problems are urgent vs important.',        type: 'choice' as const, options: ['Bootstrapped — self-funded', 'Pre-seed or angel funded', 'Seed funded', 'Series A or above', 'Actively fundraising right now', 'Not applicable — established SME'] },
-      { id: 'team_size',          section: 'Context',  label: 'How many people work in your business full time?',                                               why: 'Team size determines realistic execution capacity for each fix.',          type: 'choice' as const, options: ['Just me', '2–5 people', '6–15 people', '16–50 people', '50+ people'] },
-      { id: 'technical_capacity', section: 'Context',  label: 'Do you have technical or engineering capacity in-house?',                                        why: 'This shapes which solutions are immediately actionable.',                  type: 'choice' as const, options: ['Yes — strong technical team', 'Yes — limited technical capacity', 'No — we outsource development', 'No — non-technical business'] },
-      { id: 'analytics_maturity', section: 'Context',  label: 'Do you use analytics tools to track performance?',                                               why: 'We use this to calculate your data infrastructure signal.',                type: 'choice' as const, options: ['Yes — I use tools actively and trust the data', 'Yes — I have tools but rarely look at them', 'Partially — some basic tracking', 'No — I run on gut feel', 'No — too early stage'] },
-      { id: 'execution_blocker',  section: 'Context',  label: 'When you identify a problem, what usually stops you acting on it?',                             why: 'The execution gap is often more damaging than the problem itself.',        type: 'choice' as const, options: ['Not enough time', 'Team cannot execute', 'Not sure what the right solution is', 'Avoiding the decision', 'No budget or resources', 'Nothing — I act quickly'] },
-    ],
-  },
-  {
-    number: '02',
-    title: 'Your Growth Blockers',
-    objective: 'Expose demand constraints, pipeline leakage, and distribution friction.',
-    indicators: 'Revenue trends · PMF signals · Pricing confidence · ICP clarity · Funnel drop-off',
-    time: '3 min',
-    questions: [
-      { id: 'biggest_problem_now', section: 'Context',  label: 'What is the single biggest problem hurting your business right now?',                          why: 'We cross-reference this with your data signals for root cause analysis.',  type: 'text' as const },
-      { id: 'runway',              section: 'Revenue',  label: 'How many months of runway do you have?',                                                        why: 'Runway determines urgency level across all recommendations.',               type: 'choice' as const, options: ['More than 18 months', '12–18 months', '6–12 months', '3–6 months', 'Less than 3 months', 'Not applicable — profitable'] },
-      { id: 'win_reason',          section: 'Revenue',  label: 'When you win a new customer, what is the main reason they chose you?',                         why: 'Understanding your win reason reveals your true competitive moat.',          type: 'text' as const },
-      { id: 'pricing_confidence',  section: 'Revenue',  label: 'How confident are you in your pricing?',                                                        why: 'We use this to calculate your pricing signal and benchmark you against peers.', type: 'scale' as const },
-      { id: 'financial_concern',   section: 'Revenue',  label: 'What is your biggest financial concern right now?',                                             why: 'Financial pressure shapes which growth levers to pull first.',               type: 'text' as const },
-      { id: 'pmf_reaction',        section: 'Product',  label: 'If your product disappeared tomorrow, how would customers react?',                             why: 'The single most predictive PMF signal we measure.',                         type: 'choice' as const, options: ['Devastated — no real alternative', 'Disappointed — but would find something else', 'Indifferent — would move on quickly', 'Not sure — have not asked them', 'No customers yet'] },
-      { id: 'icp_alignment',       section: 'Product',  label: 'Who gets the most value from your product?',                                                   why: 'ICP clarity is the highest-leverage growth lever for most founders.',        type: 'text' as const },
-      { id: 'icp_targeting',       section: 'Product',  label: 'Is that who you are currently targeting and acquiring?',                                       why: 'ICP drift is the silent killer of growth efficiency.',                       type: 'choice' as const, options: ['Yes — perfectly aligned', 'Mostly — some misalignment', 'No — we target a different segment', 'Not sure'] },
-      { id: 'ideal_customer',      section: 'Marketing',label: 'Describe your ideal customer in one sentence — who they are and what pain you solve.',         why: 'Precision here predicts CAC efficiency and retention.',                      type: 'text' as const },
-      { id: 'already_tried',       section: 'Context',  label: 'What have you already tried to fix your main problem?',                                        why: 'We exclude dead-end recommendations based on prior attempts.',               type: 'text' as const },
-      { id: 'target_90_days',      section: 'Context',  label: 'What is the most important thing to achieve in the next 90 days — and what happens if you do not?', why: 'We weight your signal priorities against this 90-day horizon.',         type: 'text' as const },
-    ],
-  },
-  {
-    number: '03',
-    title: 'Your Team & Strategy',
-    objective: 'Measure execution velocity, internal alignment, and strategic clarity.',
-    indicators: 'Team alignment · Bug process · Churn drivers · Referrals · Strategic vision · Process maturity',
-    time: '3 min',
-    questions: [
-      { id: 'team_alignment',    section: 'Team',     label: 'How aligned are your tech and business teams on priorities?',                                     why: 'Misalignment is the #1 predictor of delivery velocity collapse.',            type: 'choice' as const, options: ['Fully aligned', 'Mostly aligned', 'Partly misaligned', 'Seriously misaligned — frequent conflict', 'Not applicable — solo or single team'] },
-      { id: 'bug_process',       section: 'Team',     label: 'When bugs reach customers — how does your team find out and how fast do you fix them?',           why: 'Bug response time is a leading indicator of product health score.',          type: 'text' as const },
-      { id: 'churn_reason',      section: 'Customer', label: 'When customers cancel or stop buying, what reason do they most commonly give?',                   why: 'Exit reasons reveal the gap between your promise and delivery.',              type: 'text' as const },
-      { id: 'customer_complaint',section: 'Customer', label: 'What do your customers complain about most?',                                                     why: 'Complaint patterns predict your next churn spike before data shows it.',      type: 'text' as const },
-      { id: 'referral_frequency',section: 'Customer', label: 'How often do customers refer others without being asked?',                                        why: 'Organic referral rate is your most honest NPS proxy.',                       type: 'choice' as const, options: ['Regularly', 'Occasionally', 'Rarely', 'Never', 'Too early to measure'] },
-      { id: 'avoided_decision',  section: 'Strategy', label: 'What is the one decision you have been avoiding that would change the business if you made it?',  why: 'Avoided decisions are the most common source of strategic drift.',            type: 'text' as const },
-      { id: 'team_focus',        section: 'Strategy', label: 'Is your team working on the right things — or busy but not moving the needle?',                   why: 'We use this to weight your delivery efficiency signal.',                      type: 'choice' as const, options: ['Working on the right things', 'Mostly right', 'Busy but unclear impact', 'Clearly off track'] },
-      { id: 'success_12m',       section: 'Strategy', label: 'What does success look like in 12 months — be specific with a number?',                          why: 'A concrete number anchors every priority recommendation we make.',            type: 'text' as const },
-      { id: 'process_maturity',  section: 'Strategy', label: 'Do you have documented processes — and does the team actually follow them?',                      why: 'Process gaps predict operational fragility as you scale.',                    type: 'choice' as const, options: ['Documented and followed', 'Partially documented', 'Documented but not followed', 'Not documented', 'Too early'] },
-    ],
-  },
-]
-
-const REAL_NUMBERS = [
-  { id: 'num_mrr',        label: 'Monthly Recurring Revenue (MRR)', placeholder: 'e.g. £12,000',  group: 'Revenue' },
-  { id: 'num_mrr_growth', label: 'MRR growth last month',           placeholder: 'e.g. +8% or -2%', group: 'Revenue' },
-  { id: 'num_cac',        label: 'Customer Acquisition Cost (CAC)', placeholder: 'e.g. £450',      group: 'Revenue' },
-  { id: 'num_ltv',        label: 'Customer Lifetime Value (LTV)',   placeholder: 'e.g. £2,200',    group: 'Revenue' },
-  { id: 'num_churn',      label: 'Monthly churn rate',              placeholder: 'e.g. 4.5%',      group: 'Customer' },
-  { id: 'num_nps',        label: 'NPS score (if measured)',         placeholder: 'e.g. 42',        group: 'Customer' },
-]
-
-// ── Dynamic insight engine ────────────────────────────────────
-function getInsight(fromPage: number, answers: Record<string, string>): string {
-  if (fromPage === 0) {
-    const stage   = answers.founder_stage      ?? ''
-    const blocker = answers.execution_blocker  ?? ''
-    const data    = answers.analytics_maturity ?? ''
-    if (stage.includes('early') && blocker.includes('Team'))
-      return 'Baseline calculated. Your stage signals are consistent — but human capital velocity is the primary execution bottleneck. Next: isolating where your growth vectors are leaking.'
-    if (blocker.includes('Not sure') || blocker.includes('Avoiding'))
-      return 'Baseline calculated. Decision paralysis is your most expensive operating cost right now. Next: mapping the commercial signals behind your biggest blocker.'
-    if (data.includes('gut feel') || data.includes('rarely'))
-      return 'Baseline calculated. Scaling on incomplete data infrastructure is a high-risk pattern at every stage. Next: finding where that blind spot is costing you the most.'
-    if (stage.includes('product and customers') && blocker.includes('Nothing'))
-      return 'Baseline calculated. Strong execution foundation detected. Next: pressure-testing your growth architecture for hidden constraints.'
-    return 'Baseline calculated. Context profiled. Next: mapping your commercial growth vectors and revenue signals.'
-  }
-  if (fromPage === 1) {
-    const pmf    = answers.pmf_reaction  ?? ''
-    const icp    = answers.icp_targeting ?? ''
-    const runway = answers.runway        ?? ''
-    if (pmf.includes('Indifferent') || pmf.includes('Not sure'))
-      return 'Growth vectors mapped. Weak product-market fit signal detected — this is upstream of every other problem. Next: examining whether your team can course-correct before runway pressure forces the decision.'
-    if (icp.includes('No — we target') || icp.includes('Not sure'))
-      return 'Growth vectors mapped. ICP drift confirmed — you are acquiring the wrong customers at scale. Next: assessing whether your team has the alignment to fix this.'
-    if (runway.includes('Less than 3') || runway.includes('3–6'))
-      return 'Growth vectors mapped. Critical runway constraint detected. Every recommendation will be weighted for speed of impact, not long-term optimisation.'
-    if (pmf.includes('Devastated'))
-      return 'Growth vectors mapped. Strong PMF signal confirmed. Next: diagnosing whether your team and operational structure can scale what is working.'
-    return 'Growth vectors mapped. Revenue architecture profiled. Next: assessing your execution capacity and strategic alignment.'
-  }
-  return 'Organisational vectors mapped. Team and strategy profiled. Final step: calibrating your score with hard quantitative data.'
-}
+const BORDER_SEL  = '#3B82F6'
+const ACCENT      = '#3B82F6'
+const TEXT        = '#FFFFFF'
+const TEXT_SUB    = '#AAAAAA'
+const TEXT_MUTED  = '#8899AA'
+const TEXT_HINT   = '#667788'
+const NUM_BG      = 'rgba(255,255,255,0.08)'
 
 // ── Progress bar ──────────────────────────────────────────────
 function ProgressBar({ value }: { value: number }) {
@@ -150,8 +56,10 @@ function Logo() {
 }
 
 // ── INTRO STATE ───────────────────────────────────────────────
-function IntroScreen({ page, pageIndex, onBegin, progress }: {
-  page: typeof PAGES[0]; pageIndex: number; onBegin: () => void; progress: number
+function IntroScreen({ page, pageIndex, totalPages, onBegin, progress, t }: {
+  page: { number: string; title: string; objective: string; indicators: string; time: string; questions: unknown[] }
+  pageIndex: number; totalPages: number; onBegin: () => void; progress: number
+  t: ReturnType<typeof useT>
 }) {
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -166,77 +74,49 @@ function IntroScreen({ page, pageIndex, onBegin, progress }: {
       <ProgressBar value={progress} />
       <Logo />
 
-      {/* Large faded chapter number */}
-      <div style={{
-        position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)',
-        fontSize: 280, fontWeight: 900, color: '#1c1c1c', lineHeight: 1,
-        userSelect: 'none', pointerEvents: 'none', zIndex: 0,
-      }}>
+      <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 280, fontWeight: 900, color: '#1c1c1c', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
         {page.number}
       </div>
 
-      <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '80px 40px', position: 'relative', zIndex: 10,
-      }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 40px', position: 'relative', zIndex: 10 }}>
         <div style={{ maxWidth: 620, width: '100%' }}>
-
-          {/* Phase meta */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 36 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Phase {page.number}
+              {t('assessment.phase_label')} {page.number}
             </span>
             <span style={{ width: 1, height: 14, background: '#2a2a2a' }} />
-            <span style={{ fontSize: 12, color: TEXT_MUTED }}>{page.questions.length} questions</span>
+            <span style={{ fontSize: 12, color: TEXT_MUTED }}>{page.questions.length} {t('assessment.questions_count')}</span>
             <span style={{ width: 1, height: 14, background: '#2a2a2a' }} />
             <span style={{ fontSize: 12, color: TEXT_MUTED }}>{page.time}</span>
           </div>
 
-          {/* Title */}
           <h1 style={{ fontSize: 52, fontWeight: 900, color: TEXT, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1.5px', margin: '0 0 20px' }}>
             {page.title}
           </h1>
-
-          {/* Objective */}
           <p style={{ fontSize: 17, color: TEXT_SUB, lineHeight: 1.7, marginBottom: 10, margin: '0 0 10px' }}>
             {page.objective}
           </p>
-
-          {/* Indicators */}
           <p style={{ fontSize: 13, color: TEXT_HINT, letterSpacing: '0.02em', marginBottom: 52, margin: '0 0 52px' }}>
             {page.indicators}
           </p>
 
-          {/* Begin button */}
           <button
             onClick={onBegin}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 14,
-              padding: '14px 28px', background: 'transparent',
-              border: '1px solid #333', borderRadius: 8,
-              color: '#BBBBBB', fontSize: 14, fontWeight: 500,
-              cursor: 'pointer', fontFamily: 'inherit',
-              transition: 'all 0.2s',
-            }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 14, padding: '14px 28px', background: 'transparent', border: '1px solid #333', borderRadius: 8, color: '#BBBBBB', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = TEXT }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.color = '#BBBBBB' }}
           >
-            Initiate phase {page.number}
+            {t('assessment.initiate_phase')} {page.number}
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <kbd style={{ fontSize: 11, color: '#777', background: '#1e1e1e', padding: '2px 8px', borderRadius: 4, border: '1px solid #2e2e2e' }}>Space</kbd>
-              <span style={{ fontSize: 11, color: '#444' }}>or</span>
-              <kbd style={{ fontSize: 11, color: '#777', background: '#1e1e1e', padding: '2px 8px', borderRadius: 4, border: '1px solid #2e2e2e' }}>Enter</kbd>
+              <kbd style={{ fontSize: 11, color: '#777', background: '#1e1e1e', padding: '2px 8px', borderRadius: 4, border: '1px solid #2e2e2e' }}>{t('assessment.key_space')}</kbd>
+              <span style={{ fontSize: 11, color: '#444' }}>{t('assessment.key_or')}</span>
+              <kbd style={{ fontSize: 11, color: '#777', background: '#1e1e1e', padding: '2px 8px', borderRadius: 4, border: '1px solid #2e2e2e' }}>{t('assessment.key_enter')}</kbd>
             </span>
           </button>
 
-          {/* Page dots */}
           <div style={{ display: 'flex', gap: 6, marginTop: 48 }}>
-            {PAGES.map((_, i) => (
-              <div key={i} style={{
-                width: i === pageIndex ? 22 : 6, height: 6, borderRadius: 3,
-                background: i === pageIndex ? ACCENT : '#222',
-                transition: 'all 0.3s',
-              }} />
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <div key={i} style={{ width: i === pageIndex ? 22 : 6, height: 6, borderRadius: 3, background: i === pageIndex ? ACCENT : '#222', transition: 'all 0.3s' }} />
             ))}
           </div>
         </div>
@@ -246,7 +126,10 @@ function IntroScreen({ page, pageIndex, onBegin, progress }: {
 }
 
 // ── FLASH STATE ───────────────────────────────────────────────
-function FlashScreen({ insight, onDone, progress }: { insight: string; onDone: () => void; progress: number }) {
+function FlashScreen({ insight, onDone, progress, t }: {
+  insight: string; onDone: () => void; progress: number
+  t: ReturnType<typeof useT>
+}) {
   const [phase, setPhase] = useState<'loading' | 'insight'>('loading')
   const [opacity, setOpacity] = useState(1)
 
@@ -258,36 +141,28 @@ function FlashScreen({ insight, onDone, progress }: { insight: string; onDone: (
   }, [onDone])
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: BG_FLASH,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: 60, zIndex: 300, opacity, transition: 'opacity 0.4s ease',
-      fontFamily: 'Inter, -apple-system, sans-serif',
-    }}>
+    <div style={{ position: 'fixed', inset: 0, background: BG_FLASH, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, zIndex: 300, opacity, transition: 'opacity 0.4s ease', fontFamily: 'Inter, -apple-system, sans-serif' }}>
       <ProgressBar value={progress} />
-
       {phase === 'loading' && (
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 220, height: 1, background: '#1a1a1a', margin: '0 auto 20px', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: ACCENT, animation: 'loadbar 1.1s ease-in-out forwards' }} />
           </div>
           <p style={{ fontSize: 10, fontWeight: 700, color: '#3a3a3a', letterSpacing: '0.28em', textTransform: 'uppercase', margin: 0 }}>
-            RUNNING METRIC PROFILING
+            {t('assessment.running_profiling')}
           </p>
         </div>
       )}
-
       {phase === 'insight' && (
         <div style={{ maxWidth: 580, textAlign: 'center', animation: 'fadeUp 0.5s ease forwards' }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: ACCENT, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 28 }}>
-            ⚡ ELVANIS INSIGHT
+            {t('assessment.insight_label')}
           </p>
           <p style={{ fontSize: 21, fontWeight: 400, color: TEXT, lineHeight: 1.8, margin: 0, fontStyle: 'italic' }}>
             "{insight}"
           </p>
         </div>
       )}
-
       <style>{`
         @keyframes loadbar { from { width: 0 } to { width: 100% } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: translateY(0) } }
@@ -297,18 +172,18 @@ function FlashScreen({ insight, onDone, progress }: { insight: string; onDone: (
 }
 
 // ── QUESTION STATE ────────────────────────────────────────────
-function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance, onBack, progress }: {
-  page: typeof PAGES[0]; pageIndex: number; qIndex: number
+function QuestionScreen({ page, pageIndex, qIndex, totalQ, globalQ, answers, onAnswer, onAdvance, onBack, progress, t }: {
+  page: { number: string; questions: ReadonlyArray<{ id: string; section: string; label: string; why: string; type: 'choice' | 'text' | 'scale'; options?: ReadonlyArray<{ id: string; labelKey: string }> }> }
+  pageIndex: number; qIndex: number; totalQ: number; globalQ: number
   answers: Record<string, string>
   onAnswer: (id: string, val: string) => void
   onAdvance: () => void; onBack: () => void; progress: number
+  t: ReturnType<typeof useT>
 }) {
   const q = page.questions[qIndex]
   if (!q) return null
 
-  const answer  = answers[q.id] ?? ''
-  const globalQ = PAGES.slice(0, pageIndex).reduce((s, p) => s + p.questions.length, 0) + qIndex + 1
-  const totalQ  = PAGES.reduce((s, p) => s + p.questions.length, 0)
+  const answer = answers[q.id] ?? ''
   const [visible, setVisible] = useState(true)
 
   function animAdvance() {
@@ -326,7 +201,7 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
     if (q.type === 'choice') {
       const n = parseInt(e.key)
       if (n >= 1 && n <= (q.options?.length ?? 0)) {
-        onAnswer(q.id, q.options![n - 1])
+        onAnswer(q.id, q.options![n - 1].id)
         setTimeout(animAdvance, 300)
         return
       }
@@ -354,45 +229,26 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
       <ProgressBar value={progress} />
       <Logo />
 
-      {/* Top right counter */}
       <div style={{ position: 'fixed', top: 20, right: 28, zIndex: 100, display: 'flex', alignItems: 'center', gap: 16 }}>
-        color: '#8899AA', fontSize: 13, cursor: 'pointer', padding: 0, fontFamily: 'inherit'
         <span style={{ fontSize: 13, fontWeight: 600, color: '#CCCCCC' }}>
           {globalQ}<span style={{ color: TEXT_HINT, fontWeight: 400 }}> / {totalQ}</span>
         </span>
       </div>
 
-      {/* Large faded question number */}
-      <div style={{
-        position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)',
-        fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1,
-        userSelect: 'none', pointerEvents: 'none', zIndex: 0,
-      }}>
+      <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
         {String(qIndex + 1).padStart(2, '0')}
       </div>
 
-      {/* Content */}
-      <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'flex-start', justifyContent: 'center',
-        maxWidth: 680, margin: '0 auto', padding: '80px 32px',
-        position: 'relative', zIndex: 10,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(-10px)',
-        transition: 'opacity 0.24s ease, transform 0.24s ease',
-      }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', maxWidth: 680, margin: '0 auto', padding: '80px 32px', position: 'relative', zIndex: 10, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-10px)', transition: 'opacity 0.24s ease, transform 0.24s ease' }}>
 
-        {/* Phase label */}
         <p style={{ fontSize: 11, fontWeight: 700, color: ACCENT, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 20 }}>
-          Phase {page.number} · {q.section}
+          {t('assessment.phase_label')} {page.number} · {q.section}
         </p>
 
-        {/* Question */}
         <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, lineHeight: 1.25, marginBottom: 8, maxWidth: 580 }}>
           {q.label}
         </h1>
 
-        {/* Why */}
         <p style={{ fontSize: 13, color: TEXT_MUTED, marginBottom: 36, fontStyle: 'italic' }}>
           {q.why}
         </p>
@@ -402,40 +258,26 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 540 }}>
             {q.options?.map((opt, i) => (
               <button
-                key={opt}
+                key={opt.id}
                 onClick={() => {
-                  onAnswer(q.id, opt)
+                  onAnswer(q.id, opt.id)
                   setVisible(false)
                   setTimeout(() => { onAdvance(); setVisible(true) }, 300)
                 }}
-                style={{
-                  padding: '15px 20px',
-                  background: answer === opt ? BG_SELECTED : BG_CARD,
-                  border: `1.5px solid ${answer === opt ? BORDER_SEL : BORDER}`,
-                  borderRadius: 10, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 16,
-                  transition: 'all 0.14s ease', fontFamily: 'inherit', textAlign: 'left',
-                }}
-                onMouseEnter={e => { if (answer !== opt) { e.currentTarget.style.borderColor = BORDER_HOVER; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' } }}
-                onMouseLeave={e => { if (answer !== opt) { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.background = BG_CARD } }}
+                style={{ padding: '15px 20px', background: answer === opt.id ? BG_SELECTED : BG_CARD, border: `1.5px solid ${answer === opt.id ? BORDER_SEL : BORDER}`, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, transition: 'all 0.14s ease', fontFamily: 'inherit', textAlign: 'left' }}
+                onMouseEnter={e => { if (answer !== opt.id) { e.currentTarget.style.borderColor = BORDER_HOVER; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' } }}
+                onMouseLeave={e => { if (answer !== opt.id) { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.background = BG_CARD } }}
               >
-                <span style={{
-                  minWidth: 28, height: 28, borderRadius: 7,
-                  background: answer === opt ? ACCENT : NUM_BG,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700,
-                  color: answer === opt ? '#fff' : '#999',
-                  flexShrink: 0, transition: 'all 0.14s',
-                }}>
+                <span style={{ minWidth: 28, height: 28, borderRadius: 7, background: answer === opt.id ? ACCENT : NUM_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: answer === opt.id ? '#fff' : '#999', flexShrink: 0, transition: 'all 0.14s' }}>
                   {i + 1}
                 </span>
-                <span style={{ fontSize: 16, color: TEXT, fontWeight: answer === opt ? 600 : 400 }}>
-                  {opt}
+                <span style={{ fontSize: 16, color: TEXT, fontWeight: answer === opt.id ? 600 : 400 }}>
+                  {t(opt.labelKey as Parameters<typeof t>[0])}
                 </span>
               </button>
             ))}
             <p style={{ fontSize: 12, color: TEXT_HINT, marginTop: 6 }}>
-              Press <strong style={{ color: TEXT_MUTED }}>1–{q.options?.length}</strong> to select · auto-advances
+              {t('assessment.key_select').replace('{n}', `1–${q.options?.length}`)}
             </p>
           </div>
         )}
@@ -447,16 +289,10 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
               value={answer}
               onChange={e => onAnswer(q.id, e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); animAdvance() } }}
-              placeholder="Type your answer..."
+              placeholder={t('assessment.type_answer')}
               autoFocus
               rows={3}
-              style={{
-                width: '100%', background: 'transparent', border: 'none',
-                borderBottom: `1px solid #2e2e2e`, color: TEXT, fontSize: 19,
-                outline: 'none', resize: 'none', fontFamily: 'inherit',
-                padding: '10px 0', lineHeight: 1.65, boxSizing: 'border-box' as const,
-                transition: 'border-color 0.15s',
-              }}
+              style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: `1px solid #2e2e2e`, color: TEXT, fontSize: 19, outline: 'none', resize: 'none', fontFamily: 'inherit', padding: '10px 0', lineHeight: 1.65, boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
               onFocus={e => e.target.style.borderBottomColor = ACCENT}
               onBlur={e => e.target.style.borderBottomColor = '#2e2e2e'}
             />
@@ -464,21 +300,14 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
               <button
                 onClick={animAdvance}
                 disabled={!answer.trim()}
-                style={{
-                  padding: '12px 28px',
-                  background: answer.trim() ? ACCENT : '#1e1e1e',
-                  color: answer.trim() ? '#fff' : '#444',
-                  border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600,
-                  cursor: answer.trim() ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.15s', fontFamily: 'inherit',
-                }}
+                style={{ padding: '12px 28px', background: answer.trim() ? ACCENT : '#1e1e1e', color: answer.trim() ? '#fff' : '#444', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: answer.trim() ? 'pointer' : 'not-allowed', transition: 'all 0.15s', fontFamily: 'inherit' }}
               >
-                Continue →
+                {t('assessment.continue')}
               </button>
               <span style={{ fontSize: 12, color: TEXT_HINT }}>
-                or{' '}
+                {t('assessment.key_or')}{' '}
                 <kbd style={{ background: '#1e1e1e', color: '#777', padding: '2px 7px', borderRadius: 4, border: '1px solid #2e2e2e', fontSize: 11 }}>
-                  Shift + Enter
+                  {t('assessment.key_shift_enter')}
                 </kbd>
               </span>
             </div>
@@ -497,35 +326,25 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
                     setVisible(false)
                     setTimeout(() => { onAdvance(); setVisible(true) }, 300)
                   }}
-                  style={{
-                    width: 60, height: 60, borderRadius: 12,
-                    border: `1.5px solid ${answer === String(n) ? ACCENT : BORDER}`,
-                    background: answer === String(n) ? ACCENT : BG_CARD,
-                    color: answer === String(n) ? '#fff' : '#AAAAAA',
-                    fontSize: 20, fontWeight: 700, cursor: 'pointer',
-                    transition: 'all 0.14s', fontFamily: 'inherit',
-                  }}
+                  style={{ width: 60, height: 60, borderRadius: 12, border: `1.5px solid ${answer === String(n) ? ACCENT : BORDER}`, background: answer === String(n) ? ACCENT : BG_CARD, color: answer === String(n) ? '#fff' : '#AAAAAA', fontSize: 20, fontWeight: 700, cursor: 'pointer', transition: 'all 0.14s', fontFamily: 'inherit' }}
                 >
                   {n}
                 </button>
               ))}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TEXT_MUTED, marginBottom: 4, width: 310 }}>
-              <span>Not confident</span><span>Fully confident</span>
+              <span>{t('assessment.not_confident')}</span>
+              <span>{t('assessment.fully_confident')}</span>
             </div>
             <p style={{ fontSize: 12, color: TEXT_HINT, marginTop: 10 }}>
-              Press <strong style={{ color: TEXT_MUTED }}>1–5</strong> to select · auto-advances
+              {t('assessment.key_scale')}
             </p>
           </div>
         )}
 
-        {/* Back */}
         {(qIndex > 0 || pageIndex > 0) && (
-          <button
-            onClick={animBack}
-            style={{ marginTop: 36, background: 'none', border: 'none', color: TEXT_MUTED, fontSize: 13, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
-          >
-            ← Back
+          <button onClick={animBack} style={{ marginTop: 36, background: 'none', border: 'none', color: TEXT_MUTED, fontSize: 13, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+            {t('assessment.back')}
           </button>
         )}
       </div>
@@ -534,35 +353,36 @@ function QuestionScreen({ page, pageIndex, qIndex, answers, onAnswer, onAdvance,
 }
 
 // ── NUMBERS STATE ─────────────────────────────────────────────
-function NumbersScreen({ realNumbers, onChange, onSubmit, error }: {
+function NumbersScreen({ fields, realNumbers, onChange, onSubmit, error, t }: {
+  fields: Array<{ id: string; label: string; placeholder: string }>
   realNumbers: Record<string, string>
   onChange: (id: string, val: string) => void
   onSubmit: () => void
   error: string
+  t: ReturnType<typeof useT>
 }) {
   return (
     <div style={{ minHeight: '100vh', background: BG, fontFamily: 'Inter, -apple-system, sans-serif' }}>
       <ProgressBar value={100} />
       <Logo />
 
-      {/* Faded 04 */}
       <div style={{ position: 'fixed', right: -10, top: '50%', transform: 'translateY(-50%)', fontSize: 260, fontWeight: 900, color: '#1E3A5F', lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
         04
       </div>
 
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '100px 32px 80px', position: 'relative', zIndex: 10 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: ACCENT, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 20 }}>
-          Phase 04 · Final Calibration
+          {t('assessment.phase4_label')}
         </p>
         <h1 style={{ fontSize: 44, fontWeight: 900, color: TEXT, marginBottom: 12, letterSpacing: '-1px' }}>
-          Your Real Numbers
+          {t('assessment.numbers_title')}
         </h1>
         <p style={{ fontSize: 16, color: TEXT_SUB, marginBottom: 48, lineHeight: 1.7 }}>
-          Optional but powerful. The more precise data you give us, the more accurate your health score.
+          {t('assessment.numbers_sub')}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBottom: 48 }}>
-          {REAL_NUMBERS.map(field => (
+          {fields.map(field => (
             <div key={field.id}>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
                 {field.label}
@@ -572,13 +392,7 @@ function NumbersScreen({ realNumbers, onChange, onSubmit, error }: {
                 value={realNumbers[field.id] ?? ''}
                 onChange={e => onChange(field.id, e.target.value)}
                 placeholder={field.placeholder}
-                style={{
-                  width: '100%', padding: '12px 0', background: 'transparent',
-                  border: 'none', borderBottom: '1px solid #2e2e2e',
-                  color: TEXT, fontSize: 18, outline: 'none',
-                  boxSizing: 'border-box' as const, fontFamily: 'inherit',
-                  transition: 'border-color 0.15s',
-                }}
+                style={{ width: '100%', padding: '12px 0', background: 'transparent', border: 'none', borderBottom: '1px solid #2e2e2e', color: TEXT, fontSize: 18, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit', transition: 'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderBottomColor = ACCENT}
                 onBlur={e => e.target.style.borderBottomColor = '#2e2e2e'}
               />
@@ -592,11 +406,8 @@ function NumbersScreen({ realNumbers, onChange, onSubmit, error }: {
           </div>
         )}
 
-        <button
-          onClick={onSubmit}
-          style={{ width: '100%', padding: '16px', background: ACCENT, color: '#fff', border: 'none', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', marginBottom: 12, fontFamily: 'inherit' }}
-        >
-          Generate my health score →
+        <button onClick={onSubmit} style={{ width: '100%', padding: '16px', background: ACCENT, color: '#fff', border: 'none', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', marginBottom: 12, fontFamily: 'inherit' }}>
+          {t('assessment.generate_score')}
         </button>
       </div>
     </div>
@@ -606,6 +417,7 @@ function NumbersScreen({ realNumbers, onChange, onSubmit, error }: {
 // ── ROOT ──────────────────────────────────────────────────────
 export default function AssessmentClient({ founderId, language }: Props) {
   const router = useRouter()
+  const t      = useT()
 
   const [uiState,     setUiState]     = useState<UIState>('intro')
   const [pageIndex,   setPageIndex]   = useState(0)
@@ -615,9 +427,111 @@ export default function AssessmentClient({ founderId, language }: Props) {
   const [insightText, setInsightText] = useState('')
   const [error,       setError]       = useState('')
 
+  // ── Build PAGES with useMemo — t is stable, rebuilds only if lang changes ──
+  // Question IDs stay in English — they map directly to DB columns used in scoring
+  const PAGES = useMemo(() => [
+    {
+      number: '01',
+      title:      t('assessment.p1_title'),
+      objective:  t('assessment.p1_objective'),
+      indicators: t('assessment.p1_indicators'),
+      time:       t('assessment.p1_time'),
+      questions: [
+        { id: 'founder_stage',      section: 'Context',   label: t('assessment.q_founder_stage'),      why: t('assessment.why_founder_stage'),      type: 'choice' as const, options: OPTION_MAP.founder_stage },
+        { id: 'business_model',     section: 'Context',   label: t('assessment.q_business_model'),     why: t('assessment.why_business_model'),     type: 'choice' as const, options: OPTION_MAP.business_model },
+        { id: 'investment_status',  section: 'Context',   label: t('assessment.q_investment_status'),  why: t('assessment.why_investment_status'),  type: 'choice' as const, options: OPTION_MAP.investment_status },
+        { id: 'team_size',          section: 'Context',   label: t('assessment.q_team_size'),          why: t('assessment.why_team_size'),          type: 'choice' as const, options: OPTION_MAP.team_size },
+        { id: 'technical_capacity', section: 'Context',   label: t('assessment.q_technical_capacity'), why: t('assessment.why_technical_capacity'), type: 'choice' as const, options: OPTION_MAP.technical_capacity },
+        { id: 'analytics_maturity', section: 'Context',   label: t('assessment.q_analytics_maturity'), why: t('assessment.why_analytics_maturity'), type: 'choice' as const, options: OPTION_MAP.analytics_maturity },
+        { id: 'execution_blocker',  section: 'Context',   label: t('assessment.q_execution_blocker'),  why: t('assessment.why_execution_blocker'),  type: 'choice' as const, options: OPTION_MAP.execution_blocker },
+      ],
+    },
+    {
+      number: '02',
+      title:      t('assessment.p2_title'),
+      objective:  t('assessment.p2_objective'),
+      indicators: t('assessment.p2_indicators'),
+      time:       t('assessment.p2_time'),
+      questions: [
+        { id: 'biggest_problem_now', section: 'Context',   label: t('assessment.q_biggest_problem_now'), why: t('assessment.why_biggest_problem_now'), type: 'text' as const },
+        { id: 'runway',              section: 'Revenue',   label: t('assessment.q_runway'),              why: t('assessment.why_runway'),              type: 'choice' as const, options: OPTION_MAP.runway },
+        { id: 'win_reason',          section: 'Revenue',   label: t('assessment.q_win_reason'),          why: t('assessment.why_win_reason'),          type: 'text' as const },
+        { id: 'pricing_confidence',  section: 'Revenue',   label: t('assessment.q_pricing_confidence'),  why: t('assessment.why_pricing_confidence'),  type: 'scale' as const },
+        { id: 'financial_concern',   section: 'Revenue',   label: t('assessment.q_financial_concern'),   why: t('assessment.why_financial_concern'),   type: 'text' as const },
+        { id: 'pmf_reaction',        section: 'Product',   label: t('assessment.q_pmf_reaction'),        why: t('assessment.why_pmf_reaction'),        type: 'choice' as const, options: OPTION_MAP.pmf_reaction },
+        { id: 'icp_alignment',       section: 'Product',   label: t('assessment.q_icp_alignment'),       why: t('assessment.why_icp_alignment'),       type: 'text' as const },
+        { id: 'icp_targeting',       section: 'Product',   label: t('assessment.q_icp_targeting'),       why: t('assessment.why_icp_targeting'),       type: 'choice' as const, options: OPTION_MAP.icp_targeting },
+        { id: 'ideal_customer',      section: 'Marketing', label: t('assessment.q_ideal_customer'),      why: t('assessment.why_ideal_customer'),      type: 'text' as const },
+        { id: 'already_tried',       section: 'Context',   label: t('assessment.q_already_tried'),       why: t('assessment.why_already_tried'),       type: 'text' as const },
+        { id: 'target_90_days',      section: 'Context',   label: t('assessment.q_target_90_days'),      why: t('assessment.why_target_90_days'),      type: 'text' as const },
+      ],
+    },
+    {
+      number: '03',
+      title:      t('assessment.p3_title'),
+      objective:  t('assessment.p3_objective'),
+      indicators: t('assessment.p3_indicators'),
+      time:       t('assessment.p3_time'),
+      questions: [
+        { id: 'team_alignment',    section: 'Team',     label: t('assessment.q_team_alignment'),    why: t('assessment.why_team_alignment'),    type: 'choice' as const, options: OPTION_MAP.team_alignment },
+        { id: 'bug_process',       section: 'Team',     label: t('assessment.q_bug_process'),       why: t('assessment.why_bug_process'),       type: 'text' as const },
+        { id: 'churn_reason',      section: 'Customer', label: t('assessment.q_churn_reason'),      why: t('assessment.why_churn_reason'),      type: 'text' as const },
+        { id: 'customer_complaint',section: 'Customer', label: t('assessment.q_customer_complaint'),why: t('assessment.why_customer_complaint'),type: 'text' as const },
+        { id: 'referral_frequency',section: 'Customer', label: t('assessment.q_referral_frequency'),why: t('assessment.why_referral_frequency'),type: 'choice' as const, options: OPTION_MAP.referral_frequency },
+        { id: 'avoided_decision',  section: 'Strategy', label: t('assessment.q_avoided_decision'),  why: t('assessment.why_avoided_decision'),  type: 'text' as const },
+        { id: 'team_focus',        section: 'Strategy', label: t('assessment.q_team_focus'),        why: t('assessment.why_team_focus'),        type: 'choice' as const, options: OPTION_MAP.team_focus },
+        { id: 'success_12m',       section: 'Strategy', label: t('assessment.q_success_12m'),       why: t('assessment.why_success_12m'),       type: 'text' as const },
+        { id: 'process_maturity',  section: 'Strategy', label: t('assessment.q_process_maturity'),  why: t('assessment.why_process_maturity'),  type: 'choice' as const, options: OPTION_MAP.process_maturity },
+      ],
+    },
+  ], [t])
+
+  const REAL_NUMBER_FIELDS = useMemo(() => [
+    { id: 'num_mrr',        label: t('assessment.num_mrr'),        placeholder: 'e.g. £12,000'  },
+    { id: 'num_mrr_growth', label: t('assessment.num_mrr_growth'), placeholder: 'e.g. +8% or -2%' },
+    { id: 'num_cac',        label: t('assessment.num_cac'),        placeholder: 'e.g. £450'     },
+    { id: 'num_ltv',        label: t('assessment.num_ltv'),        placeholder: 'e.g. £2,200'   },
+    { id: 'num_churn',      label: t('assessment.num_churn'),      placeholder: 'e.g. 4.5%'     },
+    { id: 'num_nps',        label: t('assessment.num_nps'),        placeholder: 'e.g. 42'       },
+  ], [t])
+
+  // ── Dynamic insight engine — ID constants, language-neutral ──
+  function getInsight(fromPage: number, answers: Record<string, string>): string {
+    if (fromPage === 0) {
+      const stage   = answers.founder_stage      ?? ''
+      const blocker = answers.execution_blocker  ?? ''
+      const data    = answers.analytics_maturity ?? ''
+      if (stage === FOUNDER_STAGE.EARLY_STAGE && blocker === EXECUTION_BLOCKER.TEAM_CANT_EXECUTE)
+        return t('assessment.insight_p1_a')
+      if (blocker === EXECUTION_BLOCKER.UNSURE_SOLUTION || blocker === EXECUTION_BLOCKER.AVOIDING_DECISION)
+        return t('assessment.insight_p1_b')
+      if (data === ANALYTICS_MATURITY.GUT_FEEL || data === ANALYTICS_MATURITY.TOOLS_UNUSED)
+        return t('assessment.insight_p1_c')
+      if (stage === FOUNDER_STAGE.PRODUCT_CUSTOMERS && blocker === EXECUTION_BLOCKER.ACTS_QUICKLY)
+        return t('assessment.insight_p1_d')
+      return t('assessment.insight_p1_e')
+    }
+    if (fromPage === 1) {
+      const pmf    = answers.pmf_reaction  ?? ''
+      const icp    = answers.icp_targeting ?? ''
+      const runway = answers.runway        ?? ''
+      if (pmf === PMF.INDIFFERENT || pmf === PMF.NOT_ASKED)
+        return t('assessment.insight_p2_a')
+      if (icp === ICP_TARGETING.MISALIGNED || icp === ICP_TARGETING.NOT_SURE)
+        return t('assessment.insight_p2_b')
+      if (runway === RUNWAY.UNDER_3 || runway === RUNWAY.R_3_6)
+        return t('assessment.insight_p2_c')
+      if (pmf === PMF.DEVASTATED)
+        return t('assessment.insight_p2_d')
+      return t('assessment.insight_p2_e')
+    }
+    return t('assessment.insight_p3')
+  }
+
   const totalQ   = PAGES.reduce((s, p) => s + p.questions.length, 0)
   const doneQ    = PAGES.slice(0, pageIndex).reduce((s, p) => s + p.questions.length, 0) + (uiState === 'question' ? qIndex : 0)
   const progress = uiState === 'numbers' || uiState === 'submitting' ? 100 : Math.round((doneQ / totalQ) * 95)
+  const globalQ  = PAGES.slice(0, pageIndex).reduce((s, p) => s + p.questions.length, 0) + qIndex + 1
 
   function advance() {
     const page = PAGES[pageIndex]
@@ -696,13 +610,7 @@ export default function AssessmentClient({ founderId, language }: Props) {
 
       const res = await fetch('/api/score', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assessmentId: assessment.id,
-          founderId,
-          answers,
-          realNumbers: realNumbers ?? {},
-          language,
-        }),
+        body: JSON.stringify({ assessmentId: assessment.id, founderId, answers, realNumbers: realNumbers ?? {}, language }),
       })
 
       let data: { error?: string; success?: boolean } = {}
@@ -722,56 +630,31 @@ export default function AssessmentClient({ founderId, language }: Props) {
   if (uiState === 'submitting') return (
     <div style={{ position: 'fixed', inset: 0, background: BG, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ width: 36, height: 36, border: `2px solid #222`, borderTop: `2px solid ${ACCENT}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: 24 }} />
-      <p style={{ fontSize: 12, fontWeight: 700, color: TEXT_MUTED, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Generating your health score</p>
+      <p style={{ fontSize: 12, fontWeight: 700, color: TEXT_MUTED, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{t('assessment.generating')}</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
 
   // Flash
   if (uiState === 'flash') return (
-    <FlashScreen
-      insight={insightText}
-      onDone={() => { setPageIndex(p => p + 1); setQIndex(0); setUiState('intro') }}
-      progress={progress}
-    />
+    <FlashScreen insight={insightText} onDone={() => { setPageIndex(p => p + 1); setQIndex(0); setUiState('intro') }} progress={progress} t={t} />
   )
 
-// Intro
-const currentPage = PAGES[pageIndex]
-if (uiState === 'intro') {
-  if (!currentPage) { setPageIndex(0); return null }
-  return (
-    <IntroScreen
-      page={currentPage}
-      pageIndex={pageIndex}
-      onBegin={() => setUiState('question')}
-      progress={progress}
-    />
-  )
-}
+  // Intro
+  const currentPage = PAGES[pageIndex]
+  if (uiState === 'intro') {
+    if (!currentPage) { setPageIndex(0); return null }
+    return <IntroScreen page={currentPage} pageIndex={pageIndex} totalPages={PAGES.length} onBegin={() => setUiState('question')} progress={progress} t={t} />
+  }
 
   // Numbers
   if (uiState === 'numbers') return (
-    <NumbersScreen
-      realNumbers={realNumbers}
-      onChange={(id, v) => setRealNumbers(p => ({ ...p, [id]: v }))}
-      onSubmit={submit}
-      error={error}
-    />
+    <NumbersScreen fields={REAL_NUMBER_FIELDS} realNumbers={realNumbers} onChange={(id, v) => setRealNumbers(p => ({ ...p, [id]: v }))} onSubmit={submit} error={error} t={t} />
   )
 
   // Question
   if (!currentPage) return null
   return (
-    <QuestionScreen
-      page={currentPage}
-      pageIndex={pageIndex}
-      qIndex={qIndex}
-      answers={answers}
-      onAnswer={(id, v) => setAnswers(p => ({ ...p, [id]: v }))}
-      onAdvance={advance}
-      onBack={goBack}
-      progress={progress}
-    />
+    <QuestionScreen page={currentPage} pageIndex={pageIndex} qIndex={qIndex} totalQ={totalQ} globalQ={globalQ} answers={answers} onAnswer={(id, v) => setAnswers(p => ({ ...p, [id]: v }))} onAdvance={advance} onBack={goBack} progress={progress} t={t} />
   )
 }

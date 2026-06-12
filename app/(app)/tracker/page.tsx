@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import GoalsSection from './goals-section'
 import SignalsTabs from './signals-tabs'
+import { getT } from '@/lib/translations'
 
 const SIGNAL_LOWER_BETTER = new Set([
   'churn_spike', 'ticket_volume_increase', 'refund_spike',
@@ -17,6 +18,9 @@ export default async function BusinessHealthTrackerPage() {
 
   const { data: founder } = await supabase
     .from('founders').select('*').eq('user_id', user.id).maybeSingle()
+
+  const t    = getT((founder?.language ?? 'en') as 'en' | 'ar')
+  const lang = founder?.language ?? 'en'
 
   const founderId = founder?.id ?? ''
 
@@ -58,7 +62,6 @@ export default async function BusinessHealthTrackerPage() {
     .neq('source', 'manual')
     .order('updated_at', { ascending: false })
 
-  // ── Goal counts for summary strip ──
   const { data: goalSummary } = await supabase
     .from('goals')
     .select('status')
@@ -87,13 +90,15 @@ export default async function BusinessHealthTrackerPage() {
   const hasNoData = (allSignals ?? []).length === 0 && (scans ?? []).length === 0 && activeGoalCount === 0
 
   const triggeredByLabel: Record<string, string> = {
-    manual: 'Manual', cron: 'Auto', connect: 'Connect',
+    manual:  t('tracker.trigger_manual'),
+    cron:    t('tracker.trigger_auto'),
+    connect: t('tracker.trigger_connect'),
   }
 
   const scanStatusStyle = (status: string) => {
-    if (status === 'completed')       return { bg: '#ECFDF5', color: '#059669', label: 'Complete' }
-    if (status === 'partial_failure') return { bg: '#FFFBEB', color: '#D97706', label: 'Partial'  }
-    if (status === 'processing')      return { bg: '#EFF6FF', color: '#2563EB', label: 'Running'  }
+    if (status === 'completed')       return { bg: '#ECFDF5', color: '#059669', label: t('tracker.status_complete') }
+    if (status === 'partial_failure') return { bg: '#FFFBEB', color: '#D97706', label: t('tracker.status_partial')  }
+    if (status === 'processing')      return { bg: '#EFF6FF', color: '#2563EB', label: t('tracker.status_running')  }
     return { bg: '#F9FAFB', color: '#6B7280', label: status ?? '—' }
   }
 
@@ -104,15 +109,17 @@ export default async function BusinessHealthTrackerPage() {
     intercom: '💬 Intercom', shopify: '🛍️ Shopify', csv: '📁 CSV',
   }
 
-  const formatScanDate  = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  const dateLocale = lang === 'ar' ? 'ar-EG' : 'en-GB'
+
+  const formatScanDate = (iso: string) =>
+    new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso))
 
   const formatShortDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
 
   const hasHistory = (scans?.length ?? 0) >= 2
 
-  // ── Health score chart ──
+  // ── Health score chart — scores stay as Western digits ──
   const chartW      = 600
   const chartH      = 80
   const scores      = (healthHistory ?? []).map(h => h.health_score)
@@ -138,17 +145,15 @@ export default async function BusinessHealthTrackerPage() {
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>Business Health Tracker</h1>
-              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
-                Track signal trends, measure impact, and record your wins.
-              </p>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>{t('tracker.title')}</h1>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>{t('tracker.subtitle')}</p>
             </div>
             {latestScan && (
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: 11, color: '#9CA3AF', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last scan</p>
+                <p style={{ fontSize: 11, color: '#9CA3AF', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('tracker.last_scan')}</p>
                 <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', margin: 0 }}>{formatScanDate(latestScan.scanned_at)}</p>
                 {previousScan && (
-                  <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>Previous: {formatScanDate(previousScan.scanned_at)}</p>
+                  <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>{t('tracker.previous_scan')} {formatScanDate(previousScan.scanned_at)}</p>
                 )}
               </div>
             )}
@@ -159,26 +164,26 @@ export default async function BusinessHealthTrackerPage() {
         {hasNoData ? (
           <div style={{ textAlign: 'center', padding: '80px 40px', background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB' }}>
             <p style={{ fontSize: 40, marginBottom: 16 }}>📊</p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 8 }}>No data yet</p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 8 }}>{t('tracker.no_data')}</p>
             <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-              Connect your tools and run your first scan to start tracking your business health.
+              {t('tracker.no_data_sub')}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
               <a href="/connect" style={{ padding: '10px 22px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-                Connect tools →
+                {t('common.connect_tools')}
               </a>
               <a href="/signals" style={{ padding: '10px 22px', background: '#F3F4F6', color: '#374151', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-                Go to signals →
+                {t('common.go_signals')}
               </a>
             </div>
           </div>
         ) : (
           <>
             {/* ── Summary strip ── */}
-             <div className="grid-4-col" style={{ marginBottom: 24 }}>
+            <div className="grid-4-col" style={{ marginBottom: 24 }}>
               {/* Health score */}
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '16px 20px' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>Health Score</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>{t('tracker.health_score')}</p>
                 {latestScore !== null ? (
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
                     <span style={{ fontSize: 36, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{latestScore}</span>
@@ -191,26 +196,26 @@ export default async function BusinessHealthTrackerPage() {
 
               {/* Active goals */}
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '16px 20px' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>Active Goals</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>{t('overview.goals_active')}</p>
                 <span style={{ fontSize: 36, fontWeight: 900, color: '#2563EB', lineHeight: 1 }}>{activeGoalCount}</span>
                 <span style={{ fontSize: 13, color: '#9CA3AF' }}>/3</span>
               </div>
 
               {/* Active signals */}
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '16px 20px' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>Active Signals</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>{t('overview.active_signals')}</p>
                 <span style={{ fontSize: 36, fontWeight: 900, color: '#111827', lineHeight: 1 }}>{(allSignals ?? []).length}</span>
                 {newSignals.length > 0 && (
-                  <span style={{ fontSize: 12, color: '#2563EB', fontWeight: 600, marginLeft: 6 }}>+{newSignals.length} new</span>
+                  <span style={{ fontSize: 12, color: '#2563EB', fontWeight: 600, marginLeft: 6 }}>+{newSignals.length} {t('tracker.new_badge')}</span>
                 )}
               </div>
 
               {/* Resolved signals */}
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '16px 20px' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>Resolved</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px' }}>{t('tracker.resolved')}</p>
                 <span style={{ fontSize: 36, fontWeight: 900, color: '#059669', lineHeight: 1 }}>{(resolvedSignals ?? []).length}</span>
                 {recentWins.length > 0 && (
-                  <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 6 }}>{recentWins.length} in 90d</span>
+                  <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 6 }}>{recentWins.length} {t('tracker.in_90d')}</span>
                 )}
               </div>
             </div>
@@ -220,13 +225,13 @@ export default async function BusinessHealthTrackerPage() {
               <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Health Score Trend</p>
-                    <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>Last {scores.length} scans</p>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>{t('tracker.score_trend')}</p>
+                    <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{t('tracker.last_n_scans').replace('{n}', String(scores.length))}</p>
                   </div>
                   {latestScore !== null && (
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: 36, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{latestScore}</span>
-                      <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>current score</p>
+                      <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>{t('tracker.current_score')}</p>
                     </div>
                   )}
                 </div>
@@ -247,20 +252,20 @@ export default async function BusinessHealthTrackerPage() {
                     })}
                   </svg>
                 ) : (
-                  <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>Run a second scan to see your trend line.</p>
+                  <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{t('tracker.second_scan')}</p>
                 )}
               </div>
             )}
 
             {/* ── Section 2: Signal Cycle Summary + Scan History ── */}
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>Signal Cycle Summary</h2>
+              <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>{t('tracker.cycle_summary')}</h2>
               <div className="grid-4-col" style={{ marginBottom: 16 }}>
                 {[
-                  { label: 'New Detected', count: newSignals.length, color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE', icon: '🆕' },
-                  { label: 'Improving',    count: improving.length,  color: '#059669', bg: '#ECFDF5', border: '#A7F3D0', icon: '↑'  },
-                  { label: 'Worsening',    count: worsening.length,  color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: '↓'  },
-                  { label: 'Unchanged',    count: unchanged.length,  color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', icon: '→'  },
+                  { label: t('tracker.new_detected'), count: newSignals.length,  color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE', icon: '🆕' },
+                  { label: t('common.improving'),     count: improving.length,   color: '#059669', bg: '#ECFDF5', border: '#A7F3D0', icon: '↑'  },
+                  { label: t('common.worsening'),     count: worsening.length,   color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: '↓'  },
+                  { label: t('common.unchanged'),     count: unchanged.length,   color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', icon: '→'  },
                 ].map(card => (
                   <div key={card.label} style={{ background: card.bg, borderRadius: 14, border: `1px solid ${card.border}`, padding: '16px 18px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -268,19 +273,19 @@ export default async function BusinessHealthTrackerPage() {
                       <p style={{ fontSize: 11, fontWeight: 700, color: card.color, textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>{card.label}</p>
                     </div>
                     <span style={{ fontSize: 36, fontWeight: 900, color: card.color, lineHeight: 1 }}>{card.count}</span>
-                    {!hasHistory && card.label !== 'New Detected' && (
-                      <p style={{ fontSize: 10, color: card.color, opacity: 0.6, margin: '4px 0 0' }}>after 2nd scan</p>
+                    {!hasHistory && card.label !== t('tracker.new_detected') && (
+                      <p style={{ fontSize: 10, color: card.color, opacity: 0.6, margin: '4px 0 0' }}>{t('tracker.after_second')}</p>
                     )}
                   </div>
                 ))}
               </div>
 
-              {/* Scan history — collapsible */}
+              {/* Scan history */}
               {scans && scans.length > 0 && (
                 <details style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB' }}>
                   <summary style={{ padding: '12px 18px', fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Scan History</span>
-                    <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>{scans.length} scans · click to expand</span>
+                    <span>{t('tracker.scan_history')}</span>
+                    <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>{scans.length} {t('tracker.scans_expand')}</span>
                   </summary>
                   <div style={{ padding: '0 18px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {scans.map((scan, index) => {
@@ -288,7 +293,7 @@ export default async function BusinessHealthTrackerPage() {
                       return (
                         <div key={scan.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: index === 0 ? '#EFF6FF' : '#F9FAFB', borderRadius: 8, border: `1px solid ${index === 0 ? '#BFDBFE' : '#E5E7EB'}` }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            {index === 0 && <span style={{ fontSize: 10, fontWeight: 700, color: '#2563EB', background: '#DBEAFE', padding: '1px 7px', borderRadius: 20 }}>Latest</span>}
+                            {index === 0 && <span style={{ fontSize: 10, fontWeight: 700, color: '#2563EB', background: '#DBEAFE', padding: '1px 7px', borderRadius: 20 }}>{t('tracker.latest')}</span>}
                             <span style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>{formatScanDate(scan.scanned_at)}</span>
                             <span style={{ fontSize: 11, color: '#9CA3AF' }}>{scan.sources?.join(', ')}</span>
                             {scan.triggered_by && (
@@ -301,8 +306,8 @@ export default async function BusinessHealthTrackerPage() {
                             </span>
                           </div>
                           <div style={{ display: 'flex', gap: 10 }}>
-                            {scan.signals_new > 0 && <span style={{ fontSize: 11, color: '#2563EB', fontWeight: 600 }}>+{scan.signals_new} new</span>}
-                            {scan.signals_updated > 0 && <span style={{ fontSize: 11, color: '#6B7280' }}>{scan.signals_updated} updated</span>}
+                            {scan.signals_new > 0 && <span style={{ fontSize: 11, color: '#2563EB', fontWeight: 600 }}>+{scan.signals_new} {t('tracker.new_badge')}</span>}
+                            {scan.signals_updated > 0 && <span style={{ fontSize: 11, color: '#6B7280' }}>{scan.signals_updated} {t('tracker.updated_badge')}</span>}
                           </div>
                         </div>
                       )
@@ -329,7 +334,7 @@ export default async function BusinessHealthTrackerPage() {
 
             {/* ── Section 4: Signal Intelligence (tabbed) ── */}
             <div style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>Signal Intelligence</h2>
+              <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>{t('tracker.signal_intelligence')}</h2>
               <SignalsTabs
                 withComparison={withComparison}
                 newSignals={newSignals}
@@ -339,47 +344,53 @@ export default async function BusinessHealthTrackerPage() {
               />
             </div>
 
-{/* ── Section 5: 🔧 Resolved Signals ── */}
-{(resolvedSignals ?? []).length > 0 && (
+            {/* ── Section 5: Resolved Signals ── */}
+            {(resolvedSignals ?? []).length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div>
-                    <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 4px' }}>🔧 Resolved Signals</h2>
+                    <h2 style={{ fontSize: 15, fontWeight: 700, color: '#374151', margin: '0 0 4px' }}>{t('tracker.resolved_signals')}</h2>
                     {recentWins.length > 0 && (
                       <p style={{ fontSize: 13, color: '#059669', margin: 0, fontWeight: 500 }}>
-                        {recentWins.length} operational {recentWins.length === 1 ? 'risk' : 'risks'} neutralised in the last 90 days.
+                        {t('tracker.risks_neutralised').replace('{risks}', `${recentWins.length} ${recentWins.length === 1 ? 'risk' : 'risks'}`)}
                       </p>
                     )}
                   </div>
-                  <span style={{ fontSize: 12, color: '#9CA3AF' }}>{resolvedSignals?.length} total</span>
+                  <span style={{ fontSize: 12, color: '#9CA3AF' }}>{resolvedSignals?.length} {t('tracker.total')}</span>
                 </div>
-                
+
                 {/* Scrollable Container */}
                 <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflowX: 'auto' }}>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'minmax(200px, 2fr) minmax(80px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.9fr) minmax(250px, 2fr)', 
-                    padding: '10px 20px', 
-                    background: '#F9FAFB', 
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(200px, 2fr) minmax(80px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.9fr) minmax(250px, 2fr)',
+                    padding: '10px 20px',
+                    background: '#F9FAFB',
                     borderBottom: '1px solid #E5E7EB',
-                    minWidth: '750px' /* Forces browser to show scrollbar if container < 750px */
+                    minWidth: '750px',
                   }}>
-                    {['Signal', 'Source', 'Category', 'Date Resolved', 'Outcome Note'].map(h => (
+                    {[
+                      t('tracker.col_signal'),
+                      t('tracker.col_source'),
+                      t('tracker.col_category'),
+                      t('tracker.col_date_resolved'),
+                      t('tracker.col_outcome'),
+                    ].map(h => (
                       <p key={h} style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{h}</p>
                     ))}
                   </div>
-                  
+
                   {(resolvedSignals ?? []).map((signal, index) => {
                     const isLast      = index === (resolvedSignals?.length ?? 0) - 1
                     const outcomeNote = String(signal.insight_summary ?? '')
                     return (
                       <div key={signal.id} style={{
-                        display: 'grid', 
+                        display: 'grid',
                         gridTemplateColumns: 'minmax(200px, 2fr) minmax(80px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.9fr) minmax(250px, 2fr)',
                         padding: '10px 20px',
                         borderBottom: isLast ? 'none' : '1px solid #F3F4F6',
                         background: '#FAFFFE',
-                        minWidth: '750px'
+                        minWidth: '750px',
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 14 }}>{dimensionIcon(signal.dimension)}</span>

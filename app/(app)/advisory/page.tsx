@@ -1,107 +1,95 @@
 'use client'
 
 import { Suspense } from 'react'
-
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
+import { useT } from '@/app/context/LanguageContext'
 
-const SERVICES = [
+// Static service config — colors, flows, stripe links only (no translatable strings)
+const SERVICE_CONFIG = [
   {
     id: 'navigator',
     icon: '🧭',
-    title: 'Navigator — Monthly Plan',
-    description: 'Weekly scans, impact tracking, AI Action Digest, and priority signals — everything you need to run your business like a data-driven founder.',
-    price: '£29 / month',
-    turnaround: 'Active immediately after payment',
     color: '#059669',
     bg: '#ECFDF5',
     border: '#A7F3D0',
     flow: 'stripe_direct' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? '/advisory',
-    buttonLabel: 'Upgrade to Navigator →',
-    successNote: null,
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK,
+    hasSuccessNote: false,
   },
   {
     id: 'roadmap',
     icon: '🗺️',
-    title: 'AI Implementation Roadmap',
-    description: 'A step-by-step 90-day plan for implementing AI across your highest-opportunity areas — generated from your diagnostic data and tailored to your team size and budget.',
-    price: '£99 one-time',
-    turnaround: 'Delivered within 24 hours',
     color: '#2563EB',
     bg: '#EFF6FF',
     border: '#BFDBFE',
     flow: 'pay_first' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_ROADMAP_LINK ?? '/advisory',
-    buttonLabel: 'Request & Pay £99 →',
-    successNote: 'Complete your payment to confirm your order. Sally will deliver your roadmap within 24 hours.',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_ROADMAP_LINK,
+    hasSuccessNote: true,
   },
   {
     id: 'cpo',
     icon: '👩‍💼',
-    title: 'Fractional CPO Session',
-    description: '1-on-1 strategy session with Sally to prioritise your biggest growth blocker, review your signal data, and build a 30-day action plan.',
-    price: '£250 / session',
-    turnaround: 'Scheduled within 48 hours',
     color: '#7C3AED',
     bg: '#F5F3FF',
     border: '#DDD6FE',
     flow: 'calendly' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CPO_LINK ?? '/advisory',
-    buttonLabel: 'Request CPO Session →',
-    successNote: 'Sally will send you a booking link within 24 hours to schedule your session and confirm payment.',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CPO_LINK,
+    hasSuccessNote: true,
   },
   {
     id: 'training',
     icon: '🎓',
-    title: 'Team AI Workshop',
-    description: 'A half-day workshop for your team covering AI tools relevant to your specific bottlenecks — based on your Elvanis diagnostic data.',
-    price: '£500 / session',
-    turnaround: 'Scheduled within 1 week',
     color: '#0F766E',
     bg: '#ECFEFF',
     border: '#A5F3FC',
     flow: 'discovery' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_WORKSHOP_LINK ?? '/advisory',
-    buttonLabel: 'Request Workshop →',
-    successNote: 'Sally will reach out within 24 hours to arrange a discovery call and understand your team\'s specific needs before confirming.',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_WORKSHOP_LINK,
+    hasSuccessNote: true,
   },
   {
     id: 'conflict',
     icon: '⚖️',
-    title: 'Data Conflict Review',
-    description: 'Expert review of your conflicting signals — Sally will analyse your data sources and advise which to trust and why, so your Action Digest is built on accurate data.',
-    price: '£99 one-time',
-    turnaround: 'Response within 24 hours',
     color: '#D97706',
     bg: '#FFFBEB',
     border: '#FDE68A',
     flow: 'pay_first' as const,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CONFLICT_LINK ?? '/advisory',
-    buttonLabel: 'Request & Pay £99 →',
-    successNote: 'Complete your payment to confirm your review. Sally will analyse your signal data and respond within 24 hours.',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_CONFLICT_LINK,
+    hasSuccessNote: true,
   },
 ]
 
-type Service = typeof SERVICES[number]
+type ServiceConfig = typeof SERVICE_CONFIG[number]
+type ServiceWithStrings = ServiceConfig & {
+  title: string
+  description: string
+  price: string
+  turnaround: string
+  buttonLabel: string
+  successNote: string | null
+  resolvedStripeLink: string
+}
 
 function ServiceRequestPageContent() {
+  const t            = useT()
   const searchParams = useSearchParams()
-  const defaultType = searchParams.get('type') ?? ''
-  const goalSignal     = searchParams.get('goal')    ?? ''
-  const goalCurrent    = searchParams.get('current') ?? ''
-  const goalTarget     = searchParams.get('target')  ?? ''
-  const goalUnit       = searchParams.get('unit')    ?? ''
+  const defaultType  = searchParams.get('type') ?? ''
+  const goalSignal   = searchParams.get('goal')    ?? ''
+  const goalCurrent  = searchParams.get('current') ?? ''
+  const goalTarget   = searchParams.get('target')  ?? ''
+  const goalUnit     = searchParams.get('unit')    ?? ''
   const hasGoalContext = !!goalSignal
-  const goalLabel      = goalSignal ? (SIGNAL_GOAL_MAP[goalSignal]?.label ?? goalSignal.replace(/_/g, ' ')) : ''
+  const goalLabel    = goalSignal ? (SIGNAL_GOAL_MAP[goalSignal]?.label ?? goalSignal.replace(/_/g, ' ')) : ''
+
   const [selectedService, setSelectedService] = useState(defaultType)
-  const [note, setNote] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [submittedService, setSubmittedService] = useState<Service | null>(null)
-  const [loading, setLoading]         = useState(false)
-  const [submitError, setSubmitError]   = useState('')
+  const [note, setNote]                       = useState('')
+  const [submitted, setSubmitted]             = useState(false)
+  const [submittedService, setSubmittedService] = useState<ServiceWithStrings | null>(null)
+  const [loading, setLoading]                 = useState(false)
+  const [submitError, setSubmitError]         = useState('')
+
   type FounderType = {
     id: string
     full_name: string | null
@@ -127,6 +115,18 @@ function ServiceRequestPageContent() {
     loadFounder()
   }, [])
 
+  // Build enriched services with translated strings at render time
+  const SERVICES: ServiceWithStrings[] = SERVICE_CONFIG.map(cfg => ({
+    ...cfg,
+    title:               t(`advisory.svc_${cfg.id}_title`   as Parameters<typeof t>[0]),
+    description:         t(`advisory.svc_${cfg.id}_desc`    as Parameters<typeof t>[0]),
+    price:               t(`advisory.svc_${cfg.id}_price`   as Parameters<typeof t>[0]),
+    turnaround:          t(`advisory.svc_${cfg.id}_turnaround` as Parameters<typeof t>[0]),
+    buttonLabel:         t(`advisory.svc_${cfg.id}_btn`     as Parameters<typeof t>[0]),
+    successNote:         cfg.hasSuccessNote ? t(`advisory.svc_${cfg.id}_note` as Parameters<typeof t>[0]) : null,
+    resolvedStripeLink:  cfg.stripeLink ?? '/advisory',
+  }))
+
   const selected = SERVICES.find(s => s.id === selectedService) ?? null
 
   function handleSelect(serviceId: string) {
@@ -134,11 +134,8 @@ function ServiceRequestPageContent() {
     if (!service) return
     setSubmitError('')
     if (service.flow === 'stripe_direct') {
-      // Navigator — redirect to Stripe with client_reference_id for webhook linking
-      // Fix 5: append founder ID so webhook can identify who paid
       const founderId = founder?.id ?? ''
-      const baseLink  = service.stripeLink
-      // If env var not set, stripeLink is '/advisory' — route internally
+      const baseLink  = service.resolvedStripeLink
       if (baseLink.startsWith('/')) {
         window.location.href = baseLink
         return
@@ -152,11 +149,9 @@ function ServiceRequestPageContent() {
 
   async function handleSubmit() {
     if (!selected || selected.flow === 'stripe_direct') return
-    
     const contextNote = hasGoalContext
       ? `Goal: ${goalLabel} — Current: ${goalCurrent}${goalUnit}, Target: ${goalTarget}${goalUnit}\n\n${note}`
       : note
-  
     setLoading(true)
     try {
       await fetch('/api/advisory', {
@@ -165,9 +160,9 @@ function ServiceRequestPageContent() {
         body: JSON.stringify({
           type:         selected.id,
           note:         contextNote,
-          founderId:    founder?.id        ?? null,
-          founderName:  founder?.full_name ?? '',
-          founderEmail: founder?.email     ?? '',
+          founderId:    founder?.id           ?? null,
+          founderName:  founder?.full_name    ?? '',
+          founderEmail: founder?.email        ?? '',
           businessName: founder?.business_name ?? '',
           flow:         selected.flow,
         }),
@@ -176,7 +171,7 @@ function ServiceRequestPageContent() {
       setSubmitted(true)
     } catch (err) {
       console.error('Service request failed:', err)
-      setSubmitError('Something went wrong — please try again.')
+      setSubmitError(t('advisory.error'))
     }
     setLoading(false)
   }
@@ -188,18 +183,17 @@ function ServiceRequestPageContent() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)' }}>
           <div style={{ textAlign: 'center', maxWidth: 520, padding: 24 }}>
             <div style={{ fontSize: 56, marginBottom: 20 }}>✅</div>
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 10 }}>Request received</h2>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 10 }}>{t('advisory.success_title')}</h2>
             <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 16, lineHeight: 1.6 }}>
-              Our team will be in touch within 24 hours at your registered email address.
+              {t('advisory.success_sub')}
             </p>
 
-            {/* Service specific note */}
             {submittedService.successNote && (
               <div style={{ background: submittedService.bg, border: `1px solid ${submittedService.border}`, borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: 'left' }}>
                 <p style={{ fontSize: 14, color: submittedService.color, fontWeight: 600, margin: '0 0 4px' }}>
-                  {submittedService.flow === 'pay_first' ? '💳 Next step — complete payment' :
-                   submittedService.flow === 'calendly' ? '📅 Next step — booking link coming' :
-                   '📞 Next step — discovery call'}
+                  {submittedService.flow === 'pay_first'  ? t('advisory.next_payment')  :
+                   submittedService.flow === 'calendly'   ? t('advisory.next_booking')  :
+                                                            t('advisory.next_discovery')}
                 </p>
                 <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>
                   {submittedService.successNote}
@@ -208,24 +202,23 @@ function ServiceRequestPageContent() {
             )}
 
             <p style={{ fontSize: 14, color: '#9CA3AF', marginBottom: 24 }}>
-              Service requested: <strong style={{ color: '#374151' }}>{submittedService.title}</strong>
+              {t('advisory.service_requested')} <strong style={{ color: '#374151' }}>{submittedService.title}</strong>
             </p>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-              {/* Pay now button for pay_first services */}
               {submittedService.flow === 'pay_first' && (
                 <a
-                  href={submittedService.stripeLink}
+                  href={submittedService.resolvedStripeLink}
                   style={{ padding: '12px 24px', background: submittedService.color, color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}
                 >
-                  Complete payment →
+                  {t('advisory.complete_payment')}
                 </a>
               )}
               <a
                 href="/"
                 style={{ padding: '12px 24px', background: '#F3F4F6', color: '#374151', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}
               >
-                Back to dashboard
+                {t('advisory.back_dashboard')}
               </a>
             </div>
           </div>
@@ -237,11 +230,10 @@ function ServiceRequestPageContent() {
   // ── Main page ──
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>Strategy & Services</h1>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>{t('advisory.title')}</h1>
         <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 32, lineHeight: 1.6 }}>
-          Choose a service below. Navigator upgrades instantly — all other services our team will follow up within 24 hours.
+          {t('advisory.subtitle')}
         </p>
 
         {/* Service cards */}
@@ -271,22 +263,22 @@ function ServiceRequestPageContent() {
                         <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>{service.title}</p>
                         {service.flow === 'stripe_direct' && (
                           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 700, border: '1px solid #A7F3D0' }}>
-                            Instant access
+                            {t('advisory.instant_access')}
                           </span>
                         )}
                         {service.flow === 'pay_first' && (
                           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#EFF6FF', color: '#2563EB', fontWeight: 700, border: '1px solid #BFDBFE' }}>
-                            Pay to confirm
+                            {t('advisory.pay_to_confirm')}
                           </span>
                         )}
                         {service.flow === 'calendly' && (
                           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F5F3FF', color: '#7C3AED', fontWeight: 700, border: '1px solid #DDD6FE' }}>
-                            Booking link sent
+                            {t('advisory.booking_link_sent')}
                           </span>
                         )}
                         {service.flow === 'discovery' && (
                           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#FFFBEB', color: '#D97706', fontWeight: 700, border: '1px solid #FDE68A' }}>
-                            Discovery call
+                            {t('advisory.discovery_call')}
                           </span>
                         )}
                       </div>
@@ -306,29 +298,32 @@ function ServiceRequestPageContent() {
           })}
         </div>
 
-        {/* Note field — only for non-stripe-direct services */}
+        {/* Note field */}
         {selected && selected.flow !== 'stripe_direct' && (
           <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '24px', marginBottom: 20 }}>
             {hasGoalContext && (
-  <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 16px', marginBottom: 14 }}>
-    <p style={{ fontSize: 13, fontWeight: 700, color: '#1D4ED8', margin: '0 0 4px' }}>
-      Requesting help for your {goalLabel} goal
-    </p>
-    <p style={{ fontSize: 12, color: '#3B82F6', margin: 0 }}>
-      Current: {goalCurrent}{goalUnit} · Target: {goalTarget}{goalUnit}
-    </p>
-  </div>
-)}
+              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 16px', marginBottom: 14 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#1D4ED8', margin: '0 0 4px' }}>
+                  {t('advisory.goal_title').replace('{goal}', goalLabel)}
+                </p>
+                <p style={{ fontSize: 12, color: '#3B82F6', margin: 0 }}>
+                  {t('advisory.goal_sub')
+                    .replace('{current}', goalCurrent)
+                    .replace('{target}',  goalTarget)
+                    .replace(/\{unit\}/g, goalUnit)}
+                </p>
+              </div>
+            )}
             <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-              Anything specific you want to focus on? (optional)
+              {t('advisory.note_label')}
             </label>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
               placeholder={
-                selected.flow === 'calendly' ? 'e.g. We want to focus on reducing churn, our main challenge is retention after month 3' :
-                selected.flow === 'discovery' ? 'e.g. Team of 8, mix of technical and non-technical, want to automate customer support first' :
-                'e.g. We want to start with customer support automation, our main challenge is churn after 3 months'
+                selected.flow === 'calendly'  ? t('advisory.placeholder_calendly')  :
+                selected.flow === 'discovery' ? t('advisory.placeholder_discovery') :
+                                                t('advisory.placeholder_default')
               }
               rows={3}
               style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, boxSizing: 'border-box' as const, resize: 'vertical', fontFamily: 'Inter, sans-serif', outline: 'none' }}
@@ -355,14 +350,14 @@ function ServiceRequestPageContent() {
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            {loading ? 'Submitting...' : selected.buttonLabel}
+            {loading ? t('advisory.submitting') : selected.buttonLabel}
           </button>
         ) : !selected ? (
           <button
             disabled
             style={{ width: '100%', padding: '14px', background: '#E5E7EB', color: '#9CA3AF', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'not-allowed' }}
           >
-            Select a service above
+            {t('advisory.select_service')}
           </button>
         ) : null}
       </div>
@@ -370,10 +365,9 @@ function ServiceRequestPageContent() {
   )
 }
 
-
 export default function ServiceRequestPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>Loading...</div>}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>{/* loading */}</div>}>
       <ServiceRequestPageContent />
     </Suspense>
   )

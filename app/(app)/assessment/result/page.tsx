@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
+import { getT } from '@/lib/translations'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -22,26 +23,44 @@ export default async function AssessmentResultPage() {
 
   if (!score) redirect('/assessment')
 
+  const t    = getT((founder?.language ?? 'en') as 'en' | 'ar')
+  const lang = founder?.language ?? 'en'
   const name = founder?.full_name?.split(' ')[0] ?? ''
+
+  const formattedDate = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  }).format(new Date(score.created_at))
+
+  const reportTitle = name
+    ? t('assessment.report_title_named').replace('{name}', name)
+    : t('assessment.report_title')
+
+  const dimensions = [
+    { label: t('assessment.dim_revenue'),   val: score.score_revenue   as number | null },
+    { label: t('assessment.dim_pmf'),       val: score.score_pmf       as number | null },
+    { label: t('assessment.dim_team'),      val: score.score_team      as number | null },
+    { label: t('assessment.dim_customer'),  val: score.score_customer  as number | null },
+    { label: t('assessment.dim_marketing'), val: score.score_marketing as number | null },
+    { label: t('assessment.dim_strategy'),  val: score.score_strategy  as number | null },
+  ]
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
-
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 4 }}>
-            Assessment completed · {new Date(score.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            {t('assessment.completed')} {formattedDate}
           </p>
           <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111827', margin: 0 }}>
-            {name ? `${name}'s Business Health Report` : 'Business Health Report'}
+            {reportTitle}
           </h1>
         </div>
 
         {/* Overall score */}
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '32px 36px', marginBottom: 20 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Overall Health Score</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('assessment.overall_score')}</p>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 12 }}>
             <span style={{ fontSize: 80, fontWeight: 800, color: '#111827', lineHeight: 1 }}>{score.overall_score}</span>
             <span style={{ fontSize: 24, color: '#9CA3AF', marginBottom: 8 }}>/100</span>
@@ -55,22 +74,15 @@ export default async function AssessmentResultPage() {
         {/* Primary constraint */}
         {score.primary_constraint_summary && (
           <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 20, padding: '24px 28px', marginBottom: 20 }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>⚡ Primary Constraint</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{t('assessment.primary_constraint')}</p>
             <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.primary_constraint_summary}</p>
           </div>
         )}
 
         {/* 6 dimension scores */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
-          {[
-            { label: 'Revenue', val: score.score_revenue as number | null },
-            { label: 'Product-Market Fit', val: score.score_pmf as number | null },
-            { label: 'Team & Operations', val: score.score_team as number | null },
-            { label: 'Customer & Retention', val: score.score_customer as number | null },
-            { label: 'Marketing & Growth', val: score.score_marketing as number | null },
-            { label: 'Strategy & Goals', val: score.score_strategy as number | null },
-          ].map(({ label, val }) => {
-            const v = val ?? 0
+          {dimensions.map(({ label, val }) => {
+            const v     = val ?? 0
             const color = v >= 66 ? '#059669' : v >= 41 ? '#D97706' : '#DC2626'
             return (
               <div key={label} style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
@@ -90,7 +102,7 @@ export default async function AssessmentResultPage() {
         {/* Top 3 findings */}
         {score.top_3_findings && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 20 }}>Top 3 Findings</h3>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 20 }}>{t('assessment.top_findings')}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               {(score.top_3_findings as Array<{ rank: number; finding: string; impact: string }>).map(item => (
                 <div key={item.rank} style={{ display: 'flex', gap: 14 }}>
@@ -109,22 +121,22 @@ export default async function AssessmentResultPage() {
 
         {/* Next steps */}
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 16 }}>What to do next</h3>
+          <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 16 }}>{t('assessment.next_steps')}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
             <a href="/connect" style={{ padding: '18px', background: '#EFF6FF', borderRadius: 14, textDecoration: 'none', display: 'block' }}>
               <p style={{ fontSize: 20, marginBottom: 8 }}>🔌</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#1D4ED8', margin: '0 0 4px' }}>Connect your tools</p>
-              <p style={{ fontSize: 12, color: '#3B82F6', margin: 0 }}>Get live signals from Jira, GA4, Trustpilot</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#1D4ED8', margin: '0 0 4px' }}>{t('common.connect_tools')}</p>
+              <p style={{ fontSize: 12, color: '#3B82F6', margin: 0 }}>{t('assessment.next_connect_sub')}</p>
             </a>
             <a href="/signals" style={{ padding: '18px', background: '#F0FDF4', borderRadius: 14, textDecoration: 'none', display: 'block' }}>
               <p style={{ fontSize: 20, marginBottom: 8 }}>📊</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#15803D', margin: '0 0 4px' }}>View signals</p>
-              <p style={{ fontSize: 12, color: '#16A34A', margin: 0 }}>See what your data is telling you right now</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#15803D', margin: '0 0 4px' }}>{t('assessment.next_signals')}</p>
+              <p style={{ fontSize: 12, color: '#16A34A', margin: 0 }}>{t('assessment.next_signals_sub')}</p>
             </a>
             <a href="/advisory?type=roadmap" style={{ padding: '18px', background: '#F5F3FF', borderRadius: 14, textDecoration: 'none', display: 'block' }}>
               <p style={{ fontSize: 20, marginBottom: 8 }}>🗺️</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#6D28D9', margin: '0 0 4px' }}>Get AI roadmap</p>
-              <p style={{ fontSize: 12, color: '#7C3AED', margin: 0 }}>90-day plan based on your results</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#6D28D9', margin: '0 0 4px' }}>{t('assessment.next_roadmap')}</p>
+              <p style={{ fontSize: 12, color: '#7C3AED', margin: 0 }}>{t('assessment.next_roadmap_sub')}</p>
             </a>
           </div>
         </div>
@@ -132,10 +144,10 @@ export default async function AssessmentResultPage() {
         {/* Actions */}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
           <a href="/" style={{ padding: '12px 24px', background: '#2563EB', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
-            Go to dashboard →
+            {t('assessment.go_dashboard')}
           </a>
           <a href="/assessment" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', padding: '8px 16px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
-            Retake assessment
+            {t('assessment.retake')}
           </a>
         </div>
       </div>

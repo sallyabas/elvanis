@@ -59,7 +59,9 @@ export type SignalWithFlags = {
   dimension: string
   source: string
   insight_summary: unknown
+  insight_summary_ar?: unknown
   recommended_action: unknown
+  recommended_action_ar?: unknown
   confidence_score: number
   founder_feedback: unknown
   created_at: string

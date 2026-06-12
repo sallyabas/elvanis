@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { useT } from '@/app/context/LanguageContext'
 
 const INDUSTRIES = [
   'B2B SaaS / Enterprise Software',
@@ -33,25 +34,6 @@ const FOCUS_OPTIONS = [
 const TICKET_TYPES = [
   'General question', 'Bug report', 'Billing issue', 'Feature request', 'Account issue',
 ]
-
-const SERVICE_TYPE_LABELS: Record<string, string> = {
-  navigator: 'Navigator Upgrade', roadmap: 'AI Roadmap', cpo: 'CPO Session',
-  conflict: 'Conflict Resolution', upgrade: 'Plan Upgrade', cto: 'CTO Advisory', billing: 'Billing Enquiry',
-}
-
-const SERVICE_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Pending',   color: '#D97706', bg: '#FFFBEB' },
-  active:    { label: 'Active',    color: '#2563EB', bg: '#EFF6FF' },
-  completed: { label: 'Completed', color: '#059669', bg: '#ECFDF5' },
-  cancelled: { label: 'Cancelled', color: '#DC2626', bg: '#FEF2F2' },
-}
-
-const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  paid:      { label: 'Paid',      color: '#059669', bg: '#ECFDF5', icon: '✓' },
-  failed:    { label: 'Failed',    color: '#DC2626', bg: '#FEF2F2', icon: '✗' },
-  refunded:  { label: 'Refunded',  color: '#D97706', bg: '#FFFBEB', icon: '↩' },
-  cancelled: { label: 'Cancelled', color: '#6B7280', bg: '#F9FAFB', icon: '○' },
-}
 
 const CURRENCY_SYMBOL: Record<string, string> = {
   gbp: '£', usd: '$', eur: '€', aed: 'AED ', sar: 'SAR ',
@@ -115,24 +97,14 @@ const sectionStyle = {
 }
 const sectionTitle = { fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 20 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-}
-
-function formatShortDate(iso: string | null): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+function formatAmount(amount: number, currency: string): string {
+  const symbol = CURRENCY_SYMBOL[currency.toLowerCase()] ?? currency.toUpperCase() + ' '
+  return `${symbol}${amount.toFixed(2)}`
 }
 
 function daysLeft(iso: string | null): number | null {
   if (!iso) return null
   return Math.ceil((new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-}
-
-function formatAmount(amount: number, currency: string): string {
-  const symbol = CURRENCY_SYMBOL[currency.toLowerCase()] ?? currency.toUpperCase() + ' '
-  return `${symbol}${amount.toFixed(2)}`
 }
 
 function MsgBox({ msg, msgColor, msgBg }: { msg: string; msgColor: string; msgBg: string }) {
@@ -152,15 +124,53 @@ export default function ProfileClient({
 }: Props) {
   const router  = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
+  const t       = useT()
+
+  const lang       = initialLanguage
+  const dateLocale = lang === 'ar' ? 'ar-EG' : 'en-GB'
+
+  const formatDate = (iso: string | null): string => {
+    if (!iso) return '—'
+    return new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
+  }
+
+  const formatShortDate = (iso: string | null): string => {
+    if (!iso) return '—'
+    return new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
+  }
+
+  // ── Service / payment label maps using t() ──
+  const SERVICE_TYPE_LABELS: Record<string, string> = {
+    navigator: t('profile.svc_navigator'),
+    roadmap:   t('profile.svc_roadmap'),
+    cpo:       t('profile.svc_cpo'),
+    conflict:  t('profile.svc_conflict'),
+    upgrade:   t('profile.svc_upgrade'),
+    cto:       t('profile.svc_cto'),
+    billing:   t('profile.svc_billing'),
+  }
+
+  const SERVICE_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    pending:   { label: t('profile.req_pending'),   color: '#D97706', bg: '#FFFBEB' },
+    active:    { label: t('profile.req_active'),    color: '#2563EB', bg: '#EFF6FF' },
+    completed: { label: t('profile.req_completed'), color: '#059669', bg: '#ECFDF5' },
+    cancelled: { label: t('profile.req_cancelled'), color: '#DC2626', bg: '#FEF2F2' },
+  }
+
+  const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+    paid:      { label: t('profile.pay_paid'),      color: '#059669', bg: '#ECFDF5', icon: '✓' },
+    failed:    { label: t('profile.pay_failed'),    color: '#DC2626', bg: '#FEF2F2', icon: '✗' },
+    refunded:  { label: t('profile.pay_refunded'),  color: '#D97706', bg: '#FFFBEB', icon: '↩' },
+    cancelled: { label: t('profile.pay_cancelled'), color: '#6B7280', bg: '#F9FAFB', icon: '○' },
+  }
 
   // ── Personal info ──
   const [fullName, setFullName]               = useState(initialFullName)
   const [businessName, setBusinessName]       = useState(initialBusinessName)
-  // Track last saved values so button dims after save
   const [savedFullName, setSavedFullName]     = useState(initialFullName)
   const [savedBizName, setSavedBizName]       = useState(initialBusinessName)
   const [saving, setSaving]                   = useState(false)
-  const [personalMsg, setPersonalMsg]         = useState('')   // shown only in personal info section
+  const [personalMsg, setPersonalMsg]         = useState('')
   const [language, setLanguage]               = useState(initialLanguage)
   const [savedLanguage, setSavedLanguage]     = useState(initialLanguage)
   const hasPersonalChanges                    = fullName.trim() !== savedFullName || businessName.trim() !== savedBizName || language !== savedLanguage
@@ -168,7 +178,7 @@ export default function ProfileClient({
   // ── Logo ──
   const [logoUrl, setLogoUrl]                 = useState<string | null>(initialLogoUrl)
   const [uploading, setUploading]             = useState(false)
-  const [logoMsg, setLogoMsg]                 = useState('')   // shown only in logo section
+  const [logoMsg, setLogoMsg]                 = useState('')
 
   // ── Business profile ──
   const [industry, setIndustry]               = useState(initialIndustry)
@@ -201,17 +211,18 @@ export default function ProfileClient({
     setSaving(true); setPersonalMsg('')
     const supabase = createClient()
     const { error } = await supabase.from('founders')
-      .update({ full_name: fullName.trim(), business_name: businessName.trim() , language })
+      .update({ full_name: fullName.trim(), business_name: businessName.trim(), language })
       .eq('id', founderId)
     if (!error) {
-      // Update saved baseline so button dims again
       setSavedFullName(fullName.trim())
       setSavedBizName(businessName.trim())
       setSavedLanguage(language)
-      setPersonalMsg('Saved successfully')
+      setPersonalMsg(t('profile.saved'))
+      // Write language cookie so LanguageContext and DirProvider stay in sync after reload
+      document.cookie = `lang=${language}; path=/; max-age=31536000; SameSite=Lax`
       setTimeout(() => window.location.reload(), 500)
     } else {
-      setPersonalMsg(`Save failed: ${error.message}`)
+      setPersonalMsg(`${t('profile.save_failed')}: ${error.message}`)
     }
     setSaving(false)
   }
@@ -219,7 +230,7 @@ export default function ProfileClient({
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) { setLogoMsg('Logo must be under 2MB'); return }
+    if (file.size > 2 * 1024 * 1024) { setLogoMsg(t('profile.logo_size')); return }
     setUploading(true); setLogoMsg(''); setPersonalMsg('')
     setTimeout(() => setPersonalMsg(''), 4000)
     const supabase = createClient()
@@ -228,19 +239,19 @@ export default function ProfileClient({
     const ext  = file.name.split('.').pop()
     const path = `${user.id}/logo.${ext}`
     const { error: uploadError } = await supabase.storage.from('logos').upload(path, file, { upsert: true })
-    if (uploadError) { setLogoMsg('Upload failed: ' + uploadError.message); setUploading(false); return }
+    if (uploadError) { setLogoMsg(`${t('profile.logo_failed')}: ${uploadError.message}`); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(path)
     await supabase.from('founders').update({ logo_url: publicUrl }).eq('id', founderId)
     setLogoUrl(`${publicUrl}?t=${Date.now()}`)
-    setLogoMsg('Logo updated successfully')
+    setLogoMsg(t('profile.logo_saved'))
     setTimeout(() => setLogoMsg(''), 4000)
     setUploading(false)
   }
 
   function normaliseBrandUrl(raw: string): string {
     if (!raw.trim()) return ''
-    const t = raw.trim()
-    return t.startsWith('http://') || t.startsWith('https://') ? t : `https://${t}`
+    const trimmed = raw.trim()
+    return trimmed.startsWith('http://') || trimmed.startsWith('https://') ? trimmed : `https://${trimmed}`
   }
 
   async function handleSaveBusiness() {
@@ -253,7 +264,7 @@ export default function ProfileClient({
       brand_url:      normaliseBrandUrl(brandUrl) || null,
       focus_metric:   focusMetric || null,
     }).eq('id', founderId)
-    setBizMsg(error ? `Save failed: ${error.message}` : 'Business profile updated')
+    setBizMsg(error ? `${t('profile.save_failed')}: ${error.message}` : t('profile.biz_saved'))
     setTimeout(() => setBizMsg(''), 4000)
     setSavingBiz(false)
   }
@@ -266,11 +277,11 @@ export default function ProfileClient({
       body: JSON.stringify({ founderId, ticketType, subject: subject.trim(), message: supportMsg.trim() }),
     })
     if (res.ok) {
-      setSupportResult('Your message has been sent. We will get back to you within 1 business day.')
+      setSupportResult(t('profile.support_sent'))
       setTimeout(() => setSupportResult(''), 6000)
       setTicketType(''); setSubject(''); setSupportMsg('')
     } else {
-      setSupportResult('Failed to send — please try again or email us directly.')
+      setSupportResult(t('profile.support_failed'))
     }
     setSendingSupport(false)
   }
@@ -286,71 +297,74 @@ export default function ProfileClient({
   const isNavigator = subscriptionTier === 'navigator'
   const isActive    = subscriptionStatus === 'active'
   const remaining   = daysLeft(subscriptionEndsAt)
-  const tierLabel   = isNavigator ? 'Navigator' : subscriptionTier === 'deactivated' ? 'Deactivated' : 'Free'
+  const tierLabel   = isNavigator ? t('profile.tier_navigator') : subscriptionTier === 'deactivated' ? t('profile.tier_deactivated') : t('profile.tier_free')
   const tierColor   = isNavigator ? '#7C3AED' : subscriptionTier === 'deactivated' ? '#DC2626' : '#6B7280'
   const tierBg      = isNavigator ? '#F5F3FF' : subscriptionTier === 'deactivated' ? '#FEF2F2' : '#F9FAFB'
   const visiblePayments = showAllPayments ? payments : payments.slice(0, 3)
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 24px' }}>
-      <a href="/" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Back to dashboard</a>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 28 }}>Your profile</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 28 }}>{t('profile.title')}</h1>
 
       {/* ── Plan badge ── */}
       <div style={{ background: tierBg, borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 16 }}>{isNavigator ? '✨' : '🔒'}</span>
-          <span style={{ fontSize: 14, fontWeight: 600, color: tierColor }}>{tierLabel} plan</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: tierColor }}>{tierLabel} {t('profile.plan')}</span>
         </div>
         {!isNavigator && subscriptionTier !== 'deactivated' && (
           <a href="/advisory?type=navigator" style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none' }}>
-            Upgrade to Navigator →
+            {t('profile.upgrade_cta')}
           </a>
         )}
       </div>
 
-      {/* ── Billing ── Navigator or has payment history ── */}
+      {/* ── Billing ── */}
       {(isNavigator || payments.length > 0) && (
         <div style={{ ...sectionStyle, border: '1px solid #DDD6FE', background: '#FAFAFF' }}>
-          <p style={{ ...sectionTitle, color: '#7C3AED' }}>✨ Billing</p>
+          <p style={{ ...sectionTitle, color: '#7C3AED' }}>{t('profile.billing')}</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EDE9FE', padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Status</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{t('profile.status')}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: isActive ? '#10B981' : '#DC2626' }} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: isActive ? '#059669' : '#DC2626' }}>{isActive ? 'Active' : 'Inactive'}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: isActive ? '#059669' : '#DC2626' }}>{isActive ? t('profile.active') : t('profile.inactive')}</span>
               </div>
             </div>
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EDE9FE', padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Amount</p>
-              <span style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>£29 / month</span>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{t('profile.amount')}</p>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>{t('profile.amount_value')}</span>
             </div>
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EDE9FE', padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Started</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{t('profile.started')}</p>
               <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{formatDate(subscriptionStartedAt)}</span>
             </div>
             <div style={{ background: '#fff', borderRadius: 12, border: `1px solid ${remaining !== null && remaining <= 7 ? '#FECACA' : '#EDE9FE'}`, padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{isActive ? 'Renews' : 'Ended'}</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{isActive ? t('profile.renews') : t('profile.ended')}</p>
               <span style={{ fontSize: 14, fontWeight: 600, color: remaining !== null && remaining <= 7 ? '#DC2626' : '#0F172A' }}>{formatDate(subscriptionEndsAt)}</span>
-              {remaining !== null && remaining > 0 && <p style={{ fontSize: 11, color: remaining <= 7 ? '#DC2626' : '#94A3B8', margin: '4px 0 0' }}>{remaining} day{remaining !== 1 ? 's' : ''} remaining</p>}
-              {remaining !== null && remaining <= 0 && <p style={{ fontSize: 11, color: '#DC2626', margin: '4px 0 0' }}>Plan has expired</p>}
+              {remaining !== null && remaining > 0 && (
+                <p style={{ fontSize: 11, color: remaining <= 7 ? '#DC2626' : '#94A3B8', margin: '4px 0 0' }}>
+                  {t('profile.days_remaining').replace('{n}', String(remaining)).replace('{s}', remaining !== 1 ? 's' : '')}
+                </p>
+              )}
+              {remaining !== null && remaining <= 0 && <p style={{ fontSize: 11, color: '#DC2626', margin: '4px 0 0' }}>{t('profile.plan_expired')}</p>}
             </div>
           </div>
 
           {/* Payment history */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: 0 }}>Payment history</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: 0 }}>{t('profile.payment_history')}</p>
               {payments.length > 3 && (
                 <button onClick={() => setShowAllPayments(s => !s)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#7C3AED', fontFamily: 'inherit' }}>
-                  {showAllPayments ? 'Show less' : `View all ${payments.length}`}
+                  {showAllPayments ? t('profile.show_less') : t('profile.view_all').replace('{n}', String(payments.length))}
                 </button>
               )}
             </div>
             {payments.length === 0 ? (
               <div style={{ background: '#F5F3FF', borderRadius: 10, padding: '14px 16px' }}>
-                <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>No payment records yet. Records appear here after each payment.</p>
+                <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>{t('profile.no_payments')}</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -369,7 +383,7 @@ export default function ProfileClient({
                           <span style={{ fontSize: 12, color: '#6B7280' }}>{formatShortDate(payment.created_at)}</span>
                           {payment.period_start && payment.period_end && <span style={{ fontSize: 12, color: '#94A3B8' }}>{formatShortDate(payment.period_start)} → {formatShortDate(payment.period_end)}</span>}
                           {payment.reference && <span style={{ fontSize: 11, color: '#94A3B8', fontFamily: 'monospace' }}>{payment.reference}</span>}
-                          {payment.cancelled_at && <span style={{ fontSize: 11, color: '#DC2626' }}>Cancelled {formatShortDate(payment.cancelled_at)}</span>}
+                          {payment.cancelled_at && <span style={{ fontSize: 11, color: '#DC2626' }}>{t('profile.cancelled_on')} {formatShortDate(payment.cancelled_at)}</span>}
                         </div>
                       </div>
                     </div>
@@ -381,17 +395,16 @@ export default function ProfileClient({
 
           <div style={{ background: '#EDE9FE', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>
-              {remaining !== null && remaining <= 7 ? '⚠️ Your plan is expiring soon — renew to keep Navigator access.' : 'Questions about your billing? Contact us anytime.'}
+              {remaining !== null && remaining <= 7 ? t('profile.expiring_soon') : t('profile.billing_contact')}
             </p>
-            <a href="/advisory?type=billing"style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 16 }}>Contact us →</a>
+            <a href="/advisory?type=billing" style={{ fontSize: 13, fontWeight: 600, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 16 }}>{t('profile.contact_us')}</a>
           </div>
         </div>
       )}
 
       {/* ── Brand logo ── */}
-      {/* logoMsg only — no personalMsg here */}
       <div style={sectionStyle}>
-        <p style={sectionTitle}>Brand logo</p>
+        <p style={sectionTitle}>{t('profile.brand_logo')}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: logoMsg ? 14 : 0 }}>
           <div onClick={() => fileRef.current?.click()} style={{ width: 72, height: 72, borderRadius: 16, border: '2px dashed #E5E7EB', background: '#F9FAFB', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
             {logoUrl ? <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 28 }}>🏢</span>}
@@ -399,36 +412,34 @@ export default function ProfileClient({
           <div>
             <button onClick={() => fileRef.current?.click()} disabled={uploading}
               style={{ padding: '8px 16px', background: uploading ? '#E5E7EB' : '#F3F4F6', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', marginBottom: 4 }}>
-              {uploading ? 'Uploading...' : 'Upload logo'}
+              {uploading ? t('profile.uploading') : t('profile.upload_logo')}
             </button>
-            <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>PNG or JPG · Max 2MB</p>
+            <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>{t('profile.logo_hint')}</p>
           </div>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
         </div>
-        {/* logoMsg ONLY — never personalMsg */}
         <MsgBox msg={logoMsg} msgColor={getColor(logoMsg)} msgBg={getBg(logoMsg)} />
       </div>
 
       {/* ── Personal information ── */}
-      {/* personalMsg only — no logoMsg here */}
       <div style={sectionStyle}>
-        <p style={sectionTitle}>Personal information</p>
+        <p style={sectionTitle}>{t('profile.personal_info')}</p>
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Full name</label>
+          <label style={labelStyle}>{t('profile.full_name')}</label>
           <input value={fullName} onChange={e => setFullName(e.target.value)} style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
         </div>
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Business name</label>
+          <label style={labelStyle}>{t('profile.business_name')}</label>
           <input value={businessName} onChange={e => setBusinessName(e.target.value)} style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Email</label>
+          <label style={labelStyle}>{t('profile.email')}</label>
           <input value={initialEmail} disabled style={{ ...inputStyle, background: '#F9FAFB', color: '#9CA3AF', cursor: 'default' }} />
-          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>Email cannot be changed. Contact support if needed.</p>
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('profile.email_hint')}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Language / اللغة</label>
+          <label style={labelStyle}>{t('profile.language')} / اللغة</label>
           <div style={{ display: 'flex', gap: 10 }}>
             <button
               type="button"
@@ -441,7 +452,7 @@ export default function ProfileClient({
                 cursor: 'pointer',
               }}
             >
-              English
+              {t('profile.english')}
             </button>
             <button
               type="button"
@@ -454,57 +465,54 @@ export default function ProfileClient({
                 cursor: 'pointer',
               }}
             >
-              العربية
+              {t('profile.arabic')}
             </button>
           </div>
         </div>
-        {/* personalMsg ONLY — never logoMsg */}
         <MsgBox msg={personalMsg} msgColor={getColor(personalMsg)} msgBg={getBg(personalMsg)} />
         <button
           onClick={handleSavePersonal}
           disabled={saving || !hasPersonalChanges}
           style={{ padding: '10px 24px', background: (saving || !hasPersonalChanges) ? '#E5E7EB' : '#2563EB', color: (saving || !hasPersonalChanges) ? '#9CA3AF' : '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: (saving || !hasPersonalChanges) ? 'not-allowed' : 'pointer' }}>
-          {saving ? 'Saving...' : 'Save changes'}
+          {saving ? t('profile.saving') : t('profile.save_changes')}
         </button>
       </div>
 
       {/* ── Business profile ── */}
       <div style={sectionStyle}>
-        <p style={sectionTitle}>Business profile</p>
-        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, marginTop: -12 }}>This information shapes your signals, digest and AI recommendations.</p>
+        <p style={sectionTitle}>{t('profile.business_profile')}</p>
+        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, marginTop: -12 }}>{t('profile.business_profile_sub')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
           <div>
-            <label style={labelStyle}>Industry</label>
+            <label style={labelStyle}>{t('profile.industry')}</label>
             <select value={industry} onChange={e => { setIndustry(e.target.value); if (e.target.value !== 'Other') setIndustryOther('') }} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
-              <option value="">Select industry</option>
+              <option value="">{t('profile.select_industry')}</option>
               {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Market</label>
+            <label style={labelStyle}>{t('profile.market')}</label>
             <select value={market} onChange={e => setMarket(e.target.value)} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
-              <option value="">Select market</option>
+              <option value="">{t('profile.select_market')}</option>
               {MARKETS.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
         </div>
         {industry === 'Other' && (
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Describe your industry</label>
-            <input value={industryOther} onChange={e => setIndustryOther(e.target.value)} placeholder="e.g. Proptech, CleanTech..." style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
+            <label style={labelStyle}>{t('profile.describe_industry')}</label>
+            <input value={industryOther} onChange={e => setIndustryOther(e.target.value)} placeholder={t('profile.industry_placeholder')} style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
           </div>
         )}
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Website <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>optional</span></label>
+          <label style={labelStyle}>{t('profile.website')} <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>{t('profile.optional')}</span></label>
           <input value={brandUrl} onChange={e => setBrandUrl(e.target.value)} placeholder="yourcompany.com" style={inputStyle}
             onFocus={e => e.target.style.borderColor = '#2563EB'}
             onBlur={e => { e.target.style.borderColor = '#E5E7EB'; if (brandUrl.trim() && !brandUrl.startsWith('http')) setBrandUrl(`https://${brandUrl.trim()}`) }} />
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Primary focus</label>
-          <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 10, marginTop: 2 }}>
-          Your focus metric determines which dimension appears as your primary focus on the Home page. Changing it recalculates your business priorities immediately.
-          </p>
+          <label style={labelStyle}>{t('profile.primary_focus')}</label>
+          <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 10, marginTop: 2 }}>{t('profile.focus_hint')}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {FOCUS_OPTIONS.map(opt => (
               <button key={opt.id} onClick={() => setFocusMetric(opt.id)}
@@ -519,21 +527,21 @@ export default function ProfileClient({
         <MsgBox msg={bizMsg} msgColor={getColor(bizMsg)} msgBg={getBg(bizMsg)} />
         <button onClick={handleSaveBusiness} disabled={savingBiz}
           style={{ padding: '10px 24px', background: savingBiz ? '#E5E7EB' : '#2563EB', color: savingBiz ? '#9CA3AF' : '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: savingBiz ? 'not-allowed' : 'pointer' }}>
-          {savingBiz ? 'Saving...' : 'Save business profile'}
+          {savingBiz ? t('profile.saving') : t('profile.save_business')}
         </button>
       </div>
 
       {/* ── Service Requests ── */}
       <div style={sectionStyle}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <p style={sectionTitle}>Service requests</p>
-          <a href="/advisory" style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', textDecoration: 'none' }}>+ New request</a>
+          <p style={sectionTitle}>{t('profile.service_requests')}</p>
+          <a href="/advisory" style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', textDecoration: 'none' }}>{t('profile.new_request')}</a>
         </div>
         {serviceRequests.length === 0 ? (
           <div style={{ background: '#F9FAFB', borderRadius: 12, padding: '24px', textAlign: 'center' }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 6 }}>No service requests yet</p>
-            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>Request an AI Roadmap, CPO session, or hands-on implementation help.</p>
-            <a href="/advisory" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Browse services →</a>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 6 }}>{t('profile.no_requests')}</p>
+            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>{t('profile.no_requests_sub')}</p>
+            <a href="/advisory" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>{t('profile.browse_services')}</a>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -557,50 +565,50 @@ export default function ProfileClient({
 
       {/* ── Contact support ── */}
       <div style={sectionStyle}>
-        <p style={sectionTitle}>Contact support</p>
-        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, marginTop: -12 }}>We typically respond within 1 business day.</p>
+        <p style={sectionTitle}>{t('profile.contact_support')}</p>
+        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, marginTop: -12 }}>{t('profile.support_sub')}</p>
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Ticket type</label>
+          <label style={labelStyle}>{t('profile.ticket_type')}</label>
           <select value={ticketType} onChange={e => setTicketType(e.target.value)} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
-            <option value="">Select type</option>
-            {TICKET_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            <option value="">{t('profile.select_type')}</option>
+            {TICKET_TYPES.map(tt => <option key={tt} value={tt}>{tt}</option>)}
           </select>
         </div>
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Subject</label>
-          <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Brief summary of your issue" style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
+          <label style={labelStyle}>{t('profile.subject')}</label>
+          <input value={subject} onChange={e => setSubject(e.target.value)} placeholder={t('profile.subject_placeholder')} style={inputStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Message</label>
-          <textarea value={supportMsg} onChange={e => setSupportMsg(e.target.value)} placeholder="Describe your issue in detail..." rows={4}
+          <label style={labelStyle}>{t('profile.message')}</label>
+          <textarea value={supportMsg} onChange={e => setSupportMsg(e.target.value)} placeholder={t('profile.message_placeholder')} rows={4}
             style={{ ...inputStyle, resize: 'vertical' as const, fontFamily: 'Inter, sans-serif' }}
             onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'} />
         </div>
         <MsgBox msg={supportResult} msgColor={getColor(supportResult)} msgBg={getBg(supportResult)} />
         <button onClick={handleSendSupport} disabled={sendingSupport || !ticketType || !subject.trim() || !supportMsg.trim()}
           style={{ padding: '10px 24px', background: (!ticketType || !subject.trim() || !supportMsg.trim()) ? '#E5E7EB' : '#2563EB', color: (!ticketType || !subject.trim() || !supportMsg.trim()) ? '#9CA3AF' : '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: (!ticketType || !subject.trim() || !supportMsg.trim()) ? 'not-allowed' : 'pointer' }}>
-          {sendingSupport ? 'Sending...' : 'Send message'}
+          {sendingSupport ? t('profile.sending') : t('profile.send_message')}
         </button>
       </div>
 
       {/* ── Danger zone ── */}
       <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #FCA5A5', padding: '24px' }}>
-        <p style={{ fontSize: 14, fontWeight: 700, color: '#DC2626', marginBottom: 6 }}>Danger zone</p>
-        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, lineHeight: 1.6 }}>Deactivating your account will immediately sign you out and disable access. Your data will be retained for 30 days before permanent deletion.</p>
+        <p style={{ fontSize: 14, fontWeight: 700, color: '#DC2626', marginBottom: 6 }}>{t('profile.danger_zone')}</p>
+        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, lineHeight: 1.6 }}>{t('profile.danger_sub')}</p>
         {!showDelete ? (
           <button onClick={() => setShowDelete(true)} style={{ padding: '9px 20px', background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            Deactivate account
+            {t('profile.deactivate')}
           </button>
         ) : (
           <div style={{ background: '#FEF2F2', borderRadius: 10, padding: '16px' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 12 }}>Are you sure? This cannot be undone.</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 12 }}>{t('profile.deactivate_confirm')}</p>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleDeactivate} disabled={deactivating}
                 style={{ padding: '9px 20px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: deactivating ? 'not-allowed' : 'pointer', opacity: deactivating ? 0.7 : 1 }}>
-                {deactivating ? 'Deactivating...' : 'Yes, deactivate'}
+                {deactivating ? t('profile.deactivating') : t('profile.deactivate_yes')}
               </button>
               <button onClick={() => setShowDelete(false)} style={{ padding: '9px 20px', background: '#fff', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: 9, fontSize: 13, cursor: 'pointer' }}>
-                Cancel
+                {t('scan.cancel')}
               </button>
             </div>
           </div>
