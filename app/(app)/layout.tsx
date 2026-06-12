@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/Sidebar'
 import DirProvider from '@/components/DirProvider'
+import type { Lang } from '@/lib/translations'
+import { LanguageProvider } from '../context/LanguageContext'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerComponentClient()
@@ -22,20 +24,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('severity', 'critical')
     .in('status', ['new', 'acknowledged'])
 
+  const lang = (founder?.language ?? 'en') as Lang
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <DirProvider lang={founder?.language ?? 'en'} />
-      <Sidebar
-        founderName={founder?.full_name ?? null}
-        businessName={founder?.business_name ?? null}
-        subscriptionTier={founder?.subscription_tier ?? null}
-        logoUrl={founder?.logo_url ?? null}
-        criticalCount={criticalCount ?? 0}
-        language={founder?.language ?? 'en'}
-      />
-      <div style={{ flex: 1, overflowX: 'hidden', background: '#F9FAFB' }} className="app-main">
-        {children}
+    <LanguageProvider lang={lang}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <DirProvider lang={founder?.language ?? 'en'} />
+        <Sidebar
+          founderName={founder?.full_name ?? null}
+          businessName={founder?.business_name ?? null}
+          subscriptionTier={founder?.subscription_tier ?? null}
+          logoUrl={founder?.logo_url ?? null}
+          criticalCount={criticalCount ?? 0}
+          language={founder?.language ?? 'en'}
+        />
+        <div style={{ flex: 1, overflowX: 'hidden', background: '#F9FAFB' }} className="app-main">
+          {children}
+        </div>
       </div>
-    </div>
+    </LanguageProvider>
   )
 }
