@@ -94,6 +94,11 @@ export default async function OverviewPage() {
   if (!founder) redirect('/login')
   if (founder.account_status === 'suspended') redirect('/suspended')
 
+    console.log("--- DEBUG START ---");
+console.log("Founder language from Database:", founder.language);
+console.log("Final language being sent to getT:", (founder.language ?? 'en'));
+console.log("--- DEBUG END ---");
+
   const t = getT((founder.language ?? 'en') as 'en' | 'ar')
 
   const { data: assessment } = await supabase
