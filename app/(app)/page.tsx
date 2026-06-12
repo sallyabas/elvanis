@@ -165,9 +165,9 @@ export default async function HomePage() {
 
         {/* ── Overview cross-link ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingTop: 8 }}>
-          <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>More business intelligence</p>
+          <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{t('home.more_intelligence')}</p>
           <a href="/overview" style={{ fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
-            See full business health →
+          {t('home.see_full_health')}
           </a>
         </div>
 
@@ -175,15 +175,15 @@ export default async function HomePage() {
         <div id="tour-assessment-card" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: score ? 16 : 0 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-            {t('home.assessment_score')}
+            {t('assessment.score')}
            </p>
             {score && (
               <div style={{ display: 'flex', gap: 8 }}>
                 <a href="/assessment/result" style={{ fontSize: 13, color: '#2563EB', textDecoration: 'none', padding: '6px 14px', border: '1px solid #BFDBFE', borderRadius: 8, fontWeight: 600 }}>
-                {t('home.full_report')}
+                {t('assessment.full_report')}
                 </a>
                 <a href="/assessment" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
-                {t('home.retake')}
+                {t('assessment.retake')}
                 </a>
               </div>
             )}
@@ -192,10 +192,10 @@ export default async function HomePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '20px', background: '#F9FAFB', borderRadius: 12 }}>
               <div style={{ width: 52, height: 52, background: '#EFF6FF', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>🎯</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>No assessment taken yet</p>
-                <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px', lineHeight: 1.5 }}>Answer 26 questions and get a scored diagnosis across 6 dimensions. Takes 10 minutes.</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}> {t('assessment.no_assessment')}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px', lineHeight: 1.5 }}>{t('assessment.no_assessment_sub')}</p>
                 <a href="/assessment" style={{ display: 'inline-block', padding: '9px 20px', background: '#2563EB', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                {t('home.start_assessment')}
+                {t('assessment.start')}
                 </a>
               </div>
             </div>
@@ -228,9 +228,9 @@ export default async function HomePage() {
         <div id="tour-ai-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>{t('home.ai_readiness')}</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>{t('common.ai_readiness')}</p>
             <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
-                {allActiveSignals.length > 0 ? 'Based on your active signals' : 'Based on your business profile and assessment'}
+                {allActiveSignals.length > 0 ? t('common.based_on_signals') : t('common.based_on_profile')}
               </p>
             </div>
             {aiReadiness.hasEnoughData && aiReadiness.opportunities.length > 0 && (
@@ -249,7 +249,7 @@ export default async function HomePage() {
               </div>
             </div>
           ) : aiReadiness.opportunities.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>No AI opportunities in current data.</p>
+            <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>{t('common.no_ai_opportunities')}</p>
           ) : (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10, marginBottom: 16 }}>
@@ -283,7 +283,7 @@ export default async function HomePage() {
                     Generated {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 ) : (
-                  <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>Your first digest will be generated on your monthly anniversary date.</p>
+                  <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
                 )}
               </div>
               <a href="/plan" style={{ padding: '8px 18px', background: latestDigest ? '#7C3AED' : '#E5E7EB', color: latestDigest ? '#fff' : '#9CA3AF', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -300,8 +300,8 @@ export default async function HomePage() {
         ) : (
           <div id="tour-digest-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' as const }}>
             <div>
-              <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>Your AI-generated 90-day action plan</p>
-              <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>Upgrade to get an action plan built from your signals, updated each scan cycle.</p>
+              <p style={{ fontSize: 14, color: '#6D28D9', margin: '0 0 4px', fontWeight: 600 }}>{t('home.upgrade_plan')}</p>
+              <p style={{ fontSize: 13, color: '#A78BFA', margin: 0 }}>{t('home.upgrade_sub')}</p>
             </div>
             {STRIPE_PAYMENT_LINK ? (
               <a href={STRIPE_PAYMENT_LINK} target="_blank" rel="noopener noreferrer" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -309,7 +309,7 @@ export default async function HomePage() {
               </a>
             ) : (
               <a href="/advisory?type=upgrade" style={{ padding: '10px 22px', background: '#7C3AED', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                {t('home.upgrade_contact')}
+                {t('common.contact_upgrade')}
               </a>
             )}
           </div>
@@ -318,7 +318,7 @@ export default async function HomePage() {
         {/* ── Service CTA ── */}
         <div style={{ background: '#1E1B4B', borderRadius: 16, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' as const }}>
           <div>
-            <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Need a strategic plan or hands-on help?</p>
+            <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>{t('home.service_title')}</p>
             <p style={{ fontSize: 14, color: '#A5B4FC', margin: 0 }}>{t('home.service_sub')}</p>
           </div>
           <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' as const }}>
