@@ -124,12 +124,12 @@ export default function Sidebar({
                   {active && (
                     <span style={{
                       position:     'absolute',
-                      left:         0,
-                      top:          6,
+                      left:         language === 'ar' ? 'auto' : 0,
+                      right:        language === 'ar' ? 0 : 'auto',                      top:          6,
                       bottom:       6,
                       width:        3,
                       background:   '#4F46E5',
-                      borderRadius: '0 2px 2px 0',
+                      borderRadius: language === 'ar' ? '2px 0 0 2px' : '0 2px 2px 0',
                     }} />
                   )}
                   <span style={{ fontSize: 15, width: 20, textAlign: 'center', opacity: active ? 1 : 0.6, flexShrink: 0 }}>
@@ -177,12 +177,12 @@ export default function Sidebar({
               {active && (
                 <span style={{
                   position:     'absolute',
-                  left:         0,
-                  top:          6,
+                  left:         language === 'ar' ? 'auto' : 0,
+                  right:        language === 'ar' ? 0 : 'auto',                  top:          6,
                   bottom:       6,
                   width:        3,
                   background:   '#4F46E5',
-                  borderRadius: '0 2px 2px 0',
+                  borderRadius: language === 'ar' ? '2px 0 0 2px' : '0 2px 2px 0',
                 }} />
               )}
               <span style={{ fontSize: 15, width: 20, textAlign: 'center', opacity: active ? 1 : 0.6, flexShrink: 0 }}>
@@ -328,15 +328,17 @@ export default function Sidebar({
         <aside id="tour-sidebar" style={{
           position:   'fixed',
           top:        0,
-          left:       0,
+          left:       language === 'ar' ? 'auto' : 0,
+          right:      language === 'ar' ? 0 : 'auto',
           height:     '100vh',
           width:      260,
           background: '#0F0D1F',
           display:    'flex',
           flexDirection: 'column',
-          borderRight: '1px solid #1E1B33',
+          borderRight: language === 'ar' ? 'none' : '1px solid #1E1B33',
+          borderLeft:  language === 'ar' ? '1px solid #1E1B33' : 'none',
           zIndex:     9999,
-          transform:  mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transform:  mobileOpen ? 'translateX(0)' : (language === 'ar' ? 'translateX(100%)' : 'translateX(-100%)'),
           transition: 'transform 0.25s ease',
           overflow:   'hidden',
         }}>
@@ -354,7 +356,8 @@ export default function Sidebar({
       background:     '#0F0D1F',
       display:        'flex',
       flexDirection:  'column',
-      borderRight:    '1px solid #1E1B33',
+      borderRight:    language === 'ar' ? 'none' : '1px solid #1E1B33',
+      borderLeft:     language === 'ar' ? '1px solid #1E1B33' : 'none',
       position:       'fixed',
       left:           language === 'ar' ? 'auto' : 0,
       right:          language === 'ar' ? 0 : 'auto',
