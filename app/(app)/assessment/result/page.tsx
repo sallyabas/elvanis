@@ -49,6 +49,12 @@ export default async function AssessmentResultPage() {
     { label: t('assessment.dim_marketing'), val: score.score_marketing as number | null },
     { label: t('assessment.dim_strategy'),  val: score.score_strategy  as number | null },
   ]
+  const LANG_NAMES: Record<string, string> = {
+    en: t('assessment.lang_name_en'),
+    ar: t('assessment.lang_name_ar'),
+  }
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
@@ -63,6 +69,16 @@ export default async function AssessmentResultPage() {
             {reportTitle}
           </h1>
         </div>
+        {langMismatch && (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <p style={{ fontSize: 13, color: '#92400E', margin: 0, lineHeight: 1.6 }}>
+              {t('assessment.lang_mismatch_banner').replace(/{source}/g, LANG_NAMES[scoreLang]).replace(/{target}/g, LANG_NAMES[lang])}
+            </p>
+            <a href="/assessment" style={{ fontSize: 13, fontWeight: 700, color: '#D97706', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              {t('assessment.lang_mismatch_cta')}
+            </a>
+          </div>
+        )}
 
         {/* Overall score */}
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '32px 36px', marginBottom: 20 }}>
