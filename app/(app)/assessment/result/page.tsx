@@ -69,16 +69,6 @@ export default async function AssessmentResultPage() {
             {reportTitle}
           </h1>
         </div>
-        {langMismatch && (
-          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <p style={{ fontSize: 13, color: '#92400E', margin: 0, lineHeight: 1.6 }}>
-              {t('assessment.lang_mismatch_banner').replace(/{source}/g, LANG_NAMES[scoreLang]).replace(/{target}/g, LANG_NAMES[lang])}
-            </p>
-            <a href="/assessment" style={{ fontSize: 13, fontWeight: 700, color: '#D97706', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-              {t('assessment.lang_mismatch_cta')}
-            </a>
-          </div>
-        )}
 
         {/* Overall score */}
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '32px 36px', marginBottom: 20 }}>
@@ -90,11 +80,13 @@ export default async function AssessmentResultPage() {
           {score.overall_status && (
             <p style={{ color: '#374151', fontWeight: 600, marginBottom: 8 }}>{STATUS_MAP[score.overall_status] ?? score.overall_status}</p>
           )}
-          <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.overall_summary}</p>
+          {!langMismatch && (
+            <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.overall_summary}</p>
+          )}
         </div>
 
         {/* Primary constraint */}
-        {score.primary_constraint_summary && (
+        {score.primary_constraint_summary && !langMismatch && (
           <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 20, padding: '24px 28px', marginBottom: 20 }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{t('assessment.primary_constraint')}</p>
             <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.primary_constraint_summary}</p>
@@ -102,27 +94,22 @@ export default async function AssessmentResultPage() {
         )}
 
         {/* 6 dimension scores */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
-          {dimensions.map(({ label, val }) => {
-            const v     = val ?? 0
-            const color = v >= 66 ? '#059669' : v >= 41 ? '#D97706' : '#DC2626'
-            return (
-              <div key={label} style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 22px' }}>
-                <p style={{ fontSize: 12, color: '#6B7280', fontWeight: 600, marginBottom: 8 }}>{label}</p>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 10 }}>
-                  <span style={{ fontSize: 36, fontWeight: 800, color, lineHeight: 1 }}>{val ?? '—'}</span>
-                  {val !== null && <span style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 3 }}>/100</span>}
-                </div>
-                <div style={{ height: 6, background: '#F3F4F6', borderRadius: 99 }}>
-                  <div style={{ height: 6, borderRadius: 99, background: color, width: `${v}%` }} />
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        {langMismatch && (
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #FDE68A', padding: '32px 36px', marginBottom: 20 }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#92400E', marginBottom: 10 }}>
+              {t('assessment.native_notice_title').replace('{source}', LANG_NAMES[scoreLang])}
+            </p>
+            <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 14, marginBottom: 20 }}>
+              {t('assessment.native_notice_explain')}
+            </p>
+            <a href="/assessment" style={{ display: 'inline-block', padding: '10px 20px', background: '#D97706', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+              {t('assessment.native_notice_cta').replace('{target}', LANG_NAMES[lang])}
+            </a>
+          </div>
+        )}
 
         {/* Top 3 findings */}
-        {score.top_3_findings && (
+        {score.top_3_findings && !langMismatch && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 20 }}>{t('assessment.top_findings')}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
