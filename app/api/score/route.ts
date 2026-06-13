@@ -507,6 +507,44 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       return NextResponse.json({ error: 'Invalid JSON from AI' }, { status: 500 })
     }
 
+      // ── DUAL-LANGUAGE TRANSLATION — second small call for summary/findings/closing ──
+      const altLanguage = (diagnosis.language as string) === 'ar' ? 'en' : 'ar'
+      let overallSummaryAlt: string | null = null
+      let top3FindingsAlt: unknown = null
+      let closingMessageAlt: string | null = null
+      let isTranslated = false
+      try {
+        const translatePrompt = `Translate the following JSON fields from ${diagnosis.language} to ${altLanguage}. Preserve business tone and meaning exactly. If translating to Arabic, use Gulf Arabic dialect, and do NOT mix in any English words or Latin letters. Respond with valid JSON only, same structure, no preamble.
+  
+  ${JSON.stringify({
+          overall_summary: diagnosis.overall_summary,
+          top_3_findings:  diagnosis.top_3_findings,
+          closing_message: diagnosis.closing_message,
+        })}`
+  
+        const translateResponse = await groq.chat.completions.create({
+          model:           'llama-3.3-70b-versatile',
+          max_tokens:      1200,
+          temperature:     0.3,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: 'You are a professional business translator. Output valid JSON only.' },
+            { role: 'user',   content: translatePrompt },
+          ],
+        })
+        const translateText = translateResponse.choices[0]?.message?.content ?? ''
+        const tFirstBrace   = translateText.indexOf('{')
+        const tCleaned      = tFirstBrace > 0 ? translateText.substring(tFirstBrace) : translateText
+        const translated    = JSON.parse(tCleaned)
+        overallSummaryAlt = translated.overall_summary ?? null
+        top3FindingsAlt   = translated.top_3_findings  ?? null
+        closingMessageAlt = translated.closing_message ?? null
+        isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt)
+        console.log(`[score] translation to ${altLanguage}: ${isTranslated ? 'success' : 'partial/failed'}`)
+      } catch (translateErr) {
+        console.error('[score] translation call failed (non-fatal):', translateErr)
+      }  
+    
     // ── SERVER-SIDE SCORE CALCULATION — deterministic, never delegated to AI ──
     // Use founder's actual stage from request (passed from founders table)
     // Fall back to AI's business_stage only if not provided, then to early_stage default
@@ -560,6 +598,11 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       overall_score:                trueOverallScore,
       overall_status:               diagnosis.overall_status as string,
       completeness_score:           completenessScore,
+      overall_summary_alt:          overallSummaryAlt,
+      top_3_findings_alt:           top3FindingsAlt,
+      closing_message_alt:          closingMessageAlt,
+      alt_language:                 altLanguage,
+      is_translated:                isTranslated,
       overall_summary:              diagnosis.overall_summary as string,
       primary_constraint_dimension: (diagnosis.primary_constraint as Record<string, string>)?.dimension,
       primary_constraint_summary:   (diagnosis.primary_constraint as Record<string, string>)?.summary,
