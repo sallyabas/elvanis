@@ -708,6 +708,13 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
           await supabase.from('diagnostic_signals').insert(signal)
         }
       }
+      // Hard-delete stale manual signals not regenerated this run — fully re-derivable from assessments/scores history
+      const generatedTypes = new Set(assessmentSignals.map(s => s.signal_type as string))
+      for (const [signalType, prev] of existingMap) {
+        if (!generatedTypes.has(signalType)) {
+          await supabase.from('diagnostic_signals').delete().eq('id', prev.id)
+        }
+      }
 
       // Confirm assessment signals against live source signals
       const { data: liveSignals } = await supabase
