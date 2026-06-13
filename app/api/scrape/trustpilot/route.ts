@@ -210,8 +210,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.85,
       "value": 14,
       "change_percent": null,
-      "evidence": "clean descriptive pattern text extracted from the reviews without special characters"
-    }
+      "evidence": { "en": "clean descriptive pattern text extracted from the reviews without special characters", "ar": "نص وصفي عربي مستخرج من التقييمات بدون رموز خاصة" }    }
   ],
   "overall_diagnosis": "2-3 sentence summary with actual metrics"
 }`
@@ -244,8 +243,8 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         recommended_action: { en: 'Review recent customer feedback and identify top complaint themes to address immediately', ar: 'مراجعة تعليقات العملاء الأخيرة وتحديد أبرز موضوعات الشكاوى لمعالجتها فوراً' },
         severity: data.rating !== null && data.rating < 3.5 ? 'critical' : 'warning',
         confidence_score: 0.7, value: data.rating, change_percent: null,
-        evidence: 'Based on overall Trustpilot rating analysis',
-      }],
+        evidence: { en: 'Based on overall Trustpilot rating analysis', ar: 'بناءً على تحليل تقييمات Trustpilot الإجمالية' },
+            }],
       overall_diagnosis: `${data.domain} has a ${data.rating}/5 rating across ${data.reviewCount} reviews.`
     }
   }
@@ -422,6 +421,9 @@ export async function POST(request: NextRequest) {
       const rawVal    = n.value ?? null
       const parsedValue = (rawVal !== null && !isNaN(Number(rawVal))) ? Number(rawVal) : null
 
+      const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+        ? n.evidence as Record<string, string>
+        : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
       const signalRow = {
         founder_id: founderId, source_id: source?.id ?? null,
         signal_type: n.signal_type, dimension: n.dimension,
@@ -436,7 +438,7 @@ export async function POST(request: NextRequest) {
         source:          'trustpilot',
         period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         period_end:   new Date().toISOString().split('T')[0],
-        raw_data: { scraped, evidence: n.evidence },
+        raw_data: { scraped, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },
       }
 
       const prev = existingMap.get(n.signal_type)

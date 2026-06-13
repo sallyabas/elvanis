@@ -351,8 +351,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.85,
       "value": 6.5,
       "change_percent": 42,
-      "evidence": "from Intercom conversation data"
-    }
+      "evidence": { "en": "from Intercom conversation data", "ar": "من بيانات محادثات Intercom" }    }
   ],
   "overall_diagnosis": "2-3 sentences with actual metrics"
 }`
@@ -391,8 +390,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           confidence_score: 0.75,
           value: intercomData.avgFirstResponseHours,
           change_percent: intercomData.responseTimeChange,
-          evidence: 'From Intercom conversation data',
-        }],
+          evidence: { en: 'From Intercom conversation data', ar: 'من بيانات محادثات Intercom' },        }],
         overall_diagnosis: `${intercomData.totalConversations} conversations in last 30 days. Avg first response ${intercomData.avgFirstResponseHours}h. ${intercomData.openConversations} currently open.`
       }
     }
@@ -415,6 +413,9 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
 
     for (const n of mergedSignals) {
 
+      const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+        ? n.evidence as Record<string, string>
+        : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
       const signalRow = {
         founder_id: founderId,
         source_id: source.id as string,
@@ -431,7 +432,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source: 'intercom',
         period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         period_end: new Date().toISOString().split('T')[0],
-        raw_data: { intercomData, evidence: n.evidence },
+        raw_data: { intercomData, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },
       }
 
       const prev = existingMap.get(n.signal_type)

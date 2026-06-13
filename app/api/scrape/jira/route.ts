@@ -380,7 +380,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.9,
       "value": 4,
       "change_percent": null,
-      "evidence": "from Jira data"
+      "evidence": { "en": "from Jira data", "ar": "من بيانات Jira" }
     }
   ],
   "overall_diagnosis": "2-3 sentences with actual metrics"
@@ -413,8 +413,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           confidence_score: 0.8,
           value: jiraData.openBugs,
           change_percent: null,
-          evidence: jiraData.bugSummaries.join(', '),
-        }],
+          evidence: { en: jiraData.bugSummaries.join(', '), ar: jiraData.bugSummaries.join(', ') },        }],
         overall_diagnosis: `${jiraData.openBugs} open bugs, ${jiraData.recentDone} issues completed in last 90 days.`
       }
     }
@@ -434,9 +433,10 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
 
     const rawSignals = (analysis.signals ?? []).filter((s: Record<string, unknown>) => ((s.confidence_score as number) ?? 0.85) >= 0.5).map((s: Record<string, unknown>) => normalise(s))
     const mergedSignals = mergeSignals(rawSignals)
-
     for (const n of mergedSignals) {
-
+      const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+        ? n.evidence as Record<string, string>
+        : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
       const signalRow = {
         founder_id: founderId,
         source_id: jiraSource.id as string,
@@ -453,7 +453,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source: 'jira',
         period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         period_end: new Date().toISOString().split('T')[0],
-        raw_data: { jiraData, evidence: n.evidence },
+        raw_data: { jiraData, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },
       }
 
       const prev = existingMap.get(n.signal_type)

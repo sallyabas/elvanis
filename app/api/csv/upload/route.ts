@@ -329,7 +329,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.85,
       "value": 45,
       "change_percent": null,  
-      "evidence": "calculated from actual data rows"
+      "evidence": { "en": "calculated from actual data rows", "ar": "محسوب من صفوف البيانات الفعلية" }
     }
   ],
   "overall_diagnosis": "2-3 sentences with exact metrics calculated from the data"
@@ -382,7 +382,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         confidence_score: 0.6,
         value: rows.length,
         change_percent: null,
-        evidence: 'Calculated from uploaded CSV data',
+        evidence: { en: 'Calculated from uploaded CSV data', ar: 'محسوب من بيانات CSV المرفوعة' },
       }],
       overall_diagnosis: `Analysed ${rows.length} records from your ${templateType} export. ${unresolvedCount > 0 ? `${unresolvedCount} unresolved items require attention.` : ''}`
     }
@@ -536,9 +536,12 @@ export async function POST(request: NextRequest) {
         const trend = prevVal !== null && currVal !== null
           ? csvTrend(n.signal_type, prevVal, currVal)
           : 'new'
-        const scanCount = prev ? (prev.scan_count ?? 1) + 1 : 1
+          const scanCount = prev ? (prev.scan_count ?? 1) + 1 : 1
 
-        return {
+          const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+            ? n.evidence as Record<string, string>
+            : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
+          return {
           founder_id:         founder.id,
           source_id:          savedSource.id,
           signal_type:        n.signal_type,
@@ -559,8 +562,7 @@ export async function POST(request: NextRequest) {
           scan_count:         scanCount,
           period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           period_end:   new Date().toISOString().split('T')[0],
-          raw_data: { template_type: templateType, row_count: rows.length, evidence: n.evidence },
-        }
+          raw_data: { template_type: templateType, row_count: rows.length, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },        }
       })
 
     // ── Delete old signals for this source only ──

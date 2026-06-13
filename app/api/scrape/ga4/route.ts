@@ -432,7 +432,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.85,
       "value": -18,
       "change_percent": -18,
-      "evidence": "from GA4 data"
+     "evidence": { "en": "from GA4 data", "ar": "من بيانات GA4" }
     }
   ],
   "overall_diagnosis": "2-3 sentences with actual metrics"
@@ -465,7 +465,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           confidence_score: 0.75,
           value: ga4Data.engagementRate,
           change_percent: ga4Data.engagementChange,
-          evidence: 'From GA4 data',
+          evidence: { en: 'From GA4 data', ar: 'من بيانات GA4' },
         }],
         overall_diagnosis: `${ga4Data.sessions} sessions with ${ga4Data.engagementRate}% engagement rate. ${ga4Data.conversions} conversions recorded.`
       }
@@ -488,7 +488,9 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
     const mergedSignals = mergeSignals(rawSignals)
 
     for (const n of mergedSignals) {
-
+      const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+        ? n.evidence as Record<string, string>
+        : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
       const signalRow = {
         founder_id: founderId,
         source_id: ga4Source.id as string,
@@ -505,7 +507,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source: 'ga4',
         period_start: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         period_end: new Date().toISOString().split('T')[0],
-        raw_data: { ga4Data, evidence: n.evidence },
+        raw_data: { ga4Data, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },
       }
 
       const prev = existingMap.get(n.signal_type)

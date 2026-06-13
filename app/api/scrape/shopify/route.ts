@@ -352,7 +352,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       "confidence_score": 0.85,
       "value": 8.5,
       "change_percent": 42,
-      "evidence": "from Shopify order data"
+      "evidence": { "en": "from Shopify order data", "ar": "من بيانات طلبات Shopify" }
     }
   ],
   "overall_diagnosis": "2-3 sentences with actual metrics"
@@ -390,7 +390,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
           confidence_score: 0.75,
           value: shopifyData.refundRate,
           change_percent: shopifyData.refundRateChange,
-          evidence: 'From Shopify order data',
+          evidence: { en: 'From Shopify order data', ar: 'من بيانات طلبات Shopify' },
         }],
         overall_diagnosis: `${shopifyData.totalOrders} orders generating £${shopifyData.totalRevenue} with ${shopifyData.refundRate}% refund rate and ${shopifyData.repeatPurchaseRate}% repeat purchase rate.`
       }
@@ -414,6 +414,9 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
 
     for (const n of mergedSignals) {
 
+      const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
+        ? n.evidence as Record<string, string>
+        : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
       const signalRow = {
         founder_id: founderId,
         source_id: source.id as string,
@@ -430,7 +433,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
         source: 'shopify',
         period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         period_end: new Date().toISOString().split('T')[0],
-        raw_data: { shopifyData, evidence: n.evidence },
+        raw_data: { shopifyData, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },
       }
 
       const prev = existingMap.get(n.signal_type)

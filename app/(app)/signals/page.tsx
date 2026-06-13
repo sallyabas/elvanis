@@ -220,6 +220,8 @@ export default async function SignalsPage({
     'from Intercom conversation data': t('signals.evidence_intercom'),
     'From Intercom conversation data': t('signals.evidence_intercom'),
     'from Jira data': t('signals.evidence_jira'),
+    'Calculated from uploaded CSV data': t('signals.evidence_csv_uploaded_data'),
+
   }
   const DIM_PLAIN: Record<string, string> = {
     revenue: t('signals.cat_revenue'), customer: t('signals.cat_customer'), marketing: t('signals.cat_marketing'),
@@ -611,8 +613,9 @@ export default async function SignalsPage({
 
                   {showEvidence && (
                     <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, fontStyle: 'italic' }}>
-                      {t('signals.evidence_label')}: 
-                      {EVIDENCE_TRANSLATIONS[evidenceText] ?? evidenceText}                    
+                      {t('signals.evidence_label')}: {lang === 'ar' && signal.raw_data?.evidence_ar
+                        ? String(signal.raw_data.evidence_ar)
+                        : (EVIDENCE_TRANSLATIONS[evidenceText] ?? evidenceText)}                  
                       </p>
                   )}
 
