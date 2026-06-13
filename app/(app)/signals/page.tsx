@@ -209,7 +209,17 @@ export default async function SignalsPage({
     'Based on overall Trustpilot rating analysis': t('signals.evidence_trustpilot'),
     'Based on CSV data analysis': t('signals.evidence_csv'),
     'from Shopify order data': t('signals.evidence_shopify'),
+    'from Shopify customer data': t('signals.evidence_shopify_customer'),
     'from GA4 data': t('signals.evidence_ga4'),
+    'From GA4 data': t('signals.evidence_ga4'),
+    'calculated from actual data rows': t('signals.evidence_csv_rows'),
+    'calculated from AOV data': t('signals.evidence_csv_aov'),
+    'calculated from MRR and churn rate data': t('signals.evidence_csv_mrr_churn'),
+    'calculated from uploaded data': t('signals.evidence_csv_uploaded'),
+    'calculated from refund rate data': t('signals.evidence_csv_refund'),
+    'from Intercom conversation data': t('signals.evidence_intercom'),
+    'From Intercom conversation data': t('signals.evidence_intercom'),
+    'from Jira data': t('signals.evidence_jira'),
   }
   const DIM_PLAIN: Record<string, string> = {
     revenue: t('signals.cat_revenue'), customer: t('signals.cat_customer'), marketing: t('signals.cat_marketing'),
