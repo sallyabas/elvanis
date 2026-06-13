@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
-import { useT } from '@/app/context/LanguageContext'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 // Static service config — colors, flows, stripe links only (no translatable strings)
 const SERVICE_CONFIG = [
@@ -74,6 +74,7 @@ type ServiceWithStrings = ServiceConfig & {
 
 function ServiceRequestPageContent() {
   const t            = useT()
+  const lang         = useLang()
   const searchParams = useSearchParams()
   const defaultType  = searchParams.get('type') ?? ''
   const goalSignal   = searchParams.get('goal')    ?? ''
@@ -189,7 +190,7 @@ function ServiceRequestPageContent() {
             </p>
 
             {submittedService.successNote && (
-              <div style={{ background: submittedService.bg, border: `1px solid ${submittedService.border}`, borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: 'left' }}>
+              <div style={{ background: submittedService.bg, border: `1px solid ${submittedService.border}`, borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: lang === 'ar' ? 'right' : 'left' }}>
                 <p style={{ fontSize: 14, color: submittedService.color, fontWeight: 600, margin: '0 0 4px' }}>
                   {submittedService.flow === 'pay_first'  ? t('advisory.next_payment')  :
                    submittedService.flow === 'calendly'   ? t('advisory.next_booking')  :

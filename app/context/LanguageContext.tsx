@@ -15,3 +15,7 @@ export function useT() {
   // lang only changes on profile save + hard reload, so t is stable for the entire session
   return useMemo(() => getT(lang), [lang])
 }
+
+export function useLang(): Lang {
+  return useContext(LanguageContext)
+}
