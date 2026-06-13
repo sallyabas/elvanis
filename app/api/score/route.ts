@@ -185,14 +185,14 @@ function generateAssessmentSignals(
   // Critical runway
   if (answers.runway === RUNWAY.UNDER_3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'critical', confidence_score: 0.82, value: null,
-      insight_summary: 'Less than 3 months of runway — business faces immediate existential risk without revenue growth or new funding',
-      recommended_action: 'Focus exclusively on revenue-generating activities and cut all non-essential costs this week',
+      insight_summary: t('signals.runway_critical_insight'),
+      recommended_action: t('signals.runway_critical_action'),
       raw_data: { ...base.raw_data, runway: answers.runway },
     })
   } else if (answers.runway === RUNWAY.R_3_6) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'warning', confidence_score: 0.78, value: null,
-      insight_summary: '3–6 months of runway — limited time to prove growth before needing to fundraise or reach profitability',
-      recommended_action: 'Define your key revenue milestone for the next 90 days and work backwards to weekly targets',
+      insight_summary: t('signals.runway_3_6_insight'),
+      recommended_action: t('signals.runway_3_6_action'),
       raw_data: { ...base.raw_data, runway: answers.runway },
     })
   }
@@ -200,14 +200,14 @@ function generateAssessmentSignals(
   // PMF signal
   if (answers.pmf_reaction === PMF.INDIFFERENT) {
     signals.push({ ...base, signal_type: 'engagement_drop', dimension: 'product', severity: 'critical', confidence_score: 0.78, value: null,
-      insight_summary: 'Customers report they would be indifferent if your product disappeared — strong signal of weak product-market fit',
-      recommended_action: 'Run 10 customer interviews this week to understand what job they are actually hiring your product to do',
+      insight_summary: t('signals.pmf_indifferent_insight'),
+      recommended_action: t('signals.pmf_indifferent_action'),
       raw_data: { ...base.raw_data, pmf_reaction: answers.pmf_reaction },
     })
   } else if (answers.pmf_reaction === PMF.NOT_ASKED) {
     signals.push({ ...base, signal_type: 'engagement_drop', dimension: 'product', severity: 'watch', confidence_score: 0.65, value: null,
-      insight_summary: 'Product-market fit has not been validated — you do not know if customers would miss your product',
-      recommended_action: 'Run the Sean Ellis PMF survey with your top 20 customers this week',
+      insight_summary: t('signals.pmf_not_validated_insight'),
+      recommended_action: t('signals.pmf_not_validated_action'),
       raw_data: { ...base.raw_data, pmf_reaction: answers.pmf_reaction },
     })
   }
@@ -215,14 +215,14 @@ function generateAssessmentSignals(
   // Team misalignment
   if (answers.team_alignment === TEAM_ALIGNMENT.SERIOUSLY_MISALIGNED) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'critical', confidence_score: 0.75, value: null,
-      insight_summary: 'Serious misalignment between tech and business teams — frequent conflict is slowing execution and delivery',
-      recommended_action: 'Hold a 2-hour priority alignment session this week — agree on top 3 priorities for next 30 days and stop everything else',
+      insight_summary: t('signals.team_seriously_misaligned_insight'),
+      recommended_action: t('signals.team_seriously_misaligned_action'),
       raw_data: { ...base.raw_data, team_alignment: answers.team_alignment },
     })
   } else if (answers.team_alignment === TEAM_ALIGNMENT.PARTLY_MISALIGNED) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.68, value: null,
-      insight_summary: 'Partial misalignment between tech and business teams is creating friction and slowing delivery',
-      recommended_action: 'Establish a weekly 30-minute priority sync between tech and business leads',
+      insight_summary: t('signals.team_partly_misaligned_insight'),
+      recommended_action: t('signals.team_partly_misaligned_action'),
       raw_data: { ...base.raw_data, team_alignment: answers.team_alignment },
     })
   }
@@ -230,14 +230,14 @@ function generateAssessmentSignals(
   // Team focus
   if (answers.team_focus === TEAM_FOCUS.OFF_TRACK) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'critical', confidence_score: 0.75, value: null,
-      insight_summary: 'Team is clearly off track — busy but not moving the needle on what matters for growth',
-      recommended_action: 'Audit last 2 weeks of work against your 90-day goal — identify and stop the 3 biggest time drains',
+      insight_summary: t('signals.team_focus_off_track_insight'),
+      recommended_action: t('signals.team_focus_off_track_action'),
       raw_data: { ...base.raw_data, team_focus: answers.team_focus },
     })
   } else if (answers.team_focus === TEAM_FOCUS.BUSY_UNCLEAR) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.68, value: null,
-      insight_summary: 'Team is busy but impact is unclear — effort is not translating to measurable business outcomes',
-      recommended_action: 'Define one measurable north star metric and ensure every team task connects to it',
+      insight_summary: t('signals.team_focus_busy_unclear_insight'),
+      recommended_action: t('signals.team_focus_busy_unclear_action'),
       raw_data: { ...base.raw_data, team_focus: answers.team_focus },
     })
   }
@@ -245,8 +245,8 @@ function generateAssessmentSignals(
   // ICP misalignment
   if (answers.icp_targeting === ICP_TARGETING.MISALIGNED) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'marketing', severity: 'warning', confidence_score: 0.72, value: null,
-      insight_summary: 'You know who gets the most value from your product but are targeting a different segment — marketing spend is likely wasted',
-      recommended_action: 'Realign acquisition strategy to target your highest-value customer profile within 30 days',
+      insight_summary: t('signals.icp_misaligned_insight'),
+      recommended_action: t('signals.icp_misaligned_action'),
       raw_data: { ...base.raw_data, icp_targeting: answers.icp_targeting },
     })
   }
@@ -254,8 +254,8 @@ function generateAssessmentSignals(
   // Low referrals
   if (answers.referral_frequency === REFERRAL_FREQUENCY.NEVER) {
     signals.push({ ...base, signal_type: 'nps_decline', dimension: 'customer', severity: 'warning', confidence_score: 0.65, value: null,
-      insight_summary: 'Customers never refer others without being asked — satisfaction is not strong enough to drive organic growth',
-      recommended_action: 'Survey your best customers to understand what would make them recommend you spontaneously',
+      insight_summary: t('signals.low_referrals_insight'),
+      recommended_action: t('signals.low_referrals_action'),
       raw_data: { ...base.raw_data, referral_frequency: answers.referral_frequency },
     })
   }
@@ -263,8 +263,8 @@ function generateAssessmentSignals(
   // Process maturity gap
   if (answers.process_maturity === PROCESS_MATURITY.DOCUMENTED_NOT_FOLLOWED) {
     signals.push({ ...base, signal_type: 'repeat_complaint_pattern', dimension: 'team', severity: 'warning', confidence_score: 0.65, value: null,
-      insight_summary: 'Processes are documented but not followed — execution inconsistency is likely causing recurring issues',
-      recommended_action: 'Identify why processes are not followed and either simplify them or enforce accountability',
+      insight_summary: t('signals.process_not_followed_insight'),
+      recommended_action: t('signals.process_not_followed_action'),
       raw_data: { ...base.raw_data, process_maturity: answers.process_maturity },
     })
   }
@@ -274,8 +274,8 @@ function generateAssessmentSignals(
   // slow velocity, severe key-person risk. Correlates with delivery delays and burnout.
   if (answers.team_size === TEAM_SIZE.SOLO) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.80, value: null,
-      insight_summary: 'Solo founder detected — you are the single point of failure for all execution, strategy and operations. Key-person risk is extremely high.',
-      recommended_action: 'Identify the one highest-value task only you can do and systematically delegate or automate everything else. Consider a fractional hire or co-founder for critical gaps.',
+      insight_summary: t('signals.solo_founder_insight'),
+      recommended_action: t('signals.solo_founder_action'),
       raw_data: { ...base.raw_data, team_size: answers.team_size, signal_origin: 'solo_founder' },
     })
   }
@@ -288,14 +288,14 @@ function generateAssessmentSignals(
     
   ) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'product', severity: 'warning', confidence_score: 0.75, value: null,
-      insight_summary: 'No internal technical capacity — 100% outsourced engineering means slow iteration cycles and high costs that erode runway before product-market fit is found.',
-      recommended_action: 'Either hire a part-time technical lead or find a technical co-founder. Outsourcing 100% of engineering at early stage typically results in 3-5x longer iteration cycles.',
+      insight_summary: t('signals.tech_outsourced_insight'),
+      recommended_action: t('signals.tech_outsourced_action'),
       raw_data: { ...base.raw_data, technical_capacity: answers.technical_capacity, signal_origin: 'no_technical_capacity' },
     })
   } else if (answers.technical_capacity === TECHNICAL_CAPACITY.LIMITED_TECH) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'product', severity: 'watch', confidence_score: 0.65, value: null,
-      insight_summary: 'Limited technical capacity — engineering bandwidth may constrain your ability to iterate quickly enough to find product-market fit.',
-      recommended_action: 'Audit your current technical bottlenecks and identify the highest-impact capability gap to address in the next 60 days.',
+      insight_summary: t('signals.tech_limited_insight'),
+      recommended_action: t('signals.tech_limited_action'),
       raw_data: { ...base.raw_data, technical_capacity: answers.technical_capacity, signal_origin: 'limited_technical_capacity' },
     })
   }
@@ -309,15 +309,15 @@ function generateAssessmentSignals(
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue',
       severity: pricingScore === 1 ? 'critical' : 'warning',
       confidence_score: 0.75, value: pricingScore,
-      insight_summary: `Low pricing confidence (score ${pricingScore}/5) — likely over-discounting to close deals, compressing margins and extending CAC payback period`,
-      recommended_action: 'Run 5 customer value-mapping conversations to understand outcomes your product drives, then reprice based on value delivered rather than competitive fear',
+      insight_summary: t('signals.pricing_low_insight').replace('{score}', String(pricingScore)),
+      recommended_action: t('signals.pricing_low_action'),
       raw_data: { ...base.raw_data, pricing_confidence: pricingScore, signal_origin: 'pricing_confidence_low' },
     })
   } else if (pricingScore === 3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue',
       severity: 'watch', confidence_score: 0.60, value: pricingScore,
-      insight_summary: `Moderate pricing confidence (score 3/5) — pricing may not fully reflect the value you deliver`,
-      recommended_action: 'Test a 15-20% price increase with your next 3 prospects and measure conversion impact',
+      insight_summary: t('signals.pricing_medium_insight'),
+      recommended_action: t('signals.pricing_medium_action'),
       raw_data: { ...base.raw_data, pricing_confidence: pricingScore, signal_origin: 'pricing_confidence_medium' },
     })
   }
