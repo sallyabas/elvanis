@@ -107,7 +107,8 @@ function generateAssessmentSignals(
   assessmentId: string,
   answers: Record<string, string>,
   realNumbers: Record<string, string>,
-  t: ReturnType<typeof getT>
+  tEn: ReturnType<typeof getT>,
+  tAr: ReturnType<typeof getT>
 ): Array<Record<string, unknown>> {
   const signals: Array<Record<string, unknown>> = []
   const now = new Date()
@@ -138,8 +139,10 @@ function generateAssessmentSignals(
   // LTV < CAC — existential unit economics failure
   if (ltv !== null && cac !== null && ltv < cac) {
     signals.push({ ...base, signal_type: 'churn_spike', dimension: 'revenue', severity: 'critical', confidence_score: 0.92, value: ltv,
-      insight_summary: t('signals.ltv_below_cac_insight').replace('{ltv}', String(ltv)).replace('{cac}', String(cac)),
-      recommended_action: t('signals.ltv_below_cac_action'),
+      insight_summary: tEn('signals.ltv_below_cac_insight').replace('{ltv}', String(ltv)).replace('{cac}', String(cac)),
+      insight_summary_ar: tAr('signals.ltv_below_cac_insight').replace('{ltv}', String(ltv)).replace('{cac}', String(cac)),
+      recommended_action: tEn('signals.ltv_below_cac_action'),
+      recommended_action_ar: tAr('signals.ltv_below_cac_action'),
       raw_data: { ...base.raw_data, ltv, cac, calculation: 'LTV < CAC' },
     })
   }
@@ -147,8 +150,10 @@ function generateAssessmentSignals(
   // LTV:CAC ratio < 3:1 — scaling risk
   if (ltv !== null && cac !== null && ltv >= cac && ltv / cac < 3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'warning', confidence_score: 0.85, value: parseFloat((ltv / cac).toFixed(2)),
-      insight_summary: t('signals.ltv_cac_ratio_insight').replace('{ratio}', (ltv / cac).toFixed(1)),
-      recommended_action: t('signals.ltv_cac_ratio_action'),
+      insight_summary: tEn('signals.ltv_cac_ratio_insight').replace('{ratio}', (ltv / cac).toFixed(1)),
+      insight_summary_ar: tAr('signals.ltv_cac_ratio_insight').replace('{ratio}', (ltv / cac).toFixed(1)),
+      recommended_action: tEn('signals.ltv_cac_ratio_action'),
+      recommended_action_ar: tAr('signals.ltv_cac_ratio_action'),
       raw_data: { ...base.raw_data, ltv, cac, ratio: ltv / cac },
     })
   }
@@ -156,8 +161,10 @@ function generateAssessmentSignals(
   // High churn
   if (churnRate !== null && churnRate > 5) {
     signals.push({ ...base, signal_type: 'churn_spike', dimension: 'customer', severity: churnRate > 10 ? 'critical' : 'warning', confidence_score: 0.88, value: churnRate,
-      insight_summary: t('signals.high_churn_insight').replace('{churn}', String(churnRate)).replace('{annual}', String(Math.round(churnRate * 12))),
-      recommended_action: t('signals.high_churn_action'),
+      insight_summary: tEn('signals.high_churn_insight').replace('{churn}', String(churnRate)).replace('{annual}', String(Math.round(churnRate * 12))),
+      insight_summary_ar: tAr('signals.high_churn_insight').replace('{churn}', String(churnRate)).replace('{annual}', String(Math.round(churnRate * 12))),
+      recommended_action: tEn('signals.high_churn_action'),
+      recommended_action_ar: tAr('signals.high_churn_action'),
       raw_data: { ...base.raw_data, churn_rate: churnRate },
     })
   }
@@ -165,8 +172,10 @@ function generateAssessmentSignals(
   // Negative or flat MRR growth
   if (mrrGrowth !== null && mrrGrowth <= 0) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: mrrGrowth < -5 ? 'critical' : 'warning', confidence_score: 0.85, value: mrrGrowth, change_percent: mrrGrowth,
-      insight_summary: (mrrGrowth < 0 ? t('signals.mrr_declining_insight') : t('signals.mrr_flat_insight')).replace('{growth}', String(mrrGrowth)),
-      recommended_action: t('signals.mrr_growth_action'),
+      insight_summary: (mrrGrowth < 0 ? tEn('signals.mrr_declining_insight') : tEn('signals.mrr_flat_insight')).replace('{growth}', String(mrrGrowth)),
+      insight_summary_ar: (mrrGrowth < 0 ? tAr('signals.mrr_declining_insight') : tAr('signals.mrr_flat_insight')).replace('{growth}', String(mrrGrowth)),
+      recommended_action: tEn('signals.mrr_growth_action'),
+      recommended_action_ar: tAr('signals.mrr_growth_action'),
       raw_data: { ...base.raw_data, mrr_growth: mrrGrowth },
     })
   }
@@ -174,8 +183,10 @@ function generateAssessmentSignals(
   // Low NPS
   if (nps !== null && nps < 30) {
     signals.push({ ...base, signal_type: 'nps_decline', dimension: 'customer', severity: nps < 0 ? 'critical' : 'warning', confidence_score: 0.85, value: nps,
-      insight_summary: t('signals.low_nps_insight').replace('{nps}', String(nps)),
-      recommended_action: t('signals.low_nps_action'),
+      insight_summary: tEn('signals.low_nps_insight').replace('{nps}', String(nps)),
+      insight_summary_ar: tAr('signals.low_nps_insight').replace('{nps}', String(nps)),
+      recommended_action: tEn('signals.low_nps_action'),
+      recommended_action_ar: tAr('signals.low_nps_action'),
       raw_data: { ...base.raw_data, nps },
     })
   }
@@ -185,14 +196,18 @@ function generateAssessmentSignals(
   // Critical runway
   if (answers.runway === RUNWAY.UNDER_3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'critical', confidence_score: 0.82, value: null,
-      insight_summary: t('signals.runway_critical_insight'),
-      recommended_action: t('signals.runway_critical_action'),
+      insight_summary: tEn('signals.runway_critical_insight'),
+      insight_summary_ar: tAr('signals.runway_critical_insight'),
+      recommended_action: tEn('signals.runway_critical_action'),
+      recommended_action_ar: tAr('signals.runway_critical_action'),
       raw_data: { ...base.raw_data, runway: answers.runway },
     })
   } else if (answers.runway === RUNWAY.R_3_6) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'warning', confidence_score: 0.78, value: null,
-      insight_summary: t('signals.runway_3_6_insight'),
-      recommended_action: t('signals.runway_3_6_action'),
+      insight_summary: tEn('signals.runway_3_6_insight'),
+      insight_summary_ar: tAr('signals.runway_3_6_insight'),
+      recommended_action: tEn('signals.runway_3_6_action'),
+      recommended_action_ar: tAr('signals.runway_3_6_action'),
       raw_data: { ...base.raw_data, runway: answers.runway },
     })
   }
@@ -200,14 +215,18 @@ function generateAssessmentSignals(
   // PMF signal
   if (answers.pmf_reaction === PMF.INDIFFERENT) {
     signals.push({ ...base, signal_type: 'engagement_drop', dimension: 'product', severity: 'critical', confidence_score: 0.78, value: null,
-      insight_summary: t('signals.pmf_indifferent_insight'),
-      recommended_action: t('signals.pmf_indifferent_action'),
+      insight_summary: tEn('signals.pmf_indifferent_insight'),
+      insight_summary_ar: tAr('signals.pmf_indifferent_insight'),
+      recommended_action: tEn('signals.pmf_indifferent_action'),
+      recommended_action_ar: tAr('signals.pmf_indifferent_action'),
       raw_data: { ...base.raw_data, pmf_reaction: answers.pmf_reaction },
     })
   } else if (answers.pmf_reaction === PMF.NOT_ASKED) {
     signals.push({ ...base, signal_type: 'engagement_drop', dimension: 'product', severity: 'watch', confidence_score: 0.65, value: null,
-      insight_summary: t('signals.pmf_not_validated_insight'),
-      recommended_action: t('signals.pmf_not_validated_action'),
+      insight_summary: tEn('signals.pmf_not_validated_insight'),
+      insight_summary_ar: tAr('signals.pmf_not_validated_insight'),
+      recommended_action: tEn('signals.pmf_not_validated_action'),
+      recommended_action_ar: tAr('signals.pmf_not_validated_action'),
       raw_data: { ...base.raw_data, pmf_reaction: answers.pmf_reaction },
     })
   }
@@ -215,14 +234,18 @@ function generateAssessmentSignals(
   // Team misalignment
   if (answers.team_alignment === TEAM_ALIGNMENT.SERIOUSLY_MISALIGNED) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'critical', confidence_score: 0.75, value: null,
-      insight_summary: t('signals.team_seriously_misaligned_insight'),
-      recommended_action: t('signals.team_seriously_misaligned_action'),
+      insight_summary: tEn('signals.team_seriously_misaligned_insight'),
+      insight_summary_ar: tAr('signals.team_seriously_misaligned_insight'),
+      recommended_action: tEn('signals.team_seriously_misaligned_action'),
+      recommended_action_ar: tAr('signals.team_seriously_misaligned_action'),
       raw_data: { ...base.raw_data, team_alignment: answers.team_alignment },
     })
   } else if (answers.team_alignment === TEAM_ALIGNMENT.PARTLY_MISALIGNED) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.68, value: null,
-      insight_summary: t('signals.team_partly_misaligned_insight'),
-      recommended_action: t('signals.team_partly_misaligned_action'),
+      insight_summary: tEn('signals.team_partly_misaligned_insight'),
+      insight_summary_ar: tAr('signals.team_partly_misaligned_insight'),
+      recommended_action: tEn('signals.team_partly_misaligned_action'),
+      recommended_action_ar: tAr('signals.team_partly_misaligned_action'),
       raw_data: { ...base.raw_data, team_alignment: answers.team_alignment },
     })
   }
@@ -230,14 +253,18 @@ function generateAssessmentSignals(
   // Team focus
   if (answers.team_focus === TEAM_FOCUS.OFF_TRACK) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'critical', confidence_score: 0.75, value: null,
-      insight_summary: t('signals.team_focus_off_track_insight'),
-      recommended_action: t('signals.team_focus_off_track_action'),
+      insight_summary: tEn('signals.team_focus_off_track_insight'),
+      insight_summary_ar: tAr('signals.team_focus_off_track_insight'),
+      recommended_action: tEn('signals.team_focus_off_track_action'),
+      recommended_action_ar: tAr('signals.team_focus_off_track_action'),
       raw_data: { ...base.raw_data, team_focus: answers.team_focus },
     })
   } else if (answers.team_focus === TEAM_FOCUS.BUSY_UNCLEAR) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.68, value: null,
-      insight_summary: t('signals.team_focus_busy_unclear_insight'),
-      recommended_action: t('signals.team_focus_busy_unclear_action'),
+      insight_summary: tEn('signals.team_focus_busy_unclear_insight'),
+      insight_summary_ar: tAr('signals.team_focus_busy_unclear_insight'),
+      recommended_action: tEn('signals.team_focus_busy_unclear_action'),
+      recommended_action_ar: tAr('signals.team_focus_busy_unclear_action'),
       raw_data: { ...base.raw_data, team_focus: answers.team_focus },
     })
   }
@@ -245,8 +272,10 @@ function generateAssessmentSignals(
   // ICP misalignment
   if (answers.icp_targeting === ICP_TARGETING.MISALIGNED) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'marketing', severity: 'warning', confidence_score: 0.72, value: null,
-      insight_summary: t('signals.icp_misaligned_insight'),
-      recommended_action: t('signals.icp_misaligned_action'),
+      insight_summary: tEn('signals.icp_misaligned_insight'),
+      insight_summary_ar: tAr('signals.icp_misaligned_insight'),
+      recommended_action: tEn('signals.icp_misaligned_action'),
+      recommended_action_ar: tAr('signals.icp_misaligned_action'),
       raw_data: { ...base.raw_data, icp_targeting: answers.icp_targeting },
     })
   }
@@ -254,8 +283,10 @@ function generateAssessmentSignals(
   // Low referrals
   if (answers.referral_frequency === REFERRAL_FREQUENCY.NEVER) {
     signals.push({ ...base, signal_type: 'nps_decline', dimension: 'customer', severity: 'warning', confidence_score: 0.65, value: null,
-      insight_summary: t('signals.low_referrals_insight'),
-      recommended_action: t('signals.low_referrals_action'),
+      insight_summary: tEn('signals.low_referrals_insight'),
+      insight_summary_ar: tAr('signals.low_referrals_insight'),
+      recommended_action: tEn('signals.low_referrals_action'),
+      recommended_action_ar: tAr('signals.low_referrals_action'),
       raw_data: { ...base.raw_data, referral_frequency: answers.referral_frequency },
     })
   }
@@ -263,8 +294,10 @@ function generateAssessmentSignals(
   // Process maturity gap
   if (answers.process_maturity === PROCESS_MATURITY.DOCUMENTED_NOT_FOLLOWED) {
     signals.push({ ...base, signal_type: 'repeat_complaint_pattern', dimension: 'team', severity: 'warning', confidence_score: 0.65, value: null,
-      insight_summary: t('signals.process_not_followed_insight'),
-      recommended_action: t('signals.process_not_followed_action'),
+      insight_summary: tEn('signals.process_not_followed_insight'),
+      insight_summary_ar: tAr('signals.process_not_followed_insight'),
+      recommended_action: tEn('signals.process_not_followed_action'),
+      recommended_action_ar: tAr('signals.process_not_followed_action'),
       raw_data: { ...base.raw_data, process_maturity: answers.process_maturity },
     })
   }
@@ -274,8 +307,10 @@ function generateAssessmentSignals(
   // slow velocity, severe key-person risk. Correlates with delivery delays and burnout.
   if (answers.team_size === TEAM_SIZE.SOLO) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.80, value: null,
-      insight_summary: t('signals.solo_founder_insight'),
-      recommended_action: t('signals.solo_founder_action'),
+      insight_summary: tEn('signals.solo_founder_insight'),
+      insight_summary_ar: tAr('signals.solo_founder_insight'),
+      recommended_action: tEn('signals.solo_founder_action'),
+      recommended_action_ar: tAr('signals.solo_founder_action'),
       raw_data: { ...base.raw_data, team_size: answers.team_size, signal_origin: 'solo_founder' },
     })
   }
@@ -288,14 +323,18 @@ function generateAssessmentSignals(
     
   ) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'product', severity: 'warning', confidence_score: 0.75, value: null,
-      insight_summary: t('signals.tech_outsourced_insight'),
-      recommended_action: t('signals.tech_outsourced_action'),
+      insight_summary: tEn('signals.tech_outsourced_insight'),
+      insight_summary_ar: tAr('signals.tech_outsourced_insight'),
+      recommended_action: tEn('signals.tech_outsourced_action'),
+      recommended_action_ar: tAr('signals.tech_outsourced_action'),
       raw_data: { ...base.raw_data, technical_capacity: answers.technical_capacity, signal_origin: 'no_technical_capacity' },
     })
   } else if (answers.technical_capacity === TECHNICAL_CAPACITY.LIMITED_TECH) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'product', severity: 'watch', confidence_score: 0.65, value: null,
-      insight_summary: t('signals.tech_limited_insight'),
-      recommended_action: t('signals.tech_limited_action'),
+      insight_summary: tEn('signals.tech_limited_insight'),
+      insight_summary_ar: tAr('signals.tech_limited_insight'),
+      recommended_action: tEn('signals.tech_limited_action'),
+      recommended_action_ar: tAr('signals.tech_limited_action'),
       raw_data: { ...base.raw_data, technical_capacity: answers.technical_capacity, signal_origin: 'limited_technical_capacity' },
     })
   }
@@ -309,15 +348,19 @@ function generateAssessmentSignals(
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue',
       severity: pricingScore === 1 ? 'critical' : 'warning',
       confidence_score: 0.75, value: pricingScore,
-      insight_summary: t('signals.pricing_low_insight').replace('{score}', String(pricingScore)),
-      recommended_action: t('signals.pricing_low_action'),
+      insight_summary: tEn('signals.pricing_low_insight').replace('{score}', String(pricingScore)),
+      insight_summary_ar: tAr('signals.pricing_low_insight').replace('{score}', String(pricingScore)),
+      recommended_action: tEn('signals.pricing_low_action'),
+      recommended_action_ar: tAr('signals.pricing_low_action'),
       raw_data: { ...base.raw_data, pricing_confidence: pricingScore, signal_origin: 'pricing_confidence_low' },
     })
   } else if (pricingScore === 3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue',
       severity: 'watch', confidence_score: 0.60, value: pricingScore,
-      insight_summary: t('signals.pricing_medium_insight'),
-      recommended_action: t('signals.pricing_medium_action'),
+      insight_summary: tEn('signals.pricing_medium_insight'),
+      insight_summary_ar: tAr('signals.pricing_medium_insight'),
+      recommended_action: tEn('signals.pricing_medium_action'),
+      recommended_action_ar: tAr('signals.pricing_medium_action'),
       raw_data: { ...base.raw_data, pricing_confidence: pricingScore, signal_origin: 'pricing_confidence_medium' },
     })
   }
@@ -633,8 +676,9 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
 
     // ── GENERATE ASSESSMENT SIGNALS ──
     console.log('[score] generating assessment signals...')
-    const t = getT((language as 'en' | 'ar') ?? 'en')
-    const assessmentSignals = generateAssessmentSignals(founderId, assessmentId, answers, safeRealNumbers, t)
+    const tEn = getT('en')
+    const tAr = getT('ar')
+    const assessmentSignals = generateAssessmentSignals(founderId, assessmentId, answers, safeRealNumbers, tEn, tAr)
     if (assessmentSignals.length > 0) {
       const { data: existingManual } = await supabase
         .from('diagnostic_signals')
