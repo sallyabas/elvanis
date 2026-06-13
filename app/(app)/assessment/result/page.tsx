@@ -114,6 +114,24 @@ export default async function AssessmentResultPage() {
         )}
 
         {/* 6 dimension scores */}
+        <div className="grid-3-col" style={{ marginBottom: 20 }}>
+          {dimensions.map(({ label, val }) => {
+            const v     = val ?? 0
+            const color = v >= 66 ? '#059669' : v >= 41 ? '#D97706' : '#DC2626'
+            return (
+              <div key={label} style={{ background: '#F9FAFB', borderRadius: 12, padding: '14px 16px' }}>
+                <p style={{ fontSize: 11, color: '#6B7280', fontWeight: 600, marginBottom: 6 }}>{label}</p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 8 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1 }}>{val ?? '—'}</span>
+                  {val !== null && <span style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 2 }}>/100</span>}
+                </div>
+                <div style={{ height: 4, background: '#E5E7EB', borderRadius: 99 }}>
+                  <div style={{ height: 4, borderRadius: 99, background: color, width: `${v}%` }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
         {langMismatch && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #FDE68A', padding: '32px 36px', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
