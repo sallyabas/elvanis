@@ -203,21 +203,21 @@ export default async function SignalsPage({
   const dimensionIcon = (d: string) => ({ customer: '👥', team: '⚙️', marketing: '📣', revenue: '💰', product: '🎯', strategy: '🧭' }[d] ?? '📊')
 
   const DIMENSION_LABELS: Record<string, string> = {
-    revenue:   '💰 Revenue Engine',
-    customer:  '👥 Customer Health',
-    marketing: '📈 Growth & Acquisition',
-    team:      '⚙️ Execution Capacity',
-    product:   '🎯 Product-Market Fit',
-    strategy:  '🧭 Strategic Clarity',
+    revenue:   `💰 ${t('signals.cat_revenue')}`,
+    customer:  `👥 ${t('signals.cat_customer')}`,
+    marketing: `📈 ${t('signals.cat_marketing')}`,
+    team:      `⚙️ ${t('signals.cat_team')}`,
+    product:   `🎯 ${t('signals.cat_product')}`,
+    strategy:  `🧭 ${t('signals.cat_strategy')}`,
   }
 
   const sourceLabel: Record<string, string> = {
     trustpilot: '⭐ Trustpilot', ga4: '📊 GA4', csv: '📁 CSV',
-    jira: '🔧 Jira', shopify: '🛍️ Shopify', intercom: '💬 Intercom', manual: '📋 Assessment',
+    jira: '🔧 Jira', shopify: '🛍️ Shopify', intercom: '💬 Intercom', manual: `📋 ${t('signals.source_assessment')}`,
   }
   const sourceLabelShort: Record<string, string> = {
     trustpilot: 'Trustpilot', ga4: 'GA4', csv: 'CSV',
-    jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', manual: 'Assessment',
+    jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', manual: t('signals.source_assessment'),
   }
 
   const getSectionTitle = () => {
@@ -308,13 +308,13 @@ export default async function SignalsPage({
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
                 {[
-                  { id: '',          label: 'All',                  icon: '📊' },
-                  { id: 'revenue',   label: 'Revenue Engine',       icon: '💰' },
-                  { id: 'customer',  label: 'Customer Health',      icon: '👥' },
-                  { id: 'marketing', label: 'Growth & Acquisition', icon: '📈' },
-                  { id: 'team',      label: 'Execution Capacity',   icon: '⚙️' },
-                  { id: 'product',   label: 'Product-Market Fit',   icon: '🎯' },
-                  { id: 'strategy',  label: 'Strategic Clarity',    icon: '🧭' },
+                  { id: '',          label: t('signals.cat_all'),       icon: '📊' },
+                  { id: 'revenue',   label: t('signals.cat_revenue'),   icon: '💰' },
+                  { id: 'customer',  label: t('signals.cat_customer'),  icon: '👥' },
+                  { id: 'marketing', label: t('signals.cat_marketing'), icon: '📈' },
+                  { id: 'team',      label: t('signals.cat_team'),      icon: '⚙️' },
+                  { id: 'product',   label: t('signals.cat_product'),   icon: '🎯' },
+                  { id: 'strategy',  label: t('signals.cat_strategy'),  icon: '🧭' },
                 ].map(dim => {
                   const count = dim.id ? allAnalysed.filter(s => s.dimension === dim.id).length : total
                   if (dim.id && count === 0) return null

@@ -475,3 +475,20 @@ Mapped from `SIGNAL_GOAL_MAP.service` for in-app upsell cards.
 ---
 
 *End of context document.*
+
+## Backlog — Signals page i18n audit (next session)
+Finalized inventory (from manual extraction + grep diff, confirmed complete for /signals page):
+- Status/filter values: new, acknowledged, resolved, dismissed, critical, warning, working, conflicts
+- Source labels: Trustpilot, GA4, CSV, Jira, Shopify, Intercom (brand names — recommend NOT translating)
+- Category labels: Revenue Engine, Customer Health, Growth & Acquisition, Execution Capacity, Product-Market Fit, Strategic Clarity, All (DONE for /signals — see cat_* keys; check other pages using same labels)
+- Buttons: Connect Tools, Start Assessment, Working, Mark Fixed, Correct, Not Applicable, Move to Active, Run new scan, Clear all filters
+- Descriptive: Evidence:, "in {days}d", ready now, Improving/Worsening/No change, Signal confirmed, Confirmed by, Conflicts with, In progress, Action, confidence
+- Empty/info states: Scanning your data..., No active signals (in category/found), Try a different filter, Ruw scan, Connect live data sources, Take the assessment or connect
+- Filter section: By Output, By Source, Active filters:, All Sources, All Active
+- Navigation: Your command center, Signals, Next scan, Archived/Not applicable/Deprioritised signals (+count)
+- Tooltip: "{weeklyNavigatorSources} scan every 7 days for Navigator..."
+- Date formatting: ar-EG/en-GB locale strings + date options — verify Arabic numerals render correctly
+
+## Backlog — Evidence-text i18n (separate files, NOT /signals page)
+- 'Based on CSV data analysis', 'Based on overall Trustpilot rating analysis', 'From GA4 data'
+- Located in CSV/Trustpilot/GA4 signal-generator files (raw_data.evidence field) — same pattern as today's assessment-signals fix (generate both EN+AR at creation time)
