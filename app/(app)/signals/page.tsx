@@ -205,6 +205,12 @@ export default async function SignalsPage({
   const SEVERITY_LABELS: Record<string, string> = {
     critical: t('signals.sev_critical'), warning: t('signals.sev_warning'), watch: t('signals.sev_watch'),
   }
+  const EVIDENCE_TRANSLATIONS: Record<string, string> = {
+    'Based on overall Trustpilot rating analysis': t('signals.evidence_trustpilot'),
+    'Based on CSV data analysis': t('signals.evidence_csv'),
+    'from Shopify order data': t('signals.evidence_shopify'),
+    'from GA4 data': t('signals.evidence_ga4'),
+  }
   const DIM_PLAIN: Record<string, string> = {
     revenue: t('signals.cat_revenue'), customer: t('signals.cat_customer'), marketing: t('signals.cat_marketing'),
     team: t('signals.cat_team'), product: t('signals.cat_product'), strategy: t('signals.cat_strategy'),
@@ -433,7 +439,7 @@ export default async function SignalsPage({
                 const label: Record<string, string> = { ga4: 'GA4', jira: 'Jira', shopify: 'Shopify', intercom: 'Intercom', trustpilot: 'Trustpilot' }
                 return (
                   <span key={s.id} style={{ fontSize: 12, color: daysLeft === 0 ? '#059669' : '#374151', fontWeight: daysLeft === 0 ? 700 : 500, background: daysLeft === 0 ? '#ECFDF5' : '#fff', border: '1px solid #E5E7EB', borderRadius: 20, padding: '2px 10px' }}>
-                    {label[s.source_type] ?? s.source_type}: {daysLeft === 0 ? `${t('common.ready_now')} ✓` : `in ${daysLeft}d`}
+                    {label[s.source_type] ?? s.source_type}: {daysLeft === 0 ? `${t('common.ready_now')} ✓` : t('signals.next_scan_in').replace('{days}', String(daysLeft))}
                   </span>
                 )
               })}
@@ -595,8 +601,9 @@ export default async function SignalsPage({
 
                   {showEvidence && (
                     <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, fontStyle: 'italic' }}>
-                      {t('signals.evidence_label')}: {evidenceText}
-                    </p>
+                      {t('signals.evidence_label')}: 
+                      {EVIDENCE_TRANSLATIONS[evidenceText] ?? evidenceText}                    
+                      </p>
                   )}
 
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
