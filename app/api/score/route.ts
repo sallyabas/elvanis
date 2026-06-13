@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-server'
+import { getT } from '@/lib/translations'
 import Groq from 'groq-sdk'
 import { Resend } from 'resend'
 import {
@@ -105,7 +106,8 @@ function generateAssessmentSignals(
   founderId: string,
   assessmentId: string,
   answers: Record<string, string>,
-  realNumbers: Record<string, string>
+  realNumbers: Record<string, string>,
+  t: ReturnType<typeof getT>
 ): Array<Record<string, unknown>> {
   const signals: Array<Record<string, unknown>> = []
   const now = new Date()
@@ -136,8 +138,8 @@ function generateAssessmentSignals(
   // LTV < CAC — existential unit economics failure
   if (ltv !== null && cac !== null && ltv < cac) {
     signals.push({ ...base, signal_type: 'churn_spike', dimension: 'revenue', severity: 'critical', confidence_score: 0.92, value: ltv,
-      insight_summary: `Customer lifetime value (£${ltv}) is lower than acquisition cost (£${cac}) — losing money on every customer acquired`,
-      recommended_action: 'Immediately review pricing and retention strategy — current unit economics are unsustainable',
+      insight_summary: t('signals.ltv_below_cac_insight').replace('{ltv}', String(ltv)).replace('{cac}', String(cac)),
+      recommended_action: t('signals.ltv_below_cac_action'),
       raw_data: { ...base.raw_data, ltv, cac, calculation: 'LTV < CAC' },
     })
   }
@@ -145,8 +147,8 @@ function generateAssessmentSignals(
   // LTV:CAC ratio < 3:1 — scaling risk
   if (ltv !== null && cac !== null && ltv >= cac && ltv / cac < 3) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: 'warning', confidence_score: 0.85, value: parseFloat((ltv / cac).toFixed(2)),
-      insight_summary: `LTV:CAC ratio is ${(ltv / cac).toFixed(1)}:1 — healthy SaaS requires at least 3:1 to scale profitably`,
-      recommended_action: 'Focus on increasing retention and reducing acquisition costs before scaling spend',
+      insight_summary: t('signals.ltv_cac_ratio_insight').replace('{ratio}', (ltv / cac).toFixed(1)),
+      recommended_action: t('signals.ltv_cac_ratio_action'),
       raw_data: { ...base.raw_data, ltv, cac, ratio: ltv / cac },
     })
   }
@@ -154,8 +156,8 @@ function generateAssessmentSignals(
   // High churn
   if (churnRate !== null && churnRate > 5) {
     signals.push({ ...base, signal_type: 'churn_spike', dimension: 'customer', severity: churnRate > 10 ? 'critical' : 'warning', confidence_score: 0.88, value: churnRate,
-      insight_summary: `Monthly churn of ${churnRate}% means losing approximately ${Math.round(churnRate * 12)}% of customers annually`,
-      recommended_action: 'Identify top 3 churn reasons and build a 30-day intervention plan for at-risk customers',
+      insight_summary: t('signals.high_churn_insight').replace('{churn}', String(churnRate)).replace('{annual}', String(Math.round(churnRate * 12))),
+      recommended_action: t('signals.high_churn_action'),
       raw_data: { ...base.raw_data, churn_rate: churnRate },
     })
   }
@@ -163,8 +165,8 @@ function generateAssessmentSignals(
   // Negative or flat MRR growth
   if (mrrGrowth !== null && mrrGrowth <= 0) {
     signals.push({ ...base, signal_type: 'conversion_fall', dimension: 'revenue', severity: mrrGrowth < -5 ? 'critical' : 'warning', confidence_score: 0.85, value: mrrGrowth, change_percent: mrrGrowth,
-      insight_summary: `MRR growth is ${mrrGrowth}% — revenue is ${mrrGrowth < 0 ? 'declining' : 'flat'} which signals a growth problem`,
-      recommended_action: 'Audit your acquisition funnel and identify where leads are dropping off',
+      insight_summary: (mrrGrowth < 0 ? t('signals.mrr_declining_insight') : t('signals.mrr_flat_insight')).replace('{growth}', String(mrrGrowth)),
+      recommended_action: t('signals.mrr_growth_action'),
       raw_data: { ...base.raw_data, mrr_growth: mrrGrowth },
     })
   }
@@ -172,8 +174,8 @@ function generateAssessmentSignals(
   // Low NPS
   if (nps !== null && nps < 30) {
     signals.push({ ...base, signal_type: 'nps_decline', dimension: 'customer', severity: nps < 0 ? 'critical' : 'warning', confidence_score: 0.85, value: nps,
-      insight_summary: `NPS of ${nps} indicates more detractors than promoters — customers unlikely to recommend your product`,
-      recommended_action: 'Survey detractors directly to understand the top 3 reasons for dissatisfaction',
+      insight_summary: t('signals.low_nps_insight').replace('{nps}', String(nps)),
+      recommended_action: t('signals.low_nps_action'),
       raw_data: { ...base.raw_data, nps },
     })
   }
@@ -588,8 +590,8 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
 
     // ── GENERATE ASSESSMENT SIGNALS ──
     console.log('[score] generating assessment signals...')
-    const assessmentSignals = generateAssessmentSignals(founderId, assessmentId, answers, safeRealNumbers)
-
+    const t = getT((language as 'en' | 'ar') ?? 'en')
+    const assessmentSignals = generateAssessmentSignals(founderId, assessmentId, answers, safeRealNumbers, t)
     if (assessmentSignals.length > 0) {
       const { data: existingManual } = await supabase
         .from('diagnostic_signals')
