@@ -55,6 +55,9 @@ export default async function AssessmentResultPage() {
   }
   const scoreLang    = (score.language as string) ?? 'en'
   const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && score.is_translated && score.alt_language === lang
+  const displaySummary  = !langMismatch ? score.overall_summary  : (canShowAlt ? score.overall_summary_alt  : null)
+  const displayFindings = !langMismatch ? score.top_3_findings   : (canShowAlt ? score.top_3_findings_alt   : null)
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
@@ -80,8 +83,13 @@ export default async function AssessmentResultPage() {
           {score.overall_status && (
             <p style={{ color: '#374151', fontWeight: 600, marginBottom: 8 }}>{STATUS_MAP[score.overall_status] ?? score.overall_status}</p>
           )}
-          {!langMismatch && (
-            <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.overall_summary}</p>
+          {displaySummary && (
+            <>
+              <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{displaySummary}</p>
+              {canShowAlt && (
+                <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, fontStyle: 'italic' }}>{t('assessment.translation_caveat')}</p>
+              )}
+            </>
           )}
           {typeof score.completeness_score === 'number' && (
             <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #F3F4F6' }}>
@@ -115,7 +123,9 @@ export default async function AssessmentResultPage() {
               </p>
             </div>
             <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 14, marginBottom: 20 }}>
-              {t('assessment.native_notice_explain')}
+              {canShowAlt
+                ? t('assessment.native_notice_explain_partial').replace(/{target}/g, LANG_NAMES[lang])
+                : t('assessment.native_notice_explain')}
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <a href="/assessment" style={{ display: 'inline-block', padding: '10px 20px', background: '#D97706', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
@@ -129,11 +139,14 @@ export default async function AssessmentResultPage() {
         )}
 
         {/* Top 3 findings */}
-        {score.top_3_findings && !langMismatch && (
+        {displayFindings && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 20 }}>{t('assessment.top_findings')}</h3>
+            {canShowAlt && (
+              <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: -10, marginBottom: 16, fontStyle: 'italic' }}>{t('assessment.translation_caveat')}</p>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              {(score.top_3_findings as Array<{ rank: number; finding: string; impact: string }>).map(item => (
+              {(displayFindings as Array<{ rank: number; finding: string; impact: string }>).map(item => (
                 <div key={item.rank} style={{ display: 'flex', gap: 14 }}>
                   <span style={{ flexShrink: 0, width: 28, height: 28, background: '#EFF6FF', color: '#2563EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>
                     {item.rank}
