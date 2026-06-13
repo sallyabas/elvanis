@@ -4,36 +4,10 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { useT } from '@/app/context/LanguageContext'
+import { INDUSTRIES, MARKETS, TICKET_TYPES, FOCUS_OPTIONS } from '@/lib/profile-options'
 
-const INDUSTRIES = [
-  'B2B SaaS / Enterprise Software',
-  'B2C Mobile Apps / Consumer Tech',
-  'E-commerce / Retail',
-  'Logistics / Supply Chain Tech',
-  'Professional Services / Consulting / Agency',
-  'Marketplace / Platform',
-  'HealthTech / MedTech',
-  'FinTech / Financial Services',
-  'EdTech / Education / Training',
-  'Other',
-]
 
-const MARKETS = [
-  'United Kingdom', 'Netherlands', 'UAE', 'Saudi Arabia',
-  'Bahrain', 'Kuwait', 'Qatar', 'Oman',
-  'Other Gulf', 'Global / Remote-first', 'Other',
-]
 
-const FOCUS_OPTIONS = [
-  { id: 'growth',    label: 'Accelerate Top-Line Growth',           icon: '🚀' },
-  { id: 'retention', label: 'Maximize Customer Retention',          icon: '🔄' },
-  { id: 'ops',       label: 'Optimize Operational / Support Costs', icon: '📥' },
-  { id: 'delivery',  label: 'Boost Product / Engineering Delivery', icon: '⚡' },
-]
-
-const TICKET_TYPES = [
-  'General question', 'Bug report', 'Billing issue', 'Feature request', 'Account issue',
-]
 
 const CURRENCY_SYMBOL: Record<string, string> = {
   gbp: '£', usd: '$', eur: '€', aed: 'AED ', sar: 'SAR ',
@@ -487,14 +461,14 @@ export default function ProfileClient({
             <label style={labelStyle}>{t('profile.industry')}</label>
             <select value={industry} onChange={e => { setIndustry(e.target.value); if (e.target.value !== 'Other') setIndustryOther('') }} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
               <option value="">{t('profile.select_industry')}</option>
-              {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+              {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{t(i.key)}</option>)}
             </select>
           </div>
           <div>
             <label style={labelStyle}>{t('profile.market')}</label>
             <select value={market} onChange={e => setMarket(e.target.value)} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
               <option value="">{t('profile.select_market')}</option>
-              {MARKETS.map(m => <option key={m} value={m}>{m}</option>)}
+              {MARKETS.map(m => <option key={m.value} value={m.value}>{t(m.key)}</option>)}
             </select>
           </div>
         </div>
@@ -518,7 +492,7 @@ export default function ProfileClient({
               <button key={opt.id} onClick={() => setFocusMetric(opt.id)}
                 style={{ padding: '10px 14px', border: `1.5px solid ${focusMetric === opt.id ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, background: focusMetric === opt.id ? '#EFF6FF' : '#fff', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 18 }}>{opt.icon}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: focusMetric === opt.id ? '#2563EB' : '#374151' }}>{opt.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: focusMetric === opt.id ? '#2563EB' : '#374151' }}>{t(opt.labelKey)}</span>
                 {focusMetric === opt.id && <span style={{ marginLeft: 'auto', width: 18, height: 18, borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, flexShrink: 0 }}>✓</span>}
               </button>
             ))}
@@ -571,7 +545,7 @@ export default function ProfileClient({
           <label style={labelStyle}>{t('profile.ticket_type')}</label>
           <select value={ticketType} onChange={e => setTicketType(e.target.value)} style={selectStyle} onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
             <option value="">{t('profile.select_type')}</option>
-            {TICKET_TYPES.map(tt => <option key={tt} value={tt}>{tt}</option>)}
+            {TICKET_TYPES.map(tt => <option key={tt.value} value={tt.value}>{t(tt.key)}</option>)}
           </select>
         </div>
         <div style={{ marginBottom: 14 }}>
