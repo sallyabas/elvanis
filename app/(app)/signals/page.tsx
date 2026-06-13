@@ -202,6 +202,13 @@ export default async function SignalsPage({
   const severityBg    = (s: string) => s === 'critical' ? '#FEF2F2' : s === 'warning' ? '#FFFBEB' : '#F9FAFB'
   const dimensionIcon = (d: string) => ({ customer: '👥', team: '⚙️', marketing: '📣', revenue: '💰', product: '🎯', strategy: '🧭' }[d] ?? '📊')
 
+  const SEVERITY_LABELS: Record<string, string> = {
+    critical: t('signals.sev_critical'), warning: t('signals.sev_warning'), watch: t('signals.sev_watch'),
+  }
+  const DIM_PLAIN: Record<string, string> = {
+    revenue: t('signals.cat_revenue'), customer: t('signals.cat_customer'), marketing: t('signals.cat_marketing'),
+    team: t('signals.cat_team'), product: t('signals.cat_product'), strategy: t('signals.cat_strategy'),
+  }
   const DIMENSION_LABELS: Record<string, string> = {
     revenue:   `💰 ${t('signals.cat_revenue')}`,
     customer:  `👥 ${t('signals.cat_customer')}`,
@@ -514,10 +521,10 @@ export default async function SignalsPage({
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10, gap: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 18 }}>{dimensionIcon(signal.dimension)}</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity), color: severityColor(signal.severity), textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
-                        {signal.severity}
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity), color: severityColor(signal.severity), letterSpacing: '0.05em' }}>
+                        {SEVERITY_LABELS[signal.severity as string] ?? signal.severity}
                       </span>
-                      <span style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase' as const }}>{signal.dimension}</span>
+                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>{DIM_PLAIN[signal.dimension as string] ?? signal.dimension}</span>
                       <span style={{ fontSize: 11, padding: '1px 8px', borderRadius: 10, background: '#F3F4F6', color: '#6B7280', fontWeight: 500 }}>
                         {sourceLabel[signal.source] ?? signal.source}
                       </span>
@@ -588,7 +595,7 @@ export default async function SignalsPage({
 
                   {showEvidence && (
                     <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, fontStyle: 'italic' }}>
-                      Evidence: {evidenceText}
+                      {t('signals.evidence_label')}: {evidenceText}
                     </p>
                   )}
 
