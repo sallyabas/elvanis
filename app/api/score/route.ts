@@ -47,11 +47,15 @@ RULES:
 - Every insight must reference the founder specific answers directly
 - Never give generic advice — be specific to their situation
 - When data clearly points to one conclusion state it directly
-- If language is ar respond entirely in Arabic Gulf dialect. If en respond in English
+- If language is ar respond entirely in Arabic Gulf dialect. Do NOT mix in English words, acronyms, or Latin letters anywhere — including for technical/business terms (e.g. write "العائد على الاستثمار" not "ROI", "نموذج العمل" not "business model"). Every word must be Arabic script. If en respond in English
 - You must respond with valid JSON only. No preamble. No explanation. No markdown fences. Pure JSON starting with { and ending with }
 - Do NOT include overall_score in your response — it is calculated server-side from your dimension scores
+- Use these score-band definitions consistently across all 6 dimensions:
+  0-40 (Critical): fundamental gaps requiring immediate intervention — e.g. no PMF validation, runway under 3 months, solo founder with no delegation capacity, no retention signal.
+  41-65 (Needs Attention): foundational elements exist but execution gaps limit growth — e.g. some traction but inconsistent, processes exist but not followed, team aligned on some but not all priorities.
+  66-100 (Healthy): this dimension is a genuine strength, not a constraint — e.g. validated PMF, strong team alignment, healthy retention, clear strategic direction.
 
-JSON structure to follow exactly:
+  JSON structure to follow exactly:
 {
   "language": "en",
   "assessed_at": "2026-04-26",
@@ -424,6 +428,25 @@ export async function POST(request: NextRequest) {
     }
 
     const safeRealNumbers = realNumbers && typeof realNumbers === 'object' ? realNumbers : {}
+
+    // ── COMPLETENESS SCORE — deterministic, server-side ──
+    const ALL_QUESTION_IDS = [
+      'founder_stage', 'business_model', 'investment_status', 'team_size', 'technical_capacity', 'analytics_maturity', 'execution_blocker',
+      'biggest_problem_now', 'runway', 'win_reason', 'pricing_confidence', 'financial_concern', 'pmf_reaction', 'icp_alignment', 'icp_targeting', 'ideal_customer',
+      'already_tried', 'target_90_days', 'team_alignment', 'bug_process', 'churn_reason', 'customer_complaint', 'referral_frequency', 'avoided_decision', 'team_focus', 'success_12m', 'process_maturity',
+    ]
+    const THIN_TEXT_IDS  = ['ideal_customer', 'biggest_problem_now', 'already_tried', 'target_90_days']
+    const THIN_THRESHOLD = 10
+    const safeAnswers = answers && typeof answers === 'object' ? answers : {}
+    let completeCount = 0
+    for (const qid of ALL_QUESTION_IDS) {
+      const val = (safeAnswers[qid] ?? '').toString().trim()
+      if (!val) continue
+      if (THIN_TEXT_IDS.includes(qid) && val.length < THIN_THRESHOLD) continue
+      completeCount++
+    }
+    const completenessScore = Math.round((completeCount / ALL_QUESTION_IDS.length) * 100)
+    console.log(`[score] completeness: ${completeCount}/${ALL_QUESTION_IDS.length} = ${completenessScore}%`)
     const realMetrics = Object.entries(safeRealNumbers)
       .filter(([, v]) => v)
       .map(([k, v]) => `${k}: ${v}`)
@@ -534,6 +557,7 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       urgency_level:                urgencyLevel,
       overall_score:                trueOverallScore,
       overall_status:               diagnosis.overall_status as string,
+      completeness_score:           completenessScore,
       overall_summary:              diagnosis.overall_summary as string,
       primary_constraint_dimension: (diagnosis.primary_constraint as Record<string, string>)?.dimension,
       primary_constraint_summary:   (diagnosis.primary_constraint as Record<string, string>)?.summary,

@@ -83,6 +83,18 @@ export default async function AssessmentResultPage() {
           {!langMismatch && (
             <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.overall_summary}</p>
           )}
+          {typeof score.completeness_score === 'number' && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #F3F4F6' }}>
+              <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0 }}>
+                {t('assessment.completeness_badge').replace('{n}', String(score.completeness_score))}
+              </p>
+              {score.completeness_score < 70 && (
+                <p style={{ fontSize: 12, color: '#D97706', margin: '4px 0 0' }}>
+                  {t('assessment.completeness_low')}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Primary constraint */}
@@ -96,15 +108,23 @@ export default async function AssessmentResultPage() {
         {/* 6 dimension scores */}
         {langMismatch && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #FDE68A', padding: '32px 36px', marginBottom: 20 }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#92400E', marginBottom: 10 }}>
-              {t('assessment.native_notice_title').replace('{source}', LANG_NAMES[scoreLang])}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
+              <span style={{ fontSize: 22, flexShrink: 0 }}>🛡️</span>
+              <p style={{ fontSize: 15, fontWeight: 700, color: '#92400E', margin: 0 }}>
+                {t('assessment.native_notice_title').replace('{source}', LANG_NAMES[scoreLang])}
+              </p>
+            </div>
             <p style={{ color: '#6B7280', lineHeight: 1.65, fontSize: 14, marginBottom: 20 }}>
               {t('assessment.native_notice_explain')}
             </p>
-            <a href="/assessment" style={{ display: 'inline-block', padding: '10px 20px', background: '#D97706', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
-              {t('assessment.native_notice_cta').replace('{target}', LANG_NAMES[lang])}
-            </a>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <a href="/assessment" style={{ display: 'inline-block', padding: '10px 20px', background: '#D97706', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+                {t('assessment.native_notice_cta').replace('{target}', LANG_NAMES[lang])}
+              </a>
+              <a href="/signals" style={{ display: 'inline-block', padding: '10px 20px', background: '#fff', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+                {t('assessment.next_signals')}
+              </a>
+            </div>
           </div>
         )}
 
