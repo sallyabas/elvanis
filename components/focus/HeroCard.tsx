@@ -30,10 +30,10 @@ interface HeroCardProps {
 
 
 
-function getTrendArrow(trend: string | null) {
+function getTrendArrow(trend: string | null, isAr = false) {
   if (trend === 'improving') return '↑'
   if (trend === 'worsening') return '↓'
-  if (trend === 'unchanged') return '→'
+  if (trend === 'unchanged') return isAr ? '←' : '→'
   return ''
 }
 
@@ -204,8 +204,8 @@ export default function HeroCard({
 )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 4 }}>
-             <span style={{ fontSize: 20, color: getTrendColor(status.trend), fontWeight: 700 }}>
-               {getTrendArrow(status.trend)}
+            <span style={{ fontSize: 20, color: getTrendColor(status.trend), fontWeight: 700 }}>
+               {getTrendArrow(status.trend, isAr)}
               </span>
               <span style={{ fontSize: 13, color: getTrendColor(status.trend), fontWeight: 600 }}>
                 {status.trend === 'improving'  ? t('focus.improving')  :
