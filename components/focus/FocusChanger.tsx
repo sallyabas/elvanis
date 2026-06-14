@@ -2,23 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { FocusMetric } from '@/lib/gravity-engine'
+import { useT } from '@/app/context/LanguageContext'
 
 interface FocusChangerProps {
   focusMetric:   FocusMetric | null
   onFocusChange: (metric: FocusMetric) => void
 }
 
-const FOCUS_OPTIONS: {
-  value: FocusMetric
-  label: string
-  icon:  string
-  desc:  string
-}[] = [
-  { value: 'growth',    label: 'Accelerate Growth',   icon: '📈', desc: 'Revenue, conversion, new customers'       },
-  { value: 'retention', label: 'Maximise Retention',  icon: '🔄', desc: 'Churn, NPS, satisfaction, LTV'            },
-  { value: 'ops',       label: 'Optimise Operations', icon: '⚙️', desc: 'Ticket volume, response time, efficiency'  },
-  { value: 'delivery',  label: 'Boost Delivery',      icon: '⚡', desc: 'Velocity, cycle time, bug backlog'        },
-]
 
 const TOOLTIP_TEXT =
   'Your focus metric tells Elvanis which business outcome matters most right now. ' +
@@ -28,8 +18,16 @@ export default function FocusChanger({
   focusMetric,
   onFocusChange,
 }: FocusChangerProps) {
-  const [open,        setOpen]        = useState(false)
+  const t = useT()
+  const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  const FOCUS_OPTIONS: { value: FocusMetric; label: string; icon: string; desc: string }[] = [
+    { value: 'growth',    label: t('profile.focus_growth'),    icon: '📈', desc: t('onboarding.focus_growth_desc')    },
+    { value: 'retention', label: t('profile.focus_retention'), icon: '🔄', desc: t('onboarding.focus_retention_desc') },
+    { value: 'ops',       label: t('profile.focus_ops'),       icon: '⚙️', desc: t('onboarding.focus_ops_desc')       },
+    { value: 'delivery',  label: t('profile.focus_delivery'),  icon: '⚡', desc: t('onboarding.focus_delivery_desc')  },
+  ]
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -87,10 +85,10 @@ export default function FocusChanger({
           { focusMetric ? (
             <>
               <span>{current?.icon}</span>
-              <span>Focus: {current?.label}</span>
+              <span>{t('focus.focus_prefix')} {current?.label}</span>
             </>
           ) : (
-            <span>Set your focus →</span>
+            <span>{t('focus.set_focus')}</span>
           )}
           <span style={{ color: '#9CA3AF', fontSize: 10 }}>
             {open ? '▲' : '▼'}
@@ -119,7 +117,7 @@ export default function FocusChanger({
               padding:       '4px 8px',
               margin:        '0 0 4px',
             }}>
-              {focusMetric ? 'Change primary focus' : 'Set your primary focus'}
+             {focusMetric ? t('focus.change_focus') : t('focus.set_primary')}
             </p>
             {FOCUS_OPTIONS.map(opt => (
               <button

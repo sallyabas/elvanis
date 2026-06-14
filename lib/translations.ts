@@ -1025,6 +1025,10 @@ const TRANSLATIONS = {
     'focus.complexity_low':    'low',
     'focus.complexity_medium': 'medium',
     'focus.complexity_high':   'high',
+    'focus.set_focus':         'Set your focus →',
+    'focus.change_focus':      'Change primary focus',
+    'focus.set_primary':       'Set your primary focus',
+    'focus.focus_prefix':      'Focus:',
   },
 
   ar: {
@@ -2044,6 +2048,10 @@ const TRANSLATIONS = {
     'focus.complexity_low':    'منخفض',
     'focus.complexity_medium': 'متوسط',
     'focus.complexity_high':   'مرتفع',
+    'focus.set_focus':         'حدد تركيزك ←',
+    'focus.change_focus':      'تغيير التركيز الأساسي',
+    'focus.set_primary':       'حدد تركيزك الأساسي',
+    'focus.focus_prefix':      'التركيز:',
   },
 } as const
 
