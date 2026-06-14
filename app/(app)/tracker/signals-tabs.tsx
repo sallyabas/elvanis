@@ -69,7 +69,14 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
     { id: 'new'     as const, label: t('tracker.tab_new'),     count: newSignals.length     },
     { id: 'sources' as const, label: t('tracker.tab_by_source'), count: null                },
   ]
-
+  const DIM_PLAIN: Record<string, string> = {
+    revenue: t('signals.cat_revenue'), customer: t('signals.cat_customer'),
+    marketing: t('signals.cat_marketing'), team: t('signals.cat_team'),
+    product: t('signals.cat_product'), strategy: t('signals.cat_strategy'),
+  }
+  const SEVERITY_LABELS: Record<string, string> = {
+    critical: t('signals.sev_critical'), warning: t('signals.sev_warning'), watch: t('signals.sev_watch'),
+  }
   const trendLabel = (trend: string) => {
     if (trend === 'improving') return t('tracker.tab_improving')
     if (trend === 'worsening') return t('tracker.tab_worsening')
@@ -209,7 +216,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{String(signal[insightKey] ?? '')}</p>
                     <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>
-                      {sourceLabel[signal.source as string] ?? String(signal.source)} · {String(signal.dimension)} ·{' '}
+                    {sourceLabel[signal.source as string] ?? String(signal.source)} · {DIM_PLAIN[signal.dimension as string] ?? String(signal.dimension)} ·{' '}
                       {new Date(signal.created_at as string).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}
                     </p>
                   </div>
