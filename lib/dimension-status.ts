@@ -178,11 +178,11 @@ export function calculateDimensionStatuses(params: {
         unlockText:         isAr ? req.unlockText_ar : req.unlockText,
         pendingText:        isAr ? req.pendingText_ar: req.pendingText,
         healthyText:        isAr ? req.healthyText_ar: req.healthyText,
-        label:              dim.label,
-        shortLabel:         dim.shortLabel,
+        label:              isAr ? (dim.label_ar      ?? dim.label)      : dim.label,
+        shortLabel:         isAr ? (dim.shortLabel_ar ?? dim.shortLabel) : dim.shortLabel,
         icon:               dim.icon,
         color:              dim.color,
-        description:        dim.description,
+        description:        isAr ? (dim.description_ar ?? dim.description) : dim.description,
       }
 
       return [id, status]

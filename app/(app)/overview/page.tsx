@@ -429,7 +429,13 @@ console.log("--- DEBUG END ---");
                           }
                         </span>
                       </div>
-                      <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{conflictFlags.map(f => f.note).join(' · ')}</p>
+                      <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
+                        {conflictFlags.map(f => {
+                          const [key, source] = f.note.split('|')
+                          const translated = t(key as Parameters<typeof t>[0])
+                          return source ? translated.replace('{source}', source) : translated
+                        }).join(' · ')}
+                      </p>
                     </div>
                     <a href="/signals?filter=conflicts" style={{ fontSize: 12, color: '#D97706', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>{t('common.resolve')}</a>
                   </div>
@@ -474,7 +480,7 @@ console.log("--- DEBUG END ---");
                     <div key={signal.id} style={{ padding: '14px 16px', background: severityBg(signal.severity), borderRadius: 12, border: `1px solid ${severityBorder(signal.severity, !!conflictFlag)}` }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                         <span style={{ width: 20, height: 20, borderRadius: '50%', background: severityColor(signal.severity), color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{index + 1}</span>
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20, background: severityBg(signal.severity), color: severityColor(signal.severity), textTransform: 'uppercase' as const, border: `1px solid ${severityColor(signal.severity)}30` }}>{signal.severity}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20, background: severityBg(signal.severity), color: severityColor(signal.severity), textTransform: 'uppercase' as const, border: `1px solid ${severityColor(signal.severity)}30` }}>{t((`signals.sev_${signal.severity}`) as Parameters<typeof t>[0])}</span>
                         <span style={{ fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase' as const }}>{sourceLabel[signal.source] ?? signal.source}</span>
                         {confirmFlag && <span style={{ fontSize: 10, color: '#059669', background: '#ECFDF5', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>✓ {t('signals.confirmed_by')} {sourceLabel[confirmFlag.bySource] ?? confirmFlag.bySource}</span>}
                         {conflictFlag && <span style={{ fontSize: 10, color: '#D97706', background: '#FFFBEB', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>⚠ {t('signals.conflicts_with')} {sourceLabel[conflictFlag.bySource] ?? conflictFlag.bySource}</span>}

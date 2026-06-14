@@ -74,8 +74,8 @@ export type SignalWithFlags = {
   raw_data?: Record<string, unknown> | null
   flags: SignalFlag[]
 }
-
-export function analyseSignalConflicts(signals: SignalWithFlags[]): SignalWithFlags[] {
+export function analyseSignalConflicts(signals: SignalWithFlags[], lang: 'en' | 'ar' = 'en'): SignalWithFlags[] {
+  const isAr = lang === 'ar'
   const active = signals.filter(s => s.status === 'new' || s.status === 'acknowledged')
 
   const byType = new Map<string, SignalWithFlags[]>()
@@ -106,7 +106,8 @@ export function analyseSignalConflicts(signals: SignalWithFlags[]): SignalWithFl
             assessment.flags.push({ signalId: tool.id, type: 'confirmed', bySource: tool.source, note: `Confirmed by ${tool.source} data` })
             tool.flags.push({ signalId: assessment.id, type: 'confirmed', bySource: 'manual', note: 'Confirmed by assessment answers' })
           } else {
-            assessment.flags.push({ signalId: tool.id, type: 'conflict', bySource: tool.source, note: `Conflicts with ${tool.source} data — review which is accurate` })
+            assessment.flags.push({ signalId: tool.id, type: 'conflict', bySource: tool.source, note: `signals.conflict_assessment_tool|${tool.source}` })
+            tool.flags.push({ signalId: assessment.id, type: 'conflict', bySource: 'manual', note: 'signals.conflict_tool_assessment' })
             tool.flags.push({ signalId: assessment.id, type: 'conflict', bySource: 'manual', note: 'Conflicts with assessment answers — review which is accurate' })
           }
         }
@@ -132,8 +133,8 @@ export function analyseSignalConflicts(signals: SignalWithFlags[]): SignalWithFl
           if (cBad === tBad) {
             csv.flags.push({ signalId: tool.id, type: 'confirmed', bySource: tool.source, note: `Confirmed by ${tool.source} data` })
           } else {
-            csv.flags.push({ signalId: tool.id, type: 'conflict', bySource: tool.source, note: `Conflicts with ${tool.source} — check if data is from same time period` })
-            tool.flags.push({ signalId: csv.id, type: 'conflict', bySource: 'csv', note: 'Conflicts with CSV upload — check if data is from same time period' })
+            csv.flags.push({ signalId: tool.id, type: 'conflict', bySource: tool.source, note: `signals.conflict_tool_csv|${tool.source}` })
+            tool.flags.push({ signalId: csv.id, type: 'conflict', bySource: 'csv', note: 'signals.conflict_csv_tool' })
           }
         }
       }
