@@ -6,7 +6,8 @@ import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health
 import { getT } from '@/lib/translations'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
-import { getStatusLabel } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary } from '@/lib/assessment-status'
+
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
@@ -174,7 +175,8 @@ console.log("--- DEBUG END ---");
   const hour        = new Date().getHours()
   const greeting    = hour < 12 ? t('greeting.morning') : hour < 17 ? t('greeting.afternoon') : t('greeting.evening')
 
-  const overallScoreColor = score
+  const displaySummary = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
+   const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
   const complexityColor = (c: string) => c === 'low' ? '#059669' : c === 'medium' ? '#D97706' : '#7C3AED'
@@ -668,7 +670,7 @@ console.log("--- DEBUG END ---");
                 <div style={{ width: 1, height: 48, background: '#E5E7EB', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{getStatusLabel(score.overall_status as string, t as (k: string) => string)}</p>
-                  <p style={{ fontSize: 12, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{(score.overall_summary as string)?.substring(0, 150)}...</p>
+                  <p style={{ fontSize: 12, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{(displaySummary ?? score.overall_summary as string)?.substring(0, 150)}...</p>
                 </div>
               </div>
               <div className="grid-3-col" style={{ marginBottom: 16 }}>

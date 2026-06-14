@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
-import { getStatusLabel } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary } from '@/lib/assessment-status'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -50,10 +50,10 @@ export default async function AssessmentResultPage() {
     ar: t('assessment.lang_name_ar'),
   }
   const scoreLang    = (score.language as string) ?? 'en'
-  const langMismatch = scoreLang !== lang
-  const canShowAlt   = langMismatch && score.is_translated && score.alt_language === lang
-  const displaySummary  = !langMismatch ? score.overall_summary  : (canShowAlt ? score.overall_summary_alt  : null)
-  const displayFindings = !langMismatch ? score.top_3_findings   : (canShowAlt ? score.top_3_findings_alt   : null)
+  const langMismatch    = scoreLang !== lang
+  const canShowAlt      = langMismatch && !!score.is_translated && score.alt_language === lang
+  const displaySummary  = getDisplaySummary(score as Record<string, unknown>, lang)
+  const displayFindings = !langMismatch ? score.top_3_findings : (canShowAlt ? score.top_3_findings_alt : null)
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>

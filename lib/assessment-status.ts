@@ -23,3 +23,16 @@ export function getStatusLabel(
   }
   return map[status] ?? status
 }
+export function getDisplaySummary(
+  score: Record<string, unknown>,
+  lang: string
+): string | null {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch
+    ? (score.overall_summary as string ?? null)
+    : canShowAlt
+      ? (score.overall_summary_alt as string ?? null)
+      : null
+}

@@ -6,7 +6,7 @@ import { calculateHealthScore } from '@/lib/health-scoring'
 import { getT } from '@/lib/translations'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
-import { getStatusLabel } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary } from '@/lib/assessment-status'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
@@ -124,6 +124,7 @@ export default async function HomePage() {
   const aiReadiness      = calculateAIReadiness(allActiveSignals, assessment as Record<string, unknown> | null)
 
   const isFreeTier      = !founder || founder.subscription_tier === 'free'
+  const displaySummary = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
   const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
@@ -197,7 +198,7 @@ export default async function HomePage() {
               <div style={{ flex: 1 }}>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{getStatusLabel(score.overall_status as string, t as (k: string) => string)}</p>
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.5 }}>
-                  {(score.overall_summary as string)?.substring(0, 120)}...
+                {(displaySummary ?? score.overall_summary as string)?.substring(0, 120)}...
                 </p>
                 {score.primary_constraint_summary && (
                   <span style={{ fontSize: 11, color: '#DC2626', fontWeight: 600 }}>
