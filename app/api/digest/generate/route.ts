@@ -282,6 +282,7 @@ export async function POST(request: NextRequest) {  try {
       .from('conflict_resolutions')
       .select('*')
       .eq('founder_id', founderId)
+      .eq('choice_type', 'founder')
       .order('created_at', { ascending: false })
 
     type ConflictPref = NonNullable<typeof conflictPrefs>[number]
