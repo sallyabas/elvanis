@@ -96,9 +96,9 @@ export function calculateHealthScore(signals: ScoringInput[]): number {
 // ── Health label ─────────────────────────────────────────────────────────
 // Shared so dashboard and any future pages use the same thresholds.
 
-export function getHealthLabel(score: number): { label: string; color: string; bg: string } {
-  if (score >= 80) return { label: 'Healthy',          color: '#059669', bg: '#ECFDF5' }
-  if (score >= 60) return { label: 'Needs Attention',  color: '#D97706', bg: '#FFFBEB' }
-  if (score >= 40) return { label: 'At Risk',          color: '#DC2626', bg: '#FEF2F2' }
-  return                   { label: 'Critical',        color: '#991B1B', bg: '#FEF2F2' }
+export function getHealthLabel(score: number): { label: string; labelKey: string; color: string; bg: string } {
+  if (score >= 80) return { label: 'Healthy',         labelKey: 'assessment.status_healthy',         color: '#059669', bg: '#ECFDF5' }
+  if (score >= 60) return { label: 'Needs Attention', labelKey: 'assessment.status_needs_attention', color: '#D97706', bg: '#FFFBEB' }
+  if (score >= 40) return { label: 'At Risk',         labelKey: 'assessment.status_at_risk',         color: '#DC2626', bg: '#FEF2F2' }
+  return                   { label: 'Critical',       labelKey: 'assessment.status_critical',        color: '#991B1B', bg: '#FEF2F2' }
 }

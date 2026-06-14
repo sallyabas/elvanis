@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { analyseSignalConflicts, calculatePriorityScore } from '@/lib/signal-analysis'
 import type { SignalWithFlags } from '@/lib/signal-analysis'
-import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health-scoring'
 import { getT } from '@/lib/translations'
+import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
@@ -249,7 +249,7 @@ console.log("--- DEBUG END ---");
                   <span style={{ fontSize: 52, fontWeight: 900, color: health.color, lineHeight: 1 }}>{healthScore}</span>
                   <span style={{ fontSize: 18, color: health.color, marginBottom: 6, opacity: 0.7 }}>/100</span>
                 </div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: health.color }}>{health.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: health.color }}>{t(health.labelKey as Parameters<typeof t>[0])}</span>
               </>
             ) : (
               <>
@@ -367,7 +367,7 @@ console.log("--- DEBUG END ---");
                 return (
                   <div key={goal.id as string} style={{ background: '#fff', borderRadius: 14, border: `1.5px solid ${isAtRisk ? '#FECACA' : '#E5E7EB'}`, padding: '16px 18px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>{meta.label}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>{founder.language === 'ar' && meta.label_ar ? meta.label_ar : meta.label}</p>
                       <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: isAtRisk ? '#FEF2F2' : '#EFF6FF', color: isAtRisk ? '#DC2626' : '#2563EB' }}>
                         {isAtRisk ? t('common.at_risk') : t('common.active')}
                       </span>
@@ -388,7 +388,7 @@ console.log("--- DEBUG END ---");
                     </p>
                     {upsellShow && (
                       <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #FECACA' }}>
-                        <p style={{ fontSize: 12, color: '#991B1B', margin: '0 0 6px' }}>⚠️ {meta.upsellCopy}</p>
+                       <p style={{ fontSize: 12, color: '#991B1B', margin: '0 0 6px' }}>⚠️ {founder.language === 'ar' && meta.upsellCopy_ar ? meta.upsellCopy_ar : meta.upsellCopy}</p>
                         {isNavigator ? (
                           <a href={`${meta.serviceUrl}&goal=${goal.signal_type}&current=${goal.current_value ?? ''}&target=${goal.target_value}&unit=${meta.unit}`} style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}>
                            {t('tracker.goals_request_help')}
@@ -437,7 +437,12 @@ console.log("--- DEBUG END ---");
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                         <span style={{ fontSize: 11, fontWeight: 700, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 20 }}>{sourceLabel[signal.source] ?? signal.source}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{signal.signal_type.replace(/_/g, ' ')}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+                          {founder.language === 'ar'
+                            ? (SIGNAL_GOAL_MAP[signal.signal_type]?.label_ar ?? signal.signal_type.replace(/_/g, ' '))
+                            : (SIGNAL_GOAL_MAP[signal.signal_type]?.label ?? signal.signal_type.replace(/_/g, ' '))
+                          }
+                        </span>
                       </div>
                       <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{conflictFlags.map(f => f.note).join(' · ')}</p>
                     </div>
