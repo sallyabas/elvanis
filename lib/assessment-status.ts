@@ -23,6 +23,21 @@ export function getStatusLabel(
   }
   return map[status] ?? status
 }
+
+export function getDisplayConstraint(
+  score: Record<string, unknown>,
+  lang: string
+): string | null {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch
+    ? (score.primary_constraint_summary as string ?? null)
+    : canShowAlt
+      ? (score.primary_constraint_summary_alt as string ?? null)
+      : null
+}
+
 export function getDisplaySummary(
   score: Record<string, unknown>,
   lang: string

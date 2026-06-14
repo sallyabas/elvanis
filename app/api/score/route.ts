@@ -396,7 +396,7 @@ function buildEmailHtml(diagnosis: Record<string, unknown>, founderEmail: string
   <div style="background:#fff;border-radius:16px;border:1px solid #E5E7EB;padding:32px;margin-bottom:20px;text-align:center">
     <p style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;margin:0 0 8px">Overall Health Score</p>
     <div style="font-size:72px;font-weight:800;color:#111827;line-height:1">${diagnosis.overall_score}<span style="font-size:28px;color:#9CA3AF">/100</span></div>
-    <p style="font-weight:600;color:#374151;margin:12px 0 8px">${diagnosis.overall_status}</p>
+    <p style="font-weight:600;color:#374151;margin:12px 0 8px">${({ 'assessment.status_healthy': 'Healthy', 'assessment.status_needs_attention': 'Needs Attention', 'assessment.status_at_risk': 'At Risk', 'assessment.status_critical': 'Critical', 'Healthy': 'Healthy', 'Needs Attention': 'Needs Attention', 'At Risk': 'At Risk', 'Critical': 'Critical' })[diagnosis.overall_status as string] ?? diagnosis.overall_status}</p>
     <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0">${diagnosis.overall_summary}</p>
   </div>
   <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:16px;padding:24px;margin-bottom:20px">
@@ -555,19 +555,21 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       let overallSummaryAlt: string | null = null
       let top3FindingsAlt: unknown = null
       let closingMessageAlt: string | null = null
+      let primaryConstraintSummaryAlt: string | null = null
       let isTranslated = false
       try {
         const translatePrompt = `Translate the following JSON fields from ${diagnosis.language} to ${altLanguage}. Preserve business tone and meaning exactly. If translating to Arabic, use Gulf Arabic dialect, and do NOT mix in any English words or Latin letters. Respond with valid JSON only, same structure, no preamble.
   
   ${JSON.stringify({
-          overall_summary: diagnosis.overall_summary,
-          top_3_findings:  diagnosis.top_3_findings,
-          closing_message: diagnosis.closing_message,
+          overall_summary:            diagnosis.overall_summary,
+          top_3_findings:             diagnosis.top_3_findings,
+          closing_message:            diagnosis.closing_message,
+          primary_constraint_summary: (diagnosis.primary_constraint as Record<string, string>)?.summary ?? '',
         })}`
   
         const translateResponse = await groq.chat.completions.create({
-          model:           'llama-3.3-70b-versatile',
-          max_tokens:      1200,
+          model:            'llama-3.1-8b-instant',
+          max_tokens:      1500,
           temperature:     0.3,
           response_format: { type: 'json_object' },
           messages: [
@@ -582,7 +584,8 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
         overallSummaryAlt = translated.overall_summary ?? null
         top3FindingsAlt   = translated.top_3_findings  ?? null
         closingMessageAlt = translated.closing_message ?? null
-        isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt)
+        primaryConstraintSummaryAlt   = translated.primary_constraint_summary  ?? null
+        isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt && primaryConstraintSummaryAlt)
         console.log(`[score] translation to ${altLanguage}: ${isTranslated ? 'success' : 'partial/failed'}`)
       } catch (translateErr) {
         console.error('[score] translation call failed (non-fatal):', translateErr)
@@ -639,17 +642,20 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       business_stage:               stageKey,
       urgency_level:                urgencyLevel,
       overall_score:                trueOverallScore,
-      overall_status:               diagnosis.overall_status as string,
+      overall_status:               ({ 'assessment.status_healthy': 'Healthy', 'assessment.status_needs_attention': 'Needs Attention', 'assessment.status_at_risk': 'At Risk', 'assessment.status_critical': 'Critical' })[diagnosis.overall_status as string] ?? diagnosis.overall_status as string,
       completeness_score:           completenessScore,
-      overall_summary_alt:          overallSummaryAlt,
-      top_3_findings_alt:           top3FindingsAlt,
-      closing_message_alt:          closingMessageAlt,
-      alt_language:                 altLanguage,
-      is_translated:                isTranslated,
       overall_summary:              diagnosis.overall_summary as string,
+      overall_summary_alt:          overallSummaryAlt,
+      closing_message:              diagnosis.closing_message as string,
+      closing_message_alt:          closingMessageAlt,
+      top_3_findings:               diagnosis.top_3_findings,
+      top_3_findings_alt:           top3FindingsAlt,
       primary_constraint_dimension: (diagnosis.primary_constraint as Record<string, string>)?.dimension,
       primary_constraint_summary:   (diagnosis.primary_constraint as Record<string, string>)?.summary,
+      primary_constraint_summary_alt: primaryConstraintSummaryAlt,
       primary_constraint_urgency:   (diagnosis.primary_constraint as Record<string, string>)?.urgency,
+      alt_language:                 altLanguage,
+      is_translated:                isTranslated,
       score_revenue:                scoreRevenue,
       score_pmf:                    scorePmf,
       score_team:                   scoreTeam,
@@ -662,11 +668,10 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       label_customer:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.customer_retention?.status,
       label_marketing: (diagnosis.dimensions as Record<string, Record<string, string>>)?.marketing_growth?.status,
       label_strategy:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.strategy_goals?.status,
-      causal_chains:          diagnosis.causal_chains,
-      top_3_findings:         diagnosis.top_3_findings,
-      priority_order:         diagnosis.priority_order,
-      implementation_roadmap: diagnosis.implementation_roadmap,
-      raw_ai_response:        diagnosis,
+      causal_chains:            diagnosis.causal_chains,
+      priority_order:           diagnosis.priority_order,
+      implementation_roadmap:   diagnosis.implementation_roadmap,
+      raw_ai_response:          diagnosis,
     })
 
     if (dbError) {
