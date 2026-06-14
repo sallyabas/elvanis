@@ -393,7 +393,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                 )}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, marginTop: isCelebrating ? 32 : 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0, flex: 1 }}>{meta.label}</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0, flex: 1 }}>{lang === 'ar' ? meta.label_ar : meta.label}</p>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: badge.bg, color: badge.color, whiteSpace: 'nowrap' as const }}>
                     {badge.label}
                   </span>
@@ -406,11 +406,10 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                     </span>
                   )}
                   <button
-                    onClick={() => handleDelete(goal.id)}
-                    disabled={deleting === goal.id}
+                    onClick={() => setConfirmDismissId(goal.id)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', fontSize: 14, padding: '0 2px', lineHeight: 1, flexShrink: 0 }}
                   >
-                    {deleting === goal.id ? '…' : '✕'}
+                    ✕
                   </button>
                 </div>
 
@@ -463,10 +462,31 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                   </div>
                 )}
 
-                {upsellShow && (
-                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
+{confirmDismissId === goal.id && (
+                  <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8 }}>
+                    <p style={{ fontSize: 12, color: '#92400E', margin: '0 0 8px', lineHeight: 1.5 }}>
+                      {t('tracker.goals_dismiss_warn')}
+                    </p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => handleDelete(goal.id)}
+                        disabled={deleting === goal.id}
+                        style={{ padding: '6px 14px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        {deleting === goal.id ? t('tracker.goals_dismissing') : t('tracker.goals_confirm_dismiss')}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDismissId(null)}
+                        style={{ padding: '6px 14px', background: '#F3F4F6', color: '#374151', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        {t('tracker.goals_keep')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {upsellShow && (                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
                     <span style={{ fontSize: 12, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 10px', flex: 1 }}>
-                      {meta.upsellCopy}
+                    {lang === 'ar' ? meta.upsellCopy_ar : meta.upsellCopy}
                     </span>
                     {isNavigator ? (
                       <a href={navigatorServiceUrl(goal, meta)} style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', textDecoration: 'none', whiteSpace: 'nowrap' as const, flexShrink: 0 }}>
@@ -512,7 +532,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                 <option value="">{t('tracker.goals_select_sig')}</option>
                 {availableSignals.map(s => (
                   <option key={s.signal_type} value={s.signal_type}>
-                    {SIGNAL_GOAL_MAP[s.signal_type]?.label ?? s.signal_type}
+                    {(lang === 'ar' ? SIGNAL_GOAL_MAP[s.signal_type]?.label_ar : SIGNAL_GOAL_MAP[s.signal_type]?.label) ?? s.signal_type}
                   </option>
                 ))}
               </select>
@@ -557,7 +577,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
 
           {selectedMeta && targetValue && (
             <p style={{ fontSize: 11, color: '#6B7280', marginBottom: zeroDayWarn ? 8 : 12 }}>
-              {selectedMeta.goalVerb} {targetValue}{selectedMeta.unit === '%' ? '%' : ` ${selectedMeta.unit}`}
+              {lang === 'ar' ? selectedMeta.goalVerb_ar : selectedMeta.goalVerb} {targetValue}{selectedMeta.unit === '%' ? '%' : ` ${selectedMeta.unit}`}
               {' — '}{selectedMeta.lowerBetter ? t('tracker.goals_lower') : t('tracker.goals_higher')}
             </p>
           )}
@@ -641,7 +661,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                 <div key={goal.id} style={{ background: '#F0FDF4', borderRadius: 10, border: '1px solid #A7F3D0', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 18, flexShrink: 0 }}>🏆</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 2px' }}>{meta?.label ?? goal.signal_type}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 2px' }}>{(lang === 'ar' ? meta?.label_ar : meta?.label) ?? goal.signal_type}</p>
                     <p style={{ fontSize: 11, color: '#059669', margin: 0 }}>
                       {t('tracker.goals_target')} {goal.target_value}{meta?.unit === '%' ? '%' : ` ${meta?.unit}`}
                       {goal.current_value ? ` · ${t('tracker.goals_final')} ${goal.current_value}${meta?.unit === '%' ? '%' : ` ${meta?.unit}`}` : ''}
@@ -701,7 +721,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', margin: 0 }}>{meta?.label ?? goal.signal_type}</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', margin: 0 }}>{(lang === 'ar' ? meta?.label_ar : meta?.label) ?? goal.signal_type}</p>
                           <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 20, background: '#FEF2F2', color: '#DC2626' }}>{t('common.missed')}</span>
                         </div>
                         <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>
