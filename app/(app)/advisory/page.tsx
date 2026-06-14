@@ -166,6 +166,7 @@ function ServiceRequestPageContent() {
           founderEmail: founder?.email        ?? '',
           businessName: founder?.business_name ?? '',
           flow:         selected.flow,
+          language:     lang,
         }),
       })
       setSubmittedService(selected)
