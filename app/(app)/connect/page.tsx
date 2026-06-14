@@ -47,18 +47,18 @@ export default async function ConnectPage({
   const isAtLimit = isFreeTier && effectiveSourceCount >= 3
 
   const CSV_TEMPLATES = [
-    { id: 'support',   name: 'Customer Support',   icon: '🎫', color: '#D97706', bg: '#FFFBEB' },
-    { id: 'orders',    name: 'Orders & Revenue',    icon: '💰', color: '#2563EB', bg: '#EFF6FF' },
-    { id: 'velocity',  name: 'Team Velocity',       icon: '⚙️', color: '#7C3AED', bg: '#F5F3FF' },
-    { id: 'financial', name: 'Financial Snapshot',  icon: '💵', color: '#059669', bg: '#ECFDF5' },
-    { id: 'marketing', name: 'Marketing Metrics',   icon: '📣', color: '#D97706', bg: '#FFFBEB' },
+    { id: 'support',   name: t('connect.csv_support'),   icon: '🎫', color: '#D97706', bg: '#FFFBEB' },
+    { id: 'orders',    name: t('connect.csv_orders'),    icon: '💰', color: '#2563EB', bg: '#EFF6FF' },
+    { id: 'velocity',  name: t('connect.csv_velocity'),  icon: '⚙️', color: '#7C3AED', bg: '#F5F3FF' },
+    { id: 'financial', name: t('connect.csv_financial'), icon: '💵', color: '#059669', bg: '#ECFDF5' },
+    { id: 'marketing', name: t('connect.csv_marketing'), icon: '📣', color: '#D97706', bg: '#FFFBEB' },
   ]
 
   const integrations = [
     {
       id: 'jira',
       name: 'Jira',
-      description: 'Sprint velocity, bug backlog, open issues. Diagnose team and product delivery problems automatically.',
+      description: t('connect.desc_jira'),
       icon: '🔧',
       color: '#0052CC',
       bg: '#E6F0FF',
@@ -70,7 +70,7 @@ export default async function ConnectPage({
     {
       id: 'ga4',
       name: 'Google Analytics',
-      description: 'Traffic trends, conversion funnel, acquisition channels, device performance.',
+      description: t('connect.desc_ga4'),
       icon: '📊',
       color: '#E37400',
       bg: '#FFF3E0',
@@ -82,7 +82,7 @@ export default async function ConnectPage({
     {
       id: 'trustpilot',
       name: 'Trustpilot',
-      description: 'Review rating trends, sentiment analysis, recurring complaint patterns.',
+      description: t('connect.desc_trustpilot'),
       icon: '⭐',
       color: '#00B67A',
       bg: '#E6F9F1',
@@ -94,7 +94,7 @@ export default async function ConnectPage({
     {
       id: 'shopify',
       name: 'Shopify',
-      description: 'Revenue trends, refund rate, AOV, repeat purchase rate, customer retention.',
+      description: t('connect.desc_shopify'),
       icon: '🛍️',
       color: '#96BF48',
       bg: '#F3F9E8',
@@ -106,7 +106,7 @@ export default async function ConnectPage({
     {
       id: 'intercom',
       name: 'Intercom',
-      description: 'Conversation volume, response times, repeat contacts, CSAT scores, activation issues.',
+      description: t('connect.desc_intercom'),
       icon: '💬',
       color: '#1F8EFF',
       bg: '#EFF6FF',
@@ -241,17 +241,16 @@ export default async function ConnectPage({
                       {isExpired ? t('connect.token_expired') : t('connect.connected')}
                     </div>
                   )}
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
                     <div style={{ width: 44, height: 44, borderRadius: 11, background: integration.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                       {integration.icon}
                     </div>
                     <div>
                       <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 3px' }}>{integration.name}</h3>
                       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                        {integration.dimensions.map(d => (
+                      {integration.dimensions.map(d => (
                           <span key={d} style={{ fontSize: 10, padding: '1px 7px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, textTransform: 'uppercase' }}>
-                            {d}
+                            {t(`signals.cat_${d}` as Parameters<typeof t>[0])}
                           </span>
                         ))}
                       </div>
@@ -265,16 +264,16 @@ export default async function ConnectPage({
                   {isConnected && integration.config && (
                     <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#6B7280' }}>
                       {integration.id === 'ga4' && integration.config.selected_property_id && (
-                        <span>Property: {integration.config.selected_property_id}</span>
+                        <span>{t('connect.config_property')} {integration.config.selected_property_id}</span>
                       )}
                       {integration.id === 'jira' && integration.config.project_name && (
-                        <span>Project: {integration.config.project_name} ({integration.config.project_key})</span>
+                        <span>{t('connect.config_project')} {integration.config.project_name} ({integration.config.project_key})</span>
                       )}
                       {integration.id === 'trustpilot' && integration.config.domain && (
-                        <span>Domain: {integration.config.domain}</span>
+                        <span>{t('connect.config_domain')} {integration.config.domain}</span>
                       )}
                       {integration.id === 'intercom' && integration.config?.app_name && (
-                        <span>Workspace: {integration.config.app_name}</span>
+                        <span>{t('connect.config_workspace')} {integration.config.app_name}</span>
                       )}
                     </div>
                   )}
@@ -365,8 +364,7 @@ export default async function ConnectPage({
 
                   {isUploaded && uploadedConfig && (
                     <p style={{ fontSize: 11, color: '#6B7280', margin: '0 0 10px' }}>
-                      {uploadedConfig.filename ?? 'File uploaded'} · {uploadedConfig.row_count ?? '?'} rows
-                    </p>
+                    {uploadedConfig.filename ?? t('connect.file_uploaded')} · {t('connect.csv_rows').replace('{n}', String(uploadedConfig.row_count ?? '?'))}                    </p>
                   )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
