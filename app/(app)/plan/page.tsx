@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
+import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 export default async function PlanPage() {
   const supabase = await createServerComponentClient()
@@ -250,7 +251,7 @@ export default async function PlanPage() {
                           </div>
                           <p style={{ fontSize: 13, color: '#374151', margin: 0 }}>{isAr && conflictsAr[i]?.note_ar ? String(conflictsAr[i].note_ar) : String(c.note ?? '')}</p>
                         </div>
-                        <a href="/signals" style={{ fontSize: 12, color: '#D97706', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        <a href="/signals?filter=conflicts" style={{ fontSize: 12, color: '#D97706', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                           {t('common.resolve')}
                         </a>
                       </div>
@@ -315,9 +316,12 @@ export default async function PlanPage() {
                                 <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>{String(action.title ?? '')}</h3>
                               </div>
                               <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                                {action.signal_type != null && (
+                              {action.signal_type != null && (
                                   <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, fontFamily: 'monospace' }}>
-                                    {String(action.signal_type).replace(/_/g, ' ')}
+                                    {isAr
+                                      ? (SIGNAL_GOAL_MAP[String(action.signal_type)]?.label_ar ?? String(action.signal_type).replace(/_/g, ' '))
+                                      : (SIGNAL_GOAL_MAP[String(action.signal_type)]?.label ?? String(action.signal_type).replace(/_/g, ' '))
+                                    }
                                   </span>
                                 )}
                                 <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: conf.bg, color: conf.color, fontWeight: 600 }}>{conf.label}</span>
@@ -326,11 +330,27 @@ export default async function PlanPage() {
                                 </span>
                                 <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#F9FAFB', color: '#6B7280', fontWeight: 600 }}>
                                   {impactIcon(String(action.impact ?? ''))} {(() => {
-                                    const imp = String(action.impact ?? '').toLowerCase().split(' ')[0]
-                                    const key = `signals.cat_${imp}` as Parameters<typeof t>[0]
-                                    try { return t(key) } catch { return String(action.impact ?? '') }
+                                    const imp = String(action.impact ?? '').toLowerCase()
+                                    const IMPACT_MAP: Record<string, Parameters<typeof t>[0]> = {
+                                      revenue:      'signals.cat_revenue',
+                                      customer:     'signals.cat_customer',
+                                      marketing:    'signals.cat_marketing',
+                                      team:         'signals.cat_team',
+                                      product:      'signals.cat_product',
+                                      strategy:     'signals.cat_strategy',
+                                      traffic:      'signals.cat_marketing',
+                                      engagement:   'signals.cat_customer',
+                                      reputation:   'signals.cat_customer',
+                                      retention:    'signals.cat_customer',
+                                      growth:       'signals.cat_revenue',
+                                      operations:   'signals.cat_team',
+                                      delivery:     'signals.cat_product',
+                                    }
+                                    const key = IMPACT_MAP[imp] ?? IMPACT_MAP[imp.split(' ')[0]]
+                                    return key ? t(key) : String(action.impact ?? '')
                                   })()}
                                 </span>
+
                               </div>
                             </div>
 
