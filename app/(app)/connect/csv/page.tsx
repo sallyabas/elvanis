@@ -189,12 +189,12 @@ function CSVUploadContent() {
                   padding: '16px 20px', cursor: 'pointer',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexDirection: isAr ? 'row-reverse' : 'row' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexDirection: isAr ? 'row-reverse' : 'row' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 10, background: tmpl.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                       {tmpl.icon}
                     </div>
-                    <div style={{ textAlign: isAr ? 'right' : 'left' }}>
+                    <div>
                       <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 3px' }}>{tmpl.name}</p>
                       <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 6px' }}>{tmpl.description}</p>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
@@ -250,14 +250,14 @@ function CSVUploadContent() {
             <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 16 }}>
               {t('connect.csv_step2_sub')}
             </p>
-            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 8, flexDirection: isAr ? 'row-reverse' : 'row' }}>
+            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
               <span style={{ fontSize: 15, flexShrink: 0 }}>💡</span>
               <p style={{ fontSize: 13, color: '#1D4ED8', margin: 0, lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>
                 {t('connect.csv_tip')}
               </p>
             </div>
             {uploadedTemplates.includes(selectedTemplate) && (
-              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, flexDirection: isAr ? 'row-reverse' : 'row' }}>
+              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 15 }}>⚠️</span>
                 <p style={{ fontSize: 13, color: '#92400E', margin: 0, textAlign: isAr ? 'right' : 'left' }}>
                   {t('connect.csv_reupload_warn')}

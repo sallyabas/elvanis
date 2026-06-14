@@ -138,7 +138,7 @@ export default async function ConnectPage({
           </p>
         </div>
 
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
+         <div dir={lang === 'ar' ? 'rtl' : 'ltr'} style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px' }}>
 
           {/* Page title */}
           <div style={{ marginBottom: 28 }}>
@@ -241,11 +241,11 @@ export default async function ConnectPage({
                       {isExpired ? t('connect.token_expired') : t('connect.connected')}
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 11, background: integration.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                       {integration.icon}
                     </div>
-                    <div style={{ textAlign: lang === 'ar' ? 'right' : 'left' }}>
+                    <div>
                       <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 3px' }}>{integration.name}</h3>
                       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: lang === 'ar' ? 'flex-end' : 'flex-start' }}>
                       {integration.dimensions.map(d => (
