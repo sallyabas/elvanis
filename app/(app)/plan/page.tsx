@@ -29,8 +29,9 @@ export default async function PlanPage() {
   console.log('[plan] founder:', founder?.id, 'digest:', digest?.id ?? 'null', 'error:', digestError?.message ?? 'none')
 
   const digestEn        = (digest?.digest as Record<string, unknown>) ?? {}
-  const digestAr        = (digest?.digest_ar as Record<string, unknown>) ?? {}
-  const isAr            = lang === 'ar'
+  const digestAr         = (digest?.digest_ar as Record<string, unknown>) ?? {}
+  const isAr             = lang === 'ar'
+  const conflictsAr      = (digestAr?.conflicts_ar as Array<Record<string, unknown>>) ?? []
 
   const actions         = digestEn?.actions as Array<Record<string, unknown>> ?? []
   const actionsAr       = (digestAr?.actions_ar as Array<Record<string, unknown>>) ?? []
@@ -247,7 +248,7 @@ export default async function PlanPage() {
                             <span style={{ fontSize: 11, color: '#9CA3AF' }}>·</span>
                             <span style={{ fontSize: 11, color: '#9CA3AF' }}>{(c.sources as string[])?.join(' vs ')}</span>
                           </div>
-                          <p style={{ fontSize: 13, color: '#374151', margin: 0 }}>{String(c.note ?? '')}</p>
+                          <p style={{ fontSize: 13, color: '#374151', margin: 0 }}>{isAr && conflictsAr[i]?.note_ar ? String(conflictsAr[i].note_ar) : String(c.note ?? '')}</p>
                         </div>
                         <a href="/signals" style={{ fontSize: 12, color: '#D97706', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                           {t('common.resolve')}
@@ -295,7 +296,7 @@ export default async function PlanPage() {
                       </span>
                       <div>
                         <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{cfg.title}</span>
-                        <span style={{ fontSize: 12, color: '#9CA3AF', marginLeft: 8 }}>{cfg.sub}</span>
+                        <span style={{ fontSize: 12, color: '#9CA3AF', margin: '0 8px' }}>{cfg.sub}</span>
                       </div>
                     </div>
 
@@ -324,7 +325,11 @@ export default async function PlanPage() {
                                   {t(`plan.effort_${String(action.effort ?? 'low')}` as Parameters<typeof t>[0])} {t('plan.effort')}
                                 </span>
                                 <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#F9FAFB', color: '#6B7280', fontWeight: 600 }}>
-                                  {impactIcon(String(action.impact ?? ''))} {t(`signals.cat_${String(action.impact ?? '')}` as Parameters<typeof t>[0]) || String(action.impact ?? '')}
+                                  {impactIcon(String(action.impact ?? ''))} {(() => {
+                                    const imp = String(action.impact ?? '').toLowerCase().split(' ')[0]
+                                    const key = `signals.cat_${imp}` as Parameters<typeof t>[0]
+                                    try { return t(key) } catch { return String(action.impact ?? '') }
+                                  })()}
                                 </span>
                               </div>
                             </div>

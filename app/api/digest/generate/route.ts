@@ -122,6 +122,9 @@ INPUT: You will receive a JSON object with this structure:
   "consultant_hook": "...",
   "actions": [
     { "title": "...", "why": "...", "how": "..." }
+  ],
+  "conflicts": [
+    { "note": "..." }
   ]
 }
 
@@ -132,7 +135,11 @@ OUTPUT: Return ONLY a JSON object with this exact structure — no preamble, no 
   "consultant_hook_ar": "...",
   "actions_ar": [
     { "title_ar": "...", "why_ar": "...", "how_ar": "..." }
+  ],
+  "conflicts_ar": [
+    { "note_ar": "..." }
   ]
+}
 }`
 
 export async function POST(request: NextRequest) {  try {
@@ -575,6 +582,9 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
         title: a.title ?? '',
         why:   a.why ?? '',
         how:   a.how ?? '',
+      })),
+      conflicts: (Array.isArray(digest.conflicts_to_resolve) ? digest.conflicts_to_resolve : []).map((c: Record<string, unknown>) => ({
+        note: c.note ?? '',
       })),
     }
 
