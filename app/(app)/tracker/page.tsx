@@ -29,13 +29,11 @@ export default async function BusinessHealthTrackerPage() {
     .select('signal_type, value, severity')
     .eq('founder_id', founderId)
     .in('status', ['new', 'acknowledged'])
-    .neq('source', 'manual')
 
   const { data: allSignals } = await supabase
     .from('diagnostic_signals')
     .select('*')
     .eq('founder_id', founderId)
-    .neq('source', 'manual')
     .in('status', ['new', 'acknowledged'])
     .order('updated_at', { ascending: false })
 
