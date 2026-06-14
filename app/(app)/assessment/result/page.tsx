@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
-import { getStatusLabel, getDisplaySummary } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint } from '@/lib/assessment-status'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -102,10 +102,10 @@ export default async function AssessmentResultPage() {
         </div>
 
         {/* Primary constraint */}
-        {score.primary_constraint_summary && !langMismatch && (
-          <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 20, padding: '24px 28px', marginBottom: 20 }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{t('assessment.primary_constraint')}</p>
-            <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{score.primary_constraint_summary}</p>
+        {getDisplayConstraint(score as Record<string, unknown>, lang) && (
+          <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{t('assessment.primary_constraint')} </span>
+            <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{getDisplayConstraint(score as Record<string, unknown>, lang)}</p>
           </div>
         )}
 
