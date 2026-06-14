@@ -206,9 +206,6 @@ export function getDependencyAlertText(
   if (atRisk.length === 0) return null
 
   const horizon = dep.horizonDays
-  const names   = atRisk.slice(0, 2).map(s =>
-    s.replace(/_/g, ' ')
-  )
-
-  return `At risk within ${horizon} days: ${names.join(', ')}`
+const names = atRisk.slice(0, 2).map(s => s)
+  return `signals.at_risk_within|${horizon}|${names.join(',')}`
 }

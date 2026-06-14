@@ -5,6 +5,7 @@ import type { DimensionStatus } from '@/lib/dimension-status'
 import { SIGNAL_DEPENDENCY_MAP, getDependencyAlertText, SignalType } from '@/lib/signal-dependency-map'
 import { DIMENSIONS } from '@/lib/gravity-engine'
 import { useT, useLang } from '@/app/context/LanguageContext'
+import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 interface Signal {
   id:                 string
@@ -423,7 +424,18 @@ export default function HeroCard({
               {t('focus.chain_alert')}
             </p>
             <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
-            {dependencyAlert}. {t('focus.chain_putting').replace('{dims}', downstreamDimensions.join(isAr ? ' و ' : ' and '))}
+              {(() => {
+                if (!dependencyAlert) return null
+                const [key, n, sigs] = dependencyAlert.split('|')
+                const sigNames = sigs.split(',').map(s => {
+                  const meta = SIGNAL_GOAL_MAP[s.trim()]
+                  return isAr ? (meta?.label_ar ?? s.replace(/_/g, ' ')) : (meta?.label ?? s.replace(/_/g, ' '))
+                }).join(isAr ? '، ' : ', ')
+                const translated = t(key as Parameters<typeof t>[0])
+                  .replace('{n}', n)
+                  .replace('{signals}', sigNames)
+                return translated
+              })()} {t('focus.chain_putting').replace('{dims}', downstreamDimensions.join(isAr ? ' و ' : ' and '))}
             </p>
           </div>
         </div>
