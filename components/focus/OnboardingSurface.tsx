@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { DimensionId, DIMENSIONS, getDimensionOrder, FounderStage, FocusMetric } from '@/lib/gravity-engine'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 type OnboardingStage = 'no_sources' | 'has_sources' | 'ready_to_scan'
 
@@ -20,7 +21,9 @@ interface OnboardingProps {
 }
 
 function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: string | null, focusMetric: string | null }) {
-  const ids     = getDimensionOrder(founderStage as FounderStage | null, focusMetric as FocusMetric | null)
+  const t    = useT()
+  const lang = useLang()
+  const ids  = getDimensionOrder(founderStage as FounderStage | null, focusMetric as FocusMetric | null)
   const [heroId, ...restIds] = ids
 
   return (
@@ -36,16 +39,16 @@ function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: strin
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <span style={{ fontSize: 28 }}>{DIMENSIONS[heroId].icon}</span>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
-              PRIMARY FOCUS
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
+              {t('focus.primary_focus')}
             </p>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827', margin: 0 }}>
-              {DIMENSIONS[heroId].label}
+              {lang === 'ar' ? (DIMENSIONS[heroId].label_ar ?? DIMENSIONS[heroId].label) : DIMENSIONS[heroId].label}
             </h2>
           </div>
         </div>
         <div style={{ fontSize: 56, fontWeight: 900, color: '#9CA3AF', lineHeight: 1, marginBottom: 8 }}>—</div>
-        <p style={{ fontSize: 14, color: '#9CA3AF' }}>Awaiting data</p>
+        <p style={{ fontSize: 14, color: '#9CA3AF' }}>{t('tracker.no_data')}</p>
       </div>
 
       {/* Faded secondary grid */}
@@ -62,10 +65,10 @@ function FadedDimensionGrid({ founderStage, focusMetric }: { founderStage: strin
           }}>
             <span style={{ fontSize: 20 }}>{DIMENSIONS[id].icon}</span>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
-                {DIMENSIONS[id].shortLabel}
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
+                {lang === 'ar' ? (DIMENSIONS[id].shortLabel_ar ?? DIMENSIONS[id].shortLabel) : DIMENSIONS[id].shortLabel}
               </p>
-              <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>Awaiting data</p>
+              <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>{t('tracker.no_data')}</p>
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, color: '#9CA3AF' }}>—</div>
           </div>
@@ -86,8 +89,9 @@ export default function OnboardingSurface({
   subscriptionTier,
   onDismiss,
 }: OnboardingProps) {
-  const router = useRouter()
-  const [scanning,  setScanning]  = useState(false)
+  const router  = useRouter()
+  const t       = useT()
+  const [scanning, setScanning] = useState(false)
 
   async function handleFirstScan() {
     setScanning(true)
@@ -134,20 +138,20 @@ export default function OnboardingSurface({
             <>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>
-                Calibrating your business engine
+                {t('focus.calibrate')}
               </h2>
               <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.6, marginBottom: 32 }}>
-                Connect your first tool so Elvanis can read your real operational data — not just what you tell it.
+                {t('onboarding.guidance_product_sub')}
               </p>
 
               {/* Checklist */}
               <div style={{ textAlign: 'left', marginBottom: 32 }}>
                 {[
-                  { label: 'Take assessment',    done: hasAssessment,      href: '/assessment' },
-                  { label: 'Connect first tool', done: connectedCount > 0, href: '/connect'    },
+                  { label: t('assessment.start'),       done: hasAssessment,      href: '/assessment' },
+                  { label: t('common.connect_first'),   done: connectedCount > 0, href: '/connect'    },
                   ...(subscriptionTier === 'navigator'
-                    ? [{ label: 'Run first scan', done: false, href: null }]
-                    : [{ label: 'First scan runs automatically', done: false, href: null }]
+                    ? [{ label: t('focus.run_first_scan'), done: false, href: null }]
+                    : [{ label: t('scan.nav_item1'),       done: false, href: null }]
                   ),
                 ].map(({ label, done, href }) => (
                   <div key={label} style={{
@@ -175,11 +179,11 @@ export default function OnboardingSurface({
                     </span>
                     {!done && href && (
                       <a href={href} style={{ marginLeft: 'auto', fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
-                        Start →
+                        {t('assessment.start')}
                       </a>
                     )}
                     {done && (
-                      <span style={{ marginLeft: 'auto', fontSize: 12, color: '#10B981', fontWeight: 600 }}>Done ✓</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 12, color: '#10B981', fontWeight: 600 }}>{t('common.achieved')} ✓</span>
                     )}
                   </div>
                 ))}
@@ -194,7 +198,7 @@ export default function OnboardingSurface({
                       fontSize: 15, fontWeight: 700, textDecoration: 'none',
                       textAlign: 'center', boxSizing: 'border-box' as const,
                     }}>
-                      📋 Take assessment — 10 min, no tools needed →
+                     📋 {t('onboarding.start_assessment_cta')}
                     </a>
                     <a href="/connect" style={{
                       display: 'block', width: '100%', padding: '14px',
@@ -203,7 +207,7 @@ export default function OnboardingSurface({
                       textAlign: 'center', boxSizing: 'border-box' as const,
                       border: '1px solid #E5E7EB',
                     }}>
-                      🔌 Connect a tool instead →
+                      🔌 {t('onboarding.connect_tools_cta')}
                     </a>
                   </>
                 ) : (
@@ -214,7 +218,7 @@ export default function OnboardingSurface({
                       fontSize: 15, fontWeight: 700, textDecoration: 'none',
                       textAlign: 'center', boxSizing: 'border-box' as const,
                     }}>
-                      🔌 Connect a tool for live data →
+                      🔌 {t('onboarding.connect_tools_cta')}
                     </a>
                     <a href="/assessment" style={{
                       display: 'block', width: '100%', padding: '14px',
@@ -223,7 +227,7 @@ export default function OnboardingSurface({
                       textAlign: 'center', boxSizing: 'border-box' as const,
                       border: '1px solid #E5E7EB',
                     }}>
-                      📋 Retake assessment →
+                      📋 {t('assessment.retake_cta')}
                     </a>
                   </>
                 )}
@@ -236,7 +240,7 @@ export default function OnboardingSurface({
                     width: '100%', textAlign: 'center' as const,
                   }}
                 >
-                  Explore the app first →
+                  {t('onboarding.explore_dashboard')}
                 </button>
               </div>
             </>
@@ -247,13 +251,13 @@ export default function OnboardingSurface({
             <>
               <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>
-                Engine warming up
+                {t('focus.tools_connected')}
               </h2>
               <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.6, marginBottom: 12 }}>
-                {connectedCount} {connectedCount === 1 ? 'tool' : 'tools'} connected.
+                {connectedCount} {t('connect.sources_active').replace('{n}', '').trim()} {t('common.live').replace('✓ ', '')}.
               </p>
               <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 32 }}>
-                This takes 30–60 seconds. We read across all your sources simultaneously.
+                {t('connect.scanning_now')}
               </p>
 
               {subscriptionTier === 'navigator' ? (
@@ -274,7 +278,7 @@ export default function OnboardingSurface({
                     fontFamily:   'inherit',
                   }}
                 >
-                  {scanning ? 'Scanning your business...' : 'Run first scan →'}
+                  {scanning ? t('scan.scanning') : t('focus.run_first_scan')}
                 </button>
               ) : (
                 <div style={{
@@ -286,10 +290,10 @@ export default function OnboardingSurface({
                   textAlign:    'left' as const,
                 }}>
                   <p style={{ fontSize: 14, fontWeight: 600, color: '#059669', margin: '0 0 4px' }}>
-                    ⚡ Your first scan runs automatically
+                    ⚡ {t('scan.nav_item1')}
                   </p>
                   <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
-                    This usually takes 1–2 minutes after connecting your first tool. No action needed.
+                    {t('connect.scanning_now')}
                   </p>
                 </div>
               )}
@@ -298,7 +302,7 @@ export default function OnboardingSurface({
                 href="/connect"
                 style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none' }}
               >
-                Connect more tools first
+                 {t('focus.connect_more')}
               </a>
             </>
           )}
@@ -308,10 +312,10 @@ export default function OnboardingSurface({
             <>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>
-                Reading your business...
+                {t('signals.scanning_data')}
               </h2>
               <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.6, marginBottom: 32 }}>
-                Elvanis is scanning across all your connected tools. This takes about 30 seconds.
+                {t('connect.scanning_now')}
               </p>
               <div style={{
                 width:        '100%',
