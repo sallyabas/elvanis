@@ -107,7 +107,7 @@ export default async function HomePage() {
 
   const { data: latestDigest } = await supabase
     .from('action_digests')
-    .select('id, digest, generated_at, status')
+    .select('id, digest, digest_ar, generated_at, status')
     .eq('founder_id', founder.id)
     .eq('status', 'active')
     .maybeSingle()
@@ -276,13 +276,12 @@ export default async function HomePage() {
             </div>
             {latestDigest && (
               <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, margin: 0, paddingTop: 14, borderTop: '1px solid #EDE9FE' }}>
-                 {(() => {
+                {(() => {
                   const d = (latestDigest as Record<string, unknown>).digest as Record<string, unknown>
                   const dAr = (latestDigest as Record<string, unknown>).digest_ar as Record<string, unknown> | undefined
                   const summary = (founder.language === 'ar' && dAr?.summary_ar) ? String(dAr.summary_ar) : String(d?.summary ?? '')
-                  return summary.substring(0, 200)
+                  return summary.substring(0, 200) + (summary.length > 200 ? '...' : '')
                 })()}
-                {String(((latestDigest as Record<string, unknown>).digest as Record<string, unknown>)?.summary ?? '').length > 200 ? '...' : ''}
               </p>
             )}
           </div>
