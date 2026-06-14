@@ -245,7 +245,12 @@ export default async function PlanPage() {
                       <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: '#D97706' }}>{String(c.signal_type ?? '').replace(/_/g, ' ')}</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#D97706' }}>
+                              {isAr
+                                ? (SIGNAL_GOAL_MAP[String(c.signal_type ?? '')]?.label_ar ?? String(c.signal_type ?? '').replace(/_/g, ' '))
+                                : (SIGNAL_GOAL_MAP[String(c.signal_type ?? '')]?.label ?? String(c.signal_type ?? '').replace(/_/g, ' '))
+                              }
+                            </span>
                             <span style={{ fontSize: 11, color: '#9CA3AF' }}>·</span>
                             <span style={{ fontSize: 11, color: '#9CA3AF' }}>{(c.sources as string[])?.join(' vs ')}</span>
                           </div>
