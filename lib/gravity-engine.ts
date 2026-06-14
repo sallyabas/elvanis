@@ -14,63 +14,84 @@ export type FocusMetric  = 'growth' | 'retention' | 'ops' | 'delivery'
 export type DimensionState = 'active' | 'secondary' | 'dormant'
 
 export interface DimensionConfig {
-  id:          DimensionId
-  label:       string
-  shortLabel:  string
-  icon:        string
-  color:       string
-  description: string
+  id:              DimensionId
+  label:           string
+  label_ar:        string
+  shortLabel:      string
+  shortLabel_ar:   string
+  icon:            string
+  color:           string
+  description:     string
+  description_ar:  string
 }
 
 // ── Master dimension definitions ─────────────────────────────
 export const DIMENSIONS: Record<DimensionId, DimensionConfig> = {
   revenue: {
-    id:          'revenue',
-    label:       'Revenue Engine',
-    shortLabel:  'Revenue',
-    icon:        '💰',
-    color:       '#10B981',
-    description: 'MRR trends, churn drivers, refund spikes, pricing health',
+    id:             'revenue',
+    label:          'Revenue Engine',
+    label_ar:       'محرك الإيرادات',
+    shortLabel:     'Revenue',
+    shortLabel_ar:  'الإيرادات',
+    icon:           '💰',
+    color:          '#10B981',
+    description:    'MRR trends, churn drivers, refund spikes, pricing health',
+    description_ar: 'اتجاهات الإيرادات الشهرية، أسباب الاضطراب، ارتفاع المرتجعات، صحة التسعير',
   },
   customer: {
-    id:          'customer',
-    label:       'Customer Health',
-    shortLabel:  'Customer',
-    icon:        '👥',
-    color:       '#3B82F6',
-    description: 'NPS patterns, complaint clusters, retention, repeat behaviour',
+    id:             'customer',
+    label:          'Customer Health',
+    label_ar:       'صحة العملاء',
+    shortLabel:     'Customer',
+    shortLabel_ar:  'العملاء',
+    icon:           '👥',
+    color:          '#3B82F6',
+    description:    'NPS patterns, complaint clusters, retention, repeat behaviour',
+    description_ar: 'أنماط NPS، مجموعات الشكاوى، الاحتفاظ، سلوك الشراء المتكرر',
   },
   marketing: {
-    id:          'marketing',
-    label:       'Growth & Acquisition',
-    shortLabel:  'Growth',
-    icon:        '📈',
-    color:       '#8B5CF6',
-    description: 'CAC trends, conversion drop-off, traffic source shifts',
+    id:             'marketing',
+    label:          'Growth & Acquisition',
+    label_ar:       'النمو والاستحواذ',
+    shortLabel:     'Growth',
+    shortLabel_ar:  'النمو',
+    icon:           '📈',
+    color:          '#8B5CF6',
+    description:    'CAC trends, conversion drop-off, traffic source shifts',
+    description_ar: 'اتجاهات تكلفة الاكتساب، انخفاض التحويل، تحولات مصادر الزيارات',
   },
   team: {
-    id:          'team',
-    label:       'Execution Capacity',
-    shortLabel:  'Execution',
-    icon:        '⚙️',
-    color:       '#F59E0B',
-    description: 'Sprint velocity, blockers, cycle time, delivery health',
+    id:             'team',
+    label:          'Execution Capacity',
+    label_ar:       'قدرة التنفيذ',
+    shortLabel:     'Execution',
+    shortLabel_ar:  'التنفيذ',
+    icon:           '⚙️',
+    color:          '#F59E0B',
+    description:    'Sprint velocity, blockers, cycle time, delivery health',
+    description_ar: 'سرعة السبرينت، العوائق، زمن الدورة، صحة التسليم',
   },
   product: {
-    id:          'product',
-    label:       'Product-Market Fit',
-    shortLabel:  'PMF',
-    icon:        '🎯',
-    color:       '#EF4444',
-    description: 'PMF signals, activation drop, engagement, bug impact',
+    id:             'product',
+    label:          'Product-Market Fit',
+    label_ar:       'التوافق بين المنتج والسوق',
+    shortLabel:     'PMF',
+    shortLabel_ar:  'التوافق',
+    icon:           '🎯',
+    color:          '#EF4444',
+    description:    'PMF signals, activation drop, engagement, bug impact',
+    description_ar: 'إشارات التوافق، انخفاض التفعيل، التفاعل، أثر الأخطاء',
   },
   strategy: {
-    id:          'strategy',
-    label:       'Strategic Clarity',
-    shortLabel:  'Strategy',
-    icon:        '🧭',
-    color:       '#6B7280',
-    description: 'ICP drift, decision avoidance, 90-day alignment',
+    id:             'strategy',
+    label:          'Strategic Clarity',
+    label_ar:       'وضوح الاستراتيجية',
+    shortLabel:     'Strategy',
+    shortLabel_ar:  'الاستراتيجية',
+    icon:           '🧭',
+    color:          '#6B7280',
+    description:    'ICP drift, decision avoidance, 90-day alignment',
+    description_ar: 'انجراف ICP، تجنب القرارات، محاذاة 90 يوماً',
   },
 }
 

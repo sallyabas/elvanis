@@ -108,6 +108,7 @@ export default function FocusView({
     hasAssessment,
     hasEverScanned,
     founderStage,
+    lang,
   })
   const { statuses, unlockedCount, totalCount } = dimensionResult
 

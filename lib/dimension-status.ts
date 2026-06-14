@@ -62,13 +62,16 @@ export function calculateDimensionStatuses(params: {
   hasAssessment:        boolean
   hasEverScanned:       boolean
   founderStage:         string | null
+  lang?:                'en' | 'ar'
 }): DimensionStatusResult {
   const {
     signals,
     connectedSourceTypes,
     hasAssessment,
     hasEverScanned,
+    lang = 'en',
   } = params
+  const isAr = lang === 'ar'
 
   const activeSignals = signals.filter(
     s => (s.status === 'new' || s.status === 'acknowledged') && s.source !== 'manual'
@@ -162,17 +165,19 @@ export function calculateDimensionStatuses(params: {
         hadSources,
         sourceIcons,
         hadSourceIcons,
-        assessmentOnlyText: topManualInsight
-          ? `Your assessment signals: "${topManualInsight}"`
-          : `This score is based on your assessment only.`,
-        reconnectText:      `Reconnect ${req.ctaText.replace('Connect ', '')} to sync your latest data.`,
+        assessmentOnlyText: isAr
+          ? (topManualInsight ? `إشارات تقييمك: "${topManualInsight}"` : 'هذه النتيجة مبنية على تقييمك فقط.')
+          : (topManualInsight ? `Your assessment signals: "${topManualInsight}"` : 'This score is based on your assessment only.'),
+        reconnectText: isAr
+          ? `أعد ربط ${req.ctaText_ar.replace('اربط ', '')} لمزامنة أحدث بياناتك.`
+          : `Reconnect ${req.ctaText.replace('Connect ', '')} to sync your latest data.`,
         topManualInsight,
         missingTools,
-        ctaText:            req.ctaText,
+        ctaText:            isAr ? req.ctaText_ar    : req.ctaText,
         ctaHref:            req.ctaHref,
-        unlockText:         req.unlockText,
-        pendingText:        req.pendingText,
-        healthyText:        req.healthyText,
+        unlockText:         isAr ? req.unlockText_ar : req.unlockText,
+        pendingText:        isAr ? req.pendingText_ar: req.pendingText,
+        healthyText:        isAr ? req.healthyText_ar: req.healthyText,
         label:              dim.label,
         shortLabel:         dim.shortLabel,
         icon:               dim.icon,
