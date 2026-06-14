@@ -207,8 +207,8 @@ export default async function ConnectPage({
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>✅</div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>
-                    {connectedCount} {t('connect.sources_active').replace('{s}', connectedCount > 1 ? 's' : '')}
-                    {isFreeTier && ` · ${effectiveSourceCount}/3 ${t('connect.slots_used')}`}
+                  {(connectedCount > 1 ? t('connect.sources_active_pl') : t('connect.sources_active')).replace('{n}', String(connectedCount))}
+                  {isFreeTier && ` · ${effectiveSourceCount}/3 ${t('connect.slots_used')}`}
                   </p>
                   <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
                     {activeSources.map(s => s.source_type === 'csv' ? `CSV (${(s.config as Record<string, string>)?.template_type ?? 'unknown'})` : s.source_type).join(' · ')}
