@@ -72,7 +72,7 @@ export default async function SignalsPage({
     { id: 'jira',       label: '🔧 Jira' },
     { id: 'shopify',    label: '🛍️ Shopify' },
     { id: 'intercom',   label: '💬 Intercom' },
-    { id: 'manual',     label: '📋 Assessment' },
+    { id: 'manual',     label: `📋 ${t('signals.source_assessment')}` },
   ]
 
   const { data: allActiveRaw } = await supabase
