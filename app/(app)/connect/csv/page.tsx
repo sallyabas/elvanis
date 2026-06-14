@@ -149,6 +149,7 @@ function CSVUploadContent() {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('templateType', selectedTemplate)
+    formData.append('language', lang)
     const res = await fetch('/api/csv/upload', { method: 'POST', body: formData })
     const data = await res.json()
     if (!res.ok) {
@@ -263,7 +264,7 @@ function CSVUploadContent() {
                 </p>
               </div>
             )}
-            <label style={{ display: 'block', padding: '32px', background: '#fff', border: '2px dashed #E5E7EB', borderRadius: 14, textAlign: 'center', cursor: 'pointer', marginBottom: 16 }}>
+            <label style={{ display: 'block', padding: '32px', background: '#fff', border: '2px dashed #E5E7EB', borderRadius: 14, textAlign: 'center', cursor: 'pointer', marginBottom: 16, direction: 'ltr' }}>
               <input type="file" accept=".csv" onChange={handleFileChange} style={{ display: 'none' }} />
               {file ? (
                 <div>

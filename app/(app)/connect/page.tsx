@@ -237,7 +237,7 @@ export default async function ConnectPage({
                   opacity: isBlocked ? 0.7 : 1,
                 }}>
                   {isConnected && (
-                    <div style={{ position: 'absolute', top: 14, right: 14, background: isExpired ? '#FFFBEB' : '#ECFDF5', color: isExpired ? '#D97706' : '#059669', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
+                  <div style={{ position: 'absolute', top: 14, ...(lang === 'ar' ? { left: 14 } : { right: 14 }), background: isExpired ? '#FFFBEB' : '#ECFDF5', color: isExpired ? '#D97706' : '#059669', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
                       {isExpired ? t('connect.token_expired') : t('connect.connected')}
                     </div>
                   )}
@@ -245,9 +245,9 @@ export default async function ConnectPage({
                     <div style={{ width: 44, height: 44, borderRadius: 11, background: integration.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                       {integration.icon}
                     </div>
-                    <div>
+                    <div style={{ textAlign: lang === 'ar' ? 'right' : 'left' }}>
                       <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 3px' }}>{integration.name}</h3>
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: lang === 'ar' ? 'flex-end' : 'flex-start' }}>
                       {integration.dimensions.map(d => (
                           <span key={d} style={{ fontSize: 10, padding: '1px 7px', borderRadius: 20, background: '#F3F4F6', color: '#6B7280', fontWeight: 600, textTransform: 'uppercase' }}>
                             {t(`signals.cat_${d}` as Parameters<typeof t>[0])}

@@ -7,6 +7,8 @@ import { resetStaleConflictPreferences } from '@/lib/conflict-reset'
 import { calculateHealthScore, ScoringInput } from '@/lib/health-scoring'
 import Groq from 'groq-sdk'
 import { availableParallelism } from 'node:os'
+import { getT } from '@/lib/translations'
+import type { TranslationKey } from '@/lib/translations'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
@@ -108,7 +110,8 @@ const TEMPLATE_RULES: Record<string, TemplateRule> = {
 // Checks selected template FIRST — avoids break-on-first bug in cross-template detection
 function verifyAndRejectMismatches(
   selectedType: string,
-  headers: string[]
+  headers: string[],
+  tCsv: (key: TranslationKey) => string
 ): { shouldReject: boolean; reason?: string } {
   const clean = headers.join(' ').toLowerCase()
 
@@ -130,8 +133,7 @@ function verifyAndRejectMismatches(
     if (type !== selectedType && matches(rule)) {
       return {
         shouldReject: true,
-        reason: `Mismatched template: you selected '${selectedType}' but this file looks like '${type}' data. Please re-upload using the '${type}' template.`,
-      }
+        reason: tCsv('signals.csv_mismatch').replace('{selected}', selectedType).replace(/{detected}/g, type),      }
     }
   }
 
@@ -403,9 +405,11 @@ export async function POST(request: NextRequest) {
 
     if (!founder) return NextResponse.json({ error: 'Founder not found' }, { status: 404 })
 
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const templateType = formData.get('templateType') as string
+      const formData = await request.formData()
+      const file = formData.get('file') as File
+      const templateType = formData.get('templateType') as string
+      const language = (formData.get('language') as string) === 'ar' ? 'ar' : 'en'
+      const tCsv = getT(language as 'en' | 'ar')
 
     if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     if (!templateType) return NextResponse.json({ error: 'Template type required' }, { status: 400 })
@@ -442,13 +446,13 @@ export async function POST(request: NextRequest) {
     const headerStr = headers.join('')
     if (headerStr.includes('PK') || headerStr.includes('<?xml') || /[^\x20-\x7E]/.test(headerStr)) {
       return NextResponse.json({
-        error: 'File content does not appear to be valid CSV. Please export your data as CSV and re-upload.'
+        error: tCsv('signals.csv_invalid')
       }, { status: 400 })
     }
 
     // Template validation — anchor column system
     // Case C: accept, Case A: wrong template detected, Case B: unrecognized structure
-    const validation = verifyAndRejectMismatches(templateType, headers)
+    const validation = verifyAndRejectMismatches(templateType, headers, tCsv)
     if (validation.shouldReject) {
       return NextResponse.json({ error: validation.reason }, { status: 400 })
     }
