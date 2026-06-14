@@ -60,19 +60,19 @@ function calculateAIReadiness(
   return { score: Math.min(baseScore + capacityBonus, 100), opportunities, hasEnoughData: true }
 }
 
-function getNextScanDate(sourceType: string, lastSynced: string | null, subscriptionTier?: string): string {
-  if (!lastSynced) return 'Ready to scan'
+function getNextScanDate(sourceType: string, lastSynced: string | null, subscriptionTier: string | undefined, tFn: (k: string) => string): string {
+  if (!lastSynced) return tFn('common.ready_now')
   const last = new Date(lastSynced)
   const weeklyTypes     = ['jira', 'intercom']
   const uploadOnlyTypes = ['csv']
-  if (uploadOnlyTypes.includes(sourceType)) return 'On upload'
+  if (uploadOnlyTypes.includes(sourceType)) return tFn('common.on_upload')
   const isNavigator = subscriptionTier === 'navigator'
   const days = (weeklyTypes.includes(sourceType) && !isNavigator) ? 30 : weeklyTypes.includes(sourceType) ? 7 : 30
   const next = new Date(last.getTime() + days * 24 * 60 * 60 * 1000)
   const now  = new Date()
-  if (next <= now) return 'Ready now'
+  if (next <= now) return tFn('common.ready_now')
   const daysLeft = Math.ceil((next.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
-  return `in ${daysLeft}d`
+  return tFn('focus.in_days').replace('{n}', String(daysLeft))
 }
 
 function buildCycleSummary(improving: number, worsening: number, unchanged: number, t: (k: Parameters<ReturnType<typeof getT>>[0]) => string): string {
@@ -195,7 +195,7 @@ console.log("--- DEBUG END ---");
 
   const sourceLabel: Record<string, string> = {
     ga4: 'GA4', jira: 'Jira', trustpilot: 'Trustpilot',
-    intercom: 'Intercom', shopify: 'Shopify', csv: 'CSV', manual: 'Assessment',
+    intercom: 'Intercom', shopify: 'Shopify', csv: 'CSV', manual: t('signals.source_assessment'),
   }
   const severityBg     = (s: string) => s === 'critical' ? '#FEF2F2' : s === 'warning' ? '#FFFBEB' : '#F9FAFB'
   const severityColor  = (s: string) => s === 'critical' ? '#DC2626' : s === 'warning' ? '#D97706' : '#6B7280'
@@ -373,7 +373,7 @@ console.log("--- DEBUG END ---");
                       </span>
                     </div>
                     <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 10px' }}>
-                      Target: <strong>{goal.target_value as string}{meta.unit === '%' ? '%' : ` ${meta.unit}`}</strong>
+                    {t('tracker.goals_target')} <strong>{goal.target_value as string}{meta.unit === '%' ? '%' : ` ${meta.unit}`}</strong>
                       {' · '}
                       <span style={{ color: daysLeft <= 7 ? '#DC2626' : daysLeft <= 14 ? '#D97706' : '#6B7280', fontWeight: daysLeft <= 14 ? 700 : 400 }}>
                         {daysLeft > 0 ? `${daysLeft} ${t('common.days_left')}` : t('common.due_today')}
@@ -383,15 +383,15 @@ console.log("--- DEBUG END ---");
                       <div style={{ height: 6, borderRadius: 99, background: isAtRisk ? '#DC2626' : '#2563EB', width: `${progressPct}%`, transition: 'width 1s ease-in-out' }} />
                     </div>
                     <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0 }}>
-                      Current: {current !== null ? `${current}${meta.unit === '%' ? '%' : ` ${meta.unit}`}` : 'No data yet'}
-                      {' · '}{progressPct}% progress
+                      {t('tracker.current_score')}: {current !== null ? `${current}${meta.unit === '%' ? '%' : ` ${meta.unit}`}` : t('tracker.no_data')}
+                      {' · '}{progressPct}% {t('common.improving').toLowerCase()}
                     </p>
                     {upsellShow && (
                       <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #FECACA' }}>
                         <p style={{ fontSize: 12, color: '#991B1B', margin: '0 0 6px' }}>⚠️ {meta.upsellCopy}</p>
                         {isNavigator ? (
                           <a href={`${meta.serviceUrl}&goal=${goal.signal_type}&current=${goal.current_value ?? ''}&target=${goal.target_value}&unit=${meta.unit}`} style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}>
-                            Request implementation →
+                           {t('tracker.goals_request_help')}
                           </a>
                         ) : (
                           <a href={meta.serviceUrl} style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}>
@@ -486,8 +486,8 @@ console.log("--- DEBUG END ---");
                         <span style={{ width: 20, height: 20, borderRadius: '50%', background: severityColor(signal.severity), color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{index + 1}</span>
                         <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20, background: severityBg(signal.severity), color: severityColor(signal.severity), textTransform: 'uppercase' as const, border: `1px solid ${severityColor(signal.severity)}30` }}>{signal.severity}</span>
                         <span style={{ fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase' as const }}>{sourceLabel[signal.source] ?? signal.source}</span>
-                        {confirmFlag && <span style={{ fontSize: 10, color: '#059669', background: '#ECFDF5', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>✓ Confirmed by {sourceLabel[confirmFlag.bySource] ?? confirmFlag.bySource}</span>}
-                        {conflictFlag && <span style={{ fontSize: 10, color: '#D97706', background: '#FFFBEB', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>⚠ Conflicts with {sourceLabel[conflictFlag.bySource] ?? conflictFlag.bySource}</span>}
+                        {confirmFlag && <span style={{ fontSize: 10, color: '#059669', background: '#ECFDF5', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>✓ {t('signals.confirmed_by')} {sourceLabel[confirmFlag.bySource] ?? confirmFlag.bySource}</span>}
+                        {conflictFlag && <span style={{ fontSize: 10, color: '#D97706', background: '#FFFBEB', padding: '2px 7px', borderRadius: 20, fontWeight: 600 }}>⚠ {t('signals.conflicts_with')} {sourceLabel[conflictFlag.bySource] ?? conflictFlag.bySource}</span>}
                       </div>
                       <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 4px', lineHeight: 1.4 }}>{insightText}</p>
                       <p style={{ fontSize: 12, color: '#6B7280', margin: 0, lineHeight: 1.4 }}>{actionText}</p>
@@ -527,7 +527,7 @@ console.log("--- DEBUG END ---");
                   const icons: Record<string, string> = { trustpilot: '⭐', ga4: '📊', jira: '🔧', csv: '📁', shopify: '🛍️', intercom: '💬' }
                   const names: Record<string, string> = { trustpilot: 'Trustpilot', ga4: 'Google Analytics', jira: 'Jira', csv: 'CSV', shopify: 'Shopify', intercom: 'Intercom' }
                   const csvTemplateNames: Record<string, string> = { support: 'CSV — Support', orders: 'CSV — Orders', velocity: 'CSV — Velocity', satisfaction: 'CSV — NPS/CSAT' }
-                  const nextScan    = getNextScanDate(s.source_type, s.last_synced_at, founder?.subscription_tier ?? 'free')
+                  const nextScan    = getNextScanDate(s.source_type, s.last_synced_at, founder?.subscription_tier ?? 'free', t as (k: string) => string)
                   const isExpired   = s.status === 'token_expired'
                   const displayName = s.source_type === 'csv' ? csvTemplateNames[(s.config as Record<string, string>)?.template_type ?? ''] ?? 'CSV' : names[s.source_type] ?? s.source_type
                   const csvLabel    = s.source_type === 'csv' ? (s.config as Record<string, string>)?.template_type ?? index.toString() : s.source_type
@@ -561,7 +561,7 @@ console.log("--- DEBUG END ---");
                         const freq = ['jira','intercom'].includes(s.source_type) ? (founder?.subscription_tier === 'navigator' ? 7 : 30) : 30
                         return Math.max(0, Math.ceil(freq - days))
                       }))
-                      return minDays === 0 ? t('common.ready_now') : `in ${minDays}d`
+                      return minDays === 0 ? t('common.ready_now') : t('focus.in_days').replace('{n}', String(minDays))
                     })()}
                   </span>
                   <a href="/signals" style={{ fontSize: 12, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
@@ -622,7 +622,7 @@ console.log("--- DEBUG END ---");
                       <span style={{ fontSize: 18, fontWeight: 800, color: trendConfig.color }}>{trendConfig.icon}</span>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{insightText}</p>
-                        <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>Was {String(signal.previous_value ?? '—')} → Now {String(signal.value ?? '—')} · {sourceLabel[signal.source as string] ?? String(signal.source)}</p>
+                        <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>{t('common.was_now').replace('{prev}', String(signal.previous_value ?? '—')).replace('{curr}', String(signal.value ?? '—'))} · {sourceLabel[signal.source as string] ?? String(signal.source)}</p>
                       </div>
                       <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#fff', color: trendConfig.color, fontWeight: 700, border: `1px solid ${trendConfig.color}30`, flexShrink: 0 }}>{trendConfig.label}</span>
                     </div>
@@ -662,7 +662,7 @@ console.log("--- DEBUG END ---");
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, padding: '16px 20px', background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB' }}>
                 <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                  <p style={{ fontSize: 10, color: '#6B7280', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('assessment.overall')}</p>
+                <p style={{ fontSize: 10, color: '#6B7280', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('assessment.overall')}</p>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2 }}>
                     <span style={{ fontSize: 40, fontWeight: 900, color: overallScoreColor, lineHeight: 1 }}>{score.overall_score as number}</span>
                     <span style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 3 }}>/100</span>
@@ -675,13 +675,13 @@ console.log("--- DEBUG END ---");
                 </div>
               </div>
               <div className="grid-3-col" style={{ marginBottom: 16 }}>
-                {[
-                  { label: 'Revenue',              val: score.score_revenue   as number | null },
-                  { label: 'Product-Market Fit',   val: score.score_pmf       as number | null },
-                  { label: 'Team & Operations',    val: score.score_team      as number | null },
-                  { label: 'Customer & Retention', val: score.score_customer  as number | null },
-                  { label: 'Marketing & Growth',   val: score.score_marketing as number | null },
-                  { label: 'Strategy & Goals',     val: score.score_strategy  as number | null },
+              {[
+                  { label: t('assessment.dim_revenue'),  val: score.score_revenue   as number | null },
+                  { label: t('assessment.dim_pmf'),      val: score.score_pmf       as number | null },
+                  { label: t('assessment.dim_team'),     val: score.score_team      as number | null },
+                  { label: t('assessment.dim_customer'), val: score.score_customer  as number | null },
+                  { label: t('assessment.dim_marketing'),val: score.score_marketing as number | null },
+                  { label: t('assessment.dim_strategy'), val: score.score_strategy  as number | null },
                 ].map(({ label, val }) => {
                   const v     = val ?? 0
                   const color = v >= 66 ? '#059669' : v >= 41 ? '#D97706' : '#DC2626'

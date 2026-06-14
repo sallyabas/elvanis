@@ -15,6 +15,7 @@ import RevealAnimation from './RevealAnimation'
 import HeroCard from './HeroCard'
 import DimensionGrid from './DimensionGrid'
 import FocusChanger from './FocusChanger'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 type FocusMode = 'onboarding' | 'os'
 
@@ -68,7 +69,9 @@ export default function FocusView({
   connectedSourceTypes,
   subscriptionTier,
 }: FocusViewProps) {
-  const router      = useRouter()
+  const router = useRouter()
+  const t      = useT()
+  const lang   = useLang()
   const [showReveal, setShowReveal] = useState(false)
   const [focusChanging, setFocusChanging] = useState(false)
   useEffect(() => {
@@ -157,19 +160,20 @@ export default function FocusView({
       }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>
-         {!hasEverScanned && !dismissed
-          ? `Welcome, ${founderName.split(' ')[0]}`
+          {!hasEverScanned && !dismissed
+          ? t('focus.welcome').replace('{name}', founderName.split(' ')[0])
           : (() => {
             const h = new Date().getHours()
             const name = founderName.split(' ')[0]
-            return h < 12 ? `Good morning, ${name}` : h < 17 ? `Good afternoon, ${name}` : `Good evening, ${name}`
+            const greeting = h < 12 ? t('greeting.morning') : h < 17 ? t('greeting.afternoon') : t('greeting.evening')
+            return `${greeting}, ${name}`
           })()}
           
           </h1>
           <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
           {!hasEverScanned && !dismissed
-           ? "Let's calibrate your business engine"
-           : new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+           ? t('focus.calibrate')
+           : new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
 
@@ -236,11 +240,11 @@ export default function FocusView({
           gap:          16,
         }}>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
-              {unlockedCount} of {totalCount} dimensions active
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
+              {t('focus.dimensions_active').replace('{n}', String(unlockedCount)).replace('{total}', String(totalCount))}
             </p>
             <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
-              Connect more tools to unlock your full business picture
+              {t('focus.connect_more')}
             </p>
           </div>
             <a
@@ -256,7 +260,7 @@ export default function FocusView({
               flexShrink:     0,
             }}
           >
-            Connect tools →
+            {t('common.connect_tools')}
           </a>
         </div>
       )}
@@ -272,11 +276,11 @@ export default function FocusView({
           flexWrap:   'wrap' as const,
         }}>
           {[
-            { label: 'Health Overview', href: '/overview'       },
-            { label: 'All Signals',     href: '/signals'        },
-            { label: 'Action Plan',     href: '/plan'           },
-            { label: 'Connect Tools',   href: '/connect'        },
-            { label: 'Health Tracker',  href: '/tracker' },
+            { label: t('focus.nav_health'),   href: '/overview' },
+            { label: t('focus.nav_signals'),  href: '/signals'  },
+            { label: t('focus.nav_plan'),     href: '/plan'     },
+            { label: t('focus.nav_connect'),  href: '/connect'  },
+            { label: t('focus.nav_tracker'),  href: '/tracker'  },
           ].map(({ label, href }) => (
               <a
               key={href}

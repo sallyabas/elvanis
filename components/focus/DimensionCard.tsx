@@ -1,6 +1,7 @@
 'use client'
 
 import { DimensionStatus } from '@/lib/dimension-status'
+import { useT } from '@/app/context/LanguageContext'
 
 interface DimensionCardProps {
   status:  DimensionStatus
@@ -28,7 +29,20 @@ function getTrendColor(trend: string | null): string {
 }
 
 export default function DimensionCard({ status, onClick }: DimensionCardProps) {
-  const { label, color: scoreColor } = getScoreLabel(status.score)
+  const t = useT()
+  const SCORE_LABELS: Record<string, { label: string; color: string }> = {
+    no_data:   { label: t('focus.score_no_data'),   color: '#9CA3AF' },
+    healthy:   { label: t('focus.score_healthy'),   color: '#10B981' },
+    attention: { label: t('focus.score_attention'), color: '#F59E0B' },
+    critical:  { label: t('focus.score_critical'),  color: '#EF4444' },
+  }
+  const getScoreLabelT = (score: number) => {
+    if (score === -1) return SCORE_LABELS.no_data
+    if (score >= 70)  return SCORE_LABELS.healthy
+    if (score >= 40)  return SCORE_LABELS.attention
+    return SCORE_LABELS.critical
+  }
+  const { label, color: scoreColor } = getScoreLabelT(status.score)
   const isDormant = status.state === 'locked' && !status.isReconnect
   const opacity   = isDormant ? 0.5 : 1
 
@@ -78,10 +92,10 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           overflow:     'hidden',
           textOverflow: 'ellipsis',
         }}>
-          {status.state === 'locked'  ? (status.isReconnect ? `⚠️ Reconnect` : status.ctaText) :
-           status.state === 'pending' ? 'Scan needed'   :
-           status.state === 'healthy' ? '✓ No issues'   :
-           status.state === 'assessment_only' ? '📋 Assessment only'  :
+          {status.state === 'locked'  ? (status.isReconnect ? t('focus.state_reconnect') : status.ctaText) :
+           status.state === 'pending' ? t('focus.state_scan_needed')   :
+           status.state === 'healthy' ? t('focus.state_no_issues')     :
+           status.state === 'assessment_only' ? t('focus.state_assessment') :
            status.description}
         </p>
       </div>
@@ -107,9 +121,9 @@ export default function DimensionCard({ status, onClick }: DimensionCardProps) {
           fontWeight: 600,
         }}>
            {isDormant ? (status.isReconnect ? status.hadSourceIcons.join(' ') : '') :
-           status.state === 'healthy' ? 'Healthy' :
-           status.state === 'pending' ? 'Pending' :
-           status.state === 'assessment_only' ? 'Provisional' :
+           status.state === 'healthy' ? t('focus.score_healthy') :
+           status.state === 'pending' ? t('focus.state_pending') :
+           status.state === 'assessment_only' ? t('focus.state_provisional') :
            status.state === 'active' && status.sourceIcons.length > 0
             ? `${getTrendArrow(status.trend)} ${status.sourceIcons.join(' ')}`
             : `${getTrendArrow(status.trend)} ${label}`}

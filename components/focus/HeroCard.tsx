@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import type { DimensionStatus } from '@/lib/dimension-status'
 import { SIGNAL_DEPENDENCY_MAP, getDependencyAlertText, SignalType } from '@/lib/signal-dependency-map'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 interface Signal {
   id:                 string
@@ -25,29 +26,7 @@ interface HeroCardProps {
   isUpdating?: boolean
 }
 
-function SeverityBadge({ severity }: { severity: string }) {
-  const map: Record<string, { bg: string; color: string; label: string }> = {
-    critical: { bg: '#FEF2F2', color: '#DC2626', label: 'Critical' },
-    warning:  { bg: '#FFFBEB', color: '#D97706', label: 'Warning'  },
-    watch:    { bg: '#F0FDF4', color: '#059669', label: 'Watch'    },
-  }
-  const s = map[severity] ?? map.watch
-  return (
-    <span style={{
-      background:    s.bg,
-      color:         s.color,
-      fontSize:      11,
-      fontWeight:    700,
-      padding:       '3px 8px',
-      borderRadius:  6,
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.05em',
-      flexShrink:    0,
-    }}>
-      {s.label}
-    </span>
-  )
-}
+
 
 function getTrendArrow(trend: string | null) {
   if (trend === 'improving') return '↑'
@@ -97,6 +76,15 @@ export default function HeroCard({
   isUpdating = false,
 }: HeroCardProps) {
   const router = useRouter()
+  const t      = useT()
+  const lang   = useLang()
+  const isAr   = lang === 'ar'
+
+  const SEVERITY_MAP: Record<string, { bg: string; color: string; label: string }> = {
+    critical: { bg: '#FEF2F2', color: '#DC2626', label: t('focus.severity_critical') },
+    warning:  { bg: '#FFFBEB', color: '#D97706', label: t('focus.severity_warning')  },
+    watch:    { bg: '#F0FDF4', color: '#059669', label: t('focus.severity_watch')    },
+  }
 
   // Top 2 signals by severity
   const severityOrder = { critical: 0, warning: 1, watch: 2 }
@@ -188,13 +176,15 @@ export default function HeroCard({
             textTransform: 'uppercase' as const,
             margin:        '0 0 2px',
           }}>
-            Primary Focus
+            {t('focus.primary_focus')}
           </p>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: '#111827', margin: '0 0 4px' }}>
             {status.label}
           </h2>
           <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0, fontStyle: 'italic' }}>
-            {getWhyPrimary(founderStage, focusMetric)}
+            {t('focus.based_on')
+              .replace('{focus}', t((`focus.focus_${focusMetric ?? 'growth'}`) as Parameters<typeof t>[0]))
+              .replace('{stage}', t((`focus.stage_${founderStage === 'early_stage' ? 'early' : 'product'}`) as Parameters<typeof t>[0]))}
           </p>
         </div>
 
@@ -212,8 +202,8 @@ export default function HeroCard({
   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
     <span style={{ fontSize: 18, color: '#9CA3AF' }}>/100</span>
     {status.isProvisional && (
-      <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, letterSpacing: '0.05em' }}>
-        📋 PROVISIONAL
+        <span style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, letterSpacing: '0.05em' }}>
+        📋 {t('focus.provisional')}
       </span>
     )}
   </div>
@@ -224,9 +214,9 @@ export default function HeroCard({
                {getTrendArrow(status.trend)}
               </span>
               <span style={{ fontSize: 13, color: getTrendColor(status.trend), fontWeight: 600 }}>
-                {status.trend === 'improving'  ? 'Improving'  :
-                 status.trend === 'worsening'  ? 'Worsening'  :
-                 status.trend === 'unchanged'  ? 'Stable'     : ''}
+                {status.trend === 'improving'  ? t('focus.improving')  :
+                 status.trend === 'worsening'  ? t('focus.worsening')  :
+                 status.trend === 'unchanged'  ? t('focus.stable')     : ''}
               </span>
               {status.state === 'active' && status.sourceIcons.length > 0 && (
                <span style={{ fontSize: 14, marginLeft: 4 }}>
@@ -247,14 +237,17 @@ export default function HeroCard({
     <p style={{ fontSize: 32, marginBottom: 12 }}>
       {status.isReconnect ? '⚠️' : '🔒'}
     </p>
+
     <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
       {status.isReconnect
-        ? `${status.label} disconnected`
-        : `${status.label} not yet activated`}
+        ? t('focus.reconnected').replace('{label}', status.label)
+        : t('focus.not_activated').replace('{label}', status.label)}
     </p>
+
     <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
       {status.isReconnect ? status.reconnectText : status.unlockText}
     </p>
+
     <a
       href={status.ctaHref}
       style={{
@@ -269,12 +262,12 @@ export default function HeroCard({
       }}
     >
       {status.isReconnect
-        ? `Reconnect ${status.shortLabel} →`
+        ? t('focus.reconnect_btn').replace('{label}', status.shortLabel)
         : `${status.ctaText} →`}
     </a>
     {status.isReconnect && status.hadSourceIcons.length > 0 && (
       <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 12 }}>
-        Previously connected:{' '}
+        {t('focus.previously')}{' '}
         <span style={{ opacity: 0.5 }}>
           {status.hadSourceIcons.join(' ')}
         </span>
@@ -288,7 +281,7 @@ export default function HeroCard({
         <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
           <p style={{ fontSize: 32, marginBottom: 12 }}>⏳</p>
           <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>
-            Tools connected — scan needed
+            {t('focus.tools_connected')}
           </p>
           <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
             {status.pendingText}
@@ -307,7 +300,7 @@ export default function HeroCard({
               fontFamily:   'inherit',
             }}
           >
-            Run first scan →
+            {t('focus.run_first_scan')}
           </button>
         </div>
       )}
@@ -317,7 +310,7 @@ export default function HeroCard({
         <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
           <p style={{ fontSize: 32, marginBottom: 12 }}>✅</p>
           <p style={{ fontSize: 15, fontWeight: 600, color: '#10B981', marginBottom: 8 }}>
-            {status.label} is healthy
+            {t('focus.is_healthy').replace('{label}', status.label)}
           </p>
           <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6 }}>
             {status.healthyText}
@@ -341,13 +334,14 @@ export default function HeroCard({
       <span style={{ fontSize: 16, flexShrink: 0 }}>📋</span>
       <div>
       <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 4px' }}>
-  📋 Assessment data only — {status.score}* provisional
+  📋 {t('focus.assessment_only').replace('{score}', String(status.score))}
 </p>
 <p style={{ fontSize: 13, color: '#92400E', margin: '0 0 4px' }}>
   {status.assessmentOnlyText}
 </p>
+
 <p style={{ fontSize: 12, color: '#92400E', margin: 0, fontStyle: 'italic' }}>
-  Connect tools to confirm or challenge this baseline.
+  {t('focus.connect_validate')}
 </p>
       </div>
     </div>
@@ -364,7 +358,7 @@ export default function HeroCard({
         textDecoration: 'none',
       }}
     >
-      {status.ctaText} to validate →
+      {status.ctaText} {t('focus.to_validate')}
     </a>
   </div>
 )}
@@ -380,7 +374,7 @@ export default function HeroCard({
             letterSpacing: '0.1em',
             marginBottom:  12,
           }}>
-            What's driving this
+            {t('focus.whats_driving')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {topSignals.map(signal => (
@@ -395,13 +389,21 @@ export default function HeroCard({
                   alignItems:   'flex-start',
                 }}
               >
-                <SeverityBadge severity={signal.severity} />
+                <span style={{
+                  background:    SEVERITY_MAP[signal.severity]?.bg ?? '#F0FDF4',
+                  color:         SEVERITY_MAP[signal.severity]?.color ?? '#059669',
+                  fontSize:      11, fontWeight: 700, padding: '3px 8px',
+                  borderRadius:  6, textTransform: 'uppercase' as const,
+                  letterSpacing: '0.05em', flexShrink: 0,
+                }}>
+                  {SEVERITY_MAP[signal.severity]?.label ?? signal.severity}
+                </span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>
-                    {signal.insight_summary}
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>
+                    {isAr && signal.insight_summary_ar ? signal.insight_summary_ar : signal.insight_summary}
                   </p>
                   <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
-                    → {signal.recommended_action}
+                    → {isAr && signal.recommended_action_ar ? signal.recommended_action_ar : signal.recommended_action}
                   </p>
                 </div>
               </div>
@@ -424,12 +426,11 @@ export default function HeroCard({
         }}>
           <span style={{ fontSize: 16, flexShrink: 0 }}>⚡</span>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
-              Chain alert
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
+              {t('focus.chain_alert')}
             </p>
             <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
-              {dependencyAlert}. Fix this first — it's putting{' '}
-              <strong>{downstreamDimensions.join(' and ')}</strong> at risk.
+              {dependencyAlert}. {t('focus.chain_putting').replace('{dims}', downstreamDimensions.join(' and '))}
             </p>
           </div>
         </div>
@@ -452,7 +453,7 @@ export default function HeroCard({
               fontFamily:   'inherit',
             }}
           >
-            See all {status.shortLabel} signals →
+           {t('focus.see_signals').replace('{label}', status.shortLabel)}
           </button>
           <button
             onClick={() => router.push('/plan')}
@@ -468,7 +469,8 @@ export default function HeroCard({
               fontFamily:   'inherit',
             }}
           >
-            See action plan
+            {t('focus.see_action_plan')}
+            
           </button>
         </div>
       )}

@@ -202,7 +202,7 @@ export default async function HomePage() {
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB' }}>
               <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                <p style={{ fontSize: 10, color: '#6B7280', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Overall</p>
+              <p style={{ fontSize: 10, color: '#6B7280', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('assessment.overall')}</p>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2 }}>
                   <span style={{ fontSize: 40, fontWeight: 900, color: overallScoreColor, lineHeight: 1 }}>{score.overall_score as number}</span>
                   <span style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 3 }}>/100</span>
@@ -244,8 +244,8 @@ export default async function HomePage() {
             <div style={{ background: '#EDE9FE', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
               <p style={{ fontSize: 13, color: '#6D28D9', margin: 0 }}>{t('home.take_assessment')}</p>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                {!assessment && <a href="/assessment" style={{ padding: '8px 16px', background: '#7C3AED', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Take assessment →</a>}
-                <a href="/connect" style={{ padding: '8px 16px', background: '#fff', color: '#7C3AED', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>Connect tools →</a>
+              {!assessment && <a href="/assessment" style={{ padding: '8px 16px', background: '#7C3AED', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>{t('common.take_assessment')}</a>}
+              <a href="/connect" style={{ padding: '8px 16px', background: '#fff', color: '#7C3AED', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid #DDD6FE' }}>{t('common.connect_tools')}</a>
               </div>
             </div>
           ) : aiReadiness.opportunities.length === 0 ? (
@@ -280,7 +280,7 @@ export default async function HomePage() {
               <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
               {latestDigest ? (
                   <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
-                    Generated {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                   {t('plan.generated')} {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString(founder.language === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 ) : (
                   <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
@@ -292,7 +292,12 @@ export default async function HomePage() {
             </div>
             {latestDigest && (
               <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, margin: 0, paddingTop: 14, borderTop: '1px solid #EDE9FE' }}>
-                {String(((latestDigest as Record<string, unknown>).digest as Record<string, unknown>)?.summary ?? '').substring(0, 200)}
+                 {(() => {
+                  const d = (latestDigest as Record<string, unknown>).digest as Record<string, unknown>
+                  const dAr = (latestDigest as Record<string, unknown>).digest_ar as Record<string, unknown> | undefined
+                  const summary = (founder.language === 'ar' && dAr?.summary_ar) ? String(dAr.summary_ar) : String(d?.summary ?? '')
+                  return summary.substring(0, 200)
+                })()}
                 {String(((latestDigest as Record<string, unknown>).digest as Record<string, unknown>)?.summary ?? '').length > 200 ? '...' : ''}
               </p>
             )}
