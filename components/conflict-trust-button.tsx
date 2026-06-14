@@ -86,7 +86,7 @@ export default function ConflictTrustButton({
       : t('signals.trusted_choice').replace('{label}', chosenLabel)
 
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap', flexDirection: isAr ? 'row-reverse' : 'row' }}>
+      <div dir={isAr ? 'rtl' : 'ltr'} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 11, padding: '4px 12px', borderRadius: 20, background: '#ECFDF5', color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           {message}
         </span>
@@ -101,8 +101,8 @@ export default function ConflictTrustButton({
   }
 
   return (
-    <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexDirection: isAr ? 'row-reverse' : 'row' }}>
+    <div dir={isAr ? 'rtl' : 'ltr'} style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <div style={{ textAlign: isAr ? 'right' : 'left' }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>
             {t('signals.choose_source')}

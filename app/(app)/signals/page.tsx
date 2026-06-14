@@ -257,7 +257,7 @@ export default async function SignalsPage({
     if (filter === 'jira')       return `Jira ${t('signals.suffix')}`
     if (filter === 'shopify')    return `Shopify ${t('signals.suffix')}`
     if (filter === 'intercom')   return `Intercom ${t('signals.suffix')}`
-    if (filter === 'manual')     return `Assessment ${t('signals.suffix')}`
+    if (filter === 'manual')     return `${t('signals.source_assessment')} ${t('signals.suffix')}`
     return `${t('signals.all_active')} ${t('signals.suffix')}`
   }
 

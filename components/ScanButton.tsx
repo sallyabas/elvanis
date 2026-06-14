@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK ?? 'https://buy.stripe.com/test_00wdR9cnMfpubZkeWGdUY00'
 
@@ -28,8 +29,12 @@ export default function ScanButton({
   cooldownHours:       number
 }) {
   const router = useRouter()
-  const [scanning,         setScanning]         = useState(false)
-  const [result,           setResult]           = useState('')
+  const t      = useT()
+  const lang   = useLang()
+  const isAr   = lang === 'ar'
+
+  const [scanning,          setScanning]          = useState(false)
+  const [result,            setResult]            = useState('')
   const [showUpgradeModal,  setShowUpgradeModal]  = useState(false)
   const [showConfirmModal,  setShowConfirmModal]  = useState(false)
 
@@ -74,7 +79,7 @@ export default function ScanButton({
 
       // 429 = weekly limit reached — show server message with next available date
       if (res.status === 429) {
-        setResult(data.error ?? 'Weekly scan limit reached — try again next week')
+        setResult(data.error ?? t('scan.limit_reached'))
         setScanning(false)
         return
       }
@@ -86,27 +91,28 @@ export default function ScanButton({
         const errors = data.results?.filter((r: { error?: string }) => r.error) ?? []
         const errorSources = errors.map((r: { source: string }) => r.source).join(', ')
         if (total > 0 && errors.length === 0) {
-          setResult(`✓ ${total} new signals found`)
+          setResult(t('scan.result_found').replace('{n}', String(total)))
         } else if (total > 0 && errors.length > 0) {
-          setResult(`✓ ${total} signals found · ${errorSources} had issues`)
+          setResult(t('scan.result_issues').replace('{n}', String(total)).replace('{sources}', errorSources))
         } else if (errors.length > 0) {
-          setResult(`⚠ Scan completed with issues on ${errorSources} — check connections`)
+          setResult(t('scan.result_errors').replace('{sources}', errorSources))
         } else {
-          setResult('✓ Scan complete — no new signals')
+          setResult(t('scan.result_none'))
         }
         router.refresh()
       } else {
-        setResult(data.error ?? 'Scan failed — try again')
+        setResult(data.error ?? t('scan.result_failed'))
       }
     } catch {
-      setResult('Scan failed — check your internet connection and try again')
+      setResult(t('scan.result_conn'))
     }
     setScanning(false)
   }
+
 if (!hasConnectedSources || isFreeTier) return null
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: isAr ? 'flex-start' : 'flex-end', gap: 6 }}>
         {result && (
           <span style={{ fontSize: 13, color: result.startsWith('✓') ? '#059669' : '#DC2626' }}>
             {result}
@@ -137,7 +143,7 @@ if (!hasConnectedSources || isFreeTier) return null
               cursor: (scanning || (!isFreeTier && !canScan)) ? 'not-allowed' : 'pointer',
             }}
           >
-            {scanning ? '🔍 Scanning...' : '🔍 Run new scan'}
+            {scanning ? t('scan.scanning') : t('scan.run_new')}
           </button>
         </div>
       </div>
@@ -152,6 +158,7 @@ if (!hasConnectedSources || isFreeTier) return null
           }}
         >
           <div
+            dir={isAr ? 'rtl' : 'ltr'}
             onClick={e => e.stopPropagation()}
             style={{
               background: '#fff', borderRadius: 20, padding: '36px 32px',
@@ -165,25 +172,25 @@ if (!hasConnectedSources || isFreeTier) return null
             }}>✨</div>
 
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 10px' }}>
-              Manual scans are a Navigator feature
+              {t('scan.upgrade_title')}
             </h2>
 
             <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, margin: '0 0 24px' }}>
               {daysUntilNextScan !== null && daysUntilNextScan > 0
-                ? `Your next automatic scan runs in ${daysUntilNextScan} day${daysUntilNextScan !== 1 ? 's' : ''}. Upgrade to Navigator to scan now and verify your fixes worked immediately.`
-                : 'Upgrade to Navigator to run manual scans anytime and verify your fixes worked immediately.'
+                ? t('scan.upgrade_days').replace('{n}', String(daysUntilNextScan)).replace('{s}', isAr ? '' : (daysUntilNextScan !== 1 ? 's' : ''))
+                : t('scan.upgrade_now')
               }
             </p>
 
             <div style={{ background: '#F5F3FF', borderRadius: 12, padding: '16px', marginBottom: 24 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#7C3AED', margin: '0 0 10px' }}>
-                Navigator includes:
+                {t('scan.nav_includes')}
               </p>
               {[
-                'Manual refresh — verify fixes immediately',
-                'Weekly auto-scans for Jira and Intercom',
-                'Monthly auto-scans for GA4, Shopify and Trustpilot',
-                'Monthly Action Digest — AI-prioritised action plan',
+                t('scan.nav_item1'),
+                t('scan.nav_item2'),
+                t('scan.nav_item3'),
+                t('scan.nav_item4'),
               ].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: '#7C3AED', fontSize: 14 }}>✓</span>
@@ -204,7 +211,7 @@ if (!hasConnectedSources || isFreeTier) return null
                   textDecoration: 'none',
                 }}
               >
-                Upgrade to Navigator — £29/mo →
+                {t('scan.upgrade_btn')}
               </a>
               <button
                 onClick={() => setShowUpgradeModal(false)}
@@ -214,12 +221,13 @@ if (!hasConnectedSources || isFreeTier) return null
                   fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 }}
               >
-                Maybe later
+                {t('scan.maybe_later')}
               </button>
             </div>
           </div>
         </div>
       )}
+
   {showConfirmModal && (
         <div
           onClick={() => setShowConfirmModal(false)}
@@ -230,6 +238,7 @@ if (!hasConnectedSources || isFreeTier) return null
           }}
         >
           <div
+            dir={isAr ? 'rtl' : 'ltr'}
             onClick={e => e.stopPropagation()}
             style={{
               background: '#fff', borderRadius: 20, padding: '36px 32px',
@@ -243,18 +252,17 @@ if (!hasConnectedSources || isFreeTier) return null
             }}>🔍</div>
 
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 10px' }}>
-              Confirm Manual Scan
+              {t('scan.confirm_title')}
             </h2>
 
             <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, margin: '0 0 12px' }}>
-              You have <strong style={{ color: '#111827' }}>1 manual scan</strong> available this week.
-              This will refresh all connected sources and cannot be undone once started.
+              {t('scan.confirm_body')}
             </p>
 
             {lastScannedAt && (
               <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '10px 14px', marginBottom: 20, fontSize: 13, color: '#6B7280' }}>
-                Last scanned: <strong style={{ color: '#374151' }}>
-                  {Math.floor((Date.now() - new Date(lastScannedAt!).getTime()) / (1000 * 60 * 60 * 24))} days ago
+                {t('scan.last_scanned')} <strong style={{ color: '#374151' }}>
+                  {Math.floor((Date.now() - new Date(lastScannedAt!).getTime()) / (1000 * 60 * 60 * 24))} {t('scan.days_ago')}
                 </strong>
               </div>
             )}
@@ -271,7 +279,7 @@ if (!hasConnectedSources || isFreeTier) return null
                   fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                Proceed with Scan →
+                {t('scan.proceed')}
               </button>
               <button
                 onClick={() => setShowConfirmModal(false)}
@@ -281,7 +289,7 @@ if (!hasConnectedSources || isFreeTier) return null
                   fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 }}
               >
-                Cancel
+                {t('scan.cancel')}
               </button>
             </div>
           </div>
