@@ -20,12 +20,8 @@ const SIGNAL_LOWER_BETTER = new Set([
   'cycle_time_increase', 'blocked_tickets_spike',
 ])
 
-const sourceTypes = ['ga4', 'jira', 'trustpilot', 'shopify', 'intercom', 'csv']
+const sourceTypes = ['ga4', 'jira', 'trustpilot', 'shopify', 'intercom', 'csv', 'manual']
 
-const sourceLabel: Record<string, string> = {
-  ga4: '📊 GA4', jira: '🔧 Jira', trustpilot: '⭐ Trustpilot',
-  intercom: '💬 Intercom', shopify: '🛍️ Shopify', csv: '📁 CSV',
-}
 
 const severityColor = (s: string) => s === 'critical' ? '#DC2626' : s === 'warning' ? '#D97706' : '#6B7280'
 const severityBg    = (s: string) => s === 'critical' ? '#FEF2F2' : s === 'warning' ? '#FFFBEB' : '#F9FAFB'
@@ -62,7 +58,12 @@ function formatScanDate(iso: string, lang: string) {
 export default function SignalsTabs({ withComparison, newSignals, allSignals, latestScan, previousScan }: Props) {
   const t    = useT()
   const lang = useLang()
-  const [activeTab, setActiveTab] = useState<'changes' | 'new' | 'sources'>('changes')
+  const sourceLabel: Record<string, string> = {
+    ga4: '📊 GA4', jira: '🔧 Jira', trustpilot: '⭐ Trustpilot',
+    intercom: '💬 Intercom', shopify: '🛍️ Shopify', csv: '📁 CSV',
+    manual: `📋 ${t('signals.source_assessment')}`,
+  }
+    const [activeTab, setActiveTab] = useState<'changes' | 'new' | 'sources'>('changes')
 
   const tabs = [
     { id: 'changes' as const, label: t('tracker.tab_changes'), count: withComparison.length },
@@ -166,7 +167,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, color: '#6B7280' }}>{sourceLabel[signal.source as string]?.replace(/^[^\s]+ /, '') ?? String(signal.source)}</span>
+                  <span style={{ fontSize: 11, color: '#6B7280' }}>{sourceLabel[signal.source as string]?.replace(/^[^\s]+ /, '') ?? String(signal.source)}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity as string), color: severityColor(signal.severity as string) }}>
@@ -249,7 +250,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
             return (
               <div key={src} style={{ background: '#F9FAFB', borderRadius: 12, border: '1px solid #E5E7EB', padding: '16px 18px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>{sourceLabel[src] ?? src}</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>{sourceLabel[src] ?? src}</p>
                   {srcCritical > 0 && (
                     <span style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', background: '#FEF2F2', padding: '2px 8px', borderRadius: 20 }}>{srcCritical} {t('tracker.tab_critical')}</span>
                   )}
