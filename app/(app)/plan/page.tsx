@@ -28,11 +28,16 @@ export default async function PlanPage() {
 
   console.log('[plan] founder:', founder?.id, 'digest:', digest?.id ?? 'null', 'error:', digestError?.message ?? 'none')
 
-  const actions         = (digest?.digest as Record<string, unknown>)?.actions as Array<Record<string, unknown>> ?? []
-  const conflicts       = (digest?.digest as Record<string, unknown>)?.conflicts_to_resolve as Array<Record<string, unknown>> ?? []
-  const summary         = (digest?.digest as Record<string, unknown>)?.summary as string ?? ''
-  const dataQualityNote = (digest?.digest as Record<string, unknown>)?.data_quality_note as string ?? ''
-  const consultantHook  = (digest?.digest as Record<string, unknown>)?.consultant_hook as string ?? ''
+  const digestEn        = (digest?.digest as Record<string, unknown>) ?? {}
+  const digestAr        = (digest?.digest_ar as Record<string, unknown>) ?? {}
+  const isAr            = lang === 'ar'
+
+  const actions         = digestEn?.actions as Array<Record<string, unknown>> ?? []
+  const actionsAr       = (digestAr?.actions_ar as Array<Record<string, unknown>>) ?? []
+  const conflicts       = digestEn?.conflicts_to_resolve as Array<Record<string, unknown>> ?? []
+  const summary         = (isAr && digestAr?.summary_ar ? digestAr.summary_ar : digestEn?.summary) as string ?? ''
+  const dataQualityNote = (isAr && digestAr?.data_quality_note_ar ? digestAr.data_quality_note_ar : digestEn?.data_quality_note) as string ?? ''
+  const consultantHook  = (isAr && digestAr?.consultant_hook_ar ? digestAr.consultant_hook_ar : digestEn?.consultant_hook) as string ?? ''
   const generatedAt     = digest?.generated_at
     ? new Date(digest.generated_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : null
@@ -51,8 +56,16 @@ export default async function PlanPage() {
   const hasNewSignals    = (currentSignals?.length ?? 0) > basedOnIds.length
   const hasDrift         = hasNewSignals || basedOnIds.some(id => !currentSignalIds.has(id))
 
-  const enrichedActions: Array<Record<string, unknown>> = actions.map((a, i) => ({ ...a, _globalIndex: i }))
-  const name = founder?.full_name?.split(' ')[0] ?? ''
+  const enrichedActions: Array<Record<string, unknown>> = actions.map((a, i) => ({
+    ...a,
+    _globalIndex: i,
+    ...(isAr && actionsAr[i] ? {
+      title: actionsAr[i].title_ar ?? a.title,
+      why:   actionsAr[i].why_ar   ?? a.why,
+      how:   actionsAr[i].how_ar   ?? a.how,
+    } : {}),
+  }))
+    const name = founder?.full_name?.split(' ')[0] ?? ''
   const hour = new Date().getHours()
   const greeting = hour < 12 ? t('greeting.morning') : hour < 17 ? t('greeting.afternoon') : t('greeting.evening')
 
@@ -307,8 +320,12 @@ export default async function PlanPage() {
                                   </span>
                                 )}
                                 <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: conf.bg, color: conf.color, fontWeight: 600 }}>{conf.label}</span>
-                                <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: effortBg(String(action.effort ?? '')), color: effortColor(String(action.effort ?? '')), fontWeight: 600 }}>{String(action.effort ?? '')} {t('plan.effort')}</span>
-                                <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#F9FAFB', color: '#6B7280', fontWeight: 600 }}>{impactIcon(String(action.impact ?? ''))} {String(action.impact ?? '')}</span>
+                                <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: effortBg(String(action.effort ?? '')), color: effortColor(String(action.effort ?? '')), fontWeight: 600 }}>
+                                  {t(`plan.effort_${String(action.effort ?? 'low')}` as Parameters<typeof t>[0])} {t('plan.effort')}
+                                </span>
+                                <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#F9FAFB', color: '#6B7280', fontWeight: 600 }}>
+                                  {impactIcon(String(action.impact ?? ''))} {t(`signals.cat_${String(action.impact ?? '')}` as Parameters<typeof t>[0]) || String(action.impact ?? '')}
+                                </span>
                               </div>
                             </div>
 
@@ -318,7 +335,7 @@ export default async function PlanPage() {
                             </div>
 
                             {String(action.how ?? '').trim().length > 0 && (
-                              <div style={{ background: '#EFF6FF', borderRadius: 10, padding: '14px 16px' }}>
+                              <div dir={isAr ? 'rtl' : 'ltr'} style={{ background: '#EFF6FF', borderRadius: 10, padding: '14px 16px' }}>
                                 <span style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', display: 'block', marginBottom: howSteps.length > 1 ? 10 : 0 }}>{t('plan.how')}</span>
                                 {howSteps.length > 1 ? (
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

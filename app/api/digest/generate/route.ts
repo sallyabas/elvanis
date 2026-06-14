@@ -94,8 +94,48 @@ JSON structure:
   "consultant_hook": "one sentence on what a human strategist would add beyond this digest — make it specific to this business"
 }`
 
-export async function POST(request: NextRequest) {
-  try {
+const TRANSLATION_PROMPT = `You are a professional Arabic business translator specialising in SaaS and e-commerce contexts.
+You will receive a JSON object containing an English action plan digest. Your job is to translate specific text fields into professional Gulf/MSA Arabic.
+
+TRANSLATION RULES:
+1. Translate ALL instructional text into professional Arabic
+2. Keep ALL UI navigation paths, button labels, menu items, and app names in English
+3. Keep ALL technical terms as-is: CSV, SKU, API, CRM, NPS, CSAT, AOV, MRR, KPI, and similar acronyms
+4. Keep ALL tool names as-is: Shopify, Intercom, GA4, Jira, Trustpilot, Google Analytics, etc.
+5. Use ← instead of → for navigation paths within Arabic text (bidi-safe)
+6. Keep ALL numbers, percentages, and currency symbols in their original format
+
+EXAMPLES:
+English how step: "Go to Shopify Admin → Orders → filter Status=Refunded, Date=last 30 days."
+Arabic how step: "اذهب إلى Shopify Admin ← Orders ← فلتر Status=Refunded، Date=last 30 days."
+
+English how step: "Export to CSV, group by product SKU — find which 1-2 products have >50% refund rate."
+Arabic how step: "صدِّر البيانات إلى CSV، ورتِّبها حسب product SKU — ابحث عن المنتج أو المنتجَين اللذين تتجاوز نسبة استردادهما 50%."
+
+English how step: "Go to Intercom → Inbox → filter by Open → sort by Oldest first."
+Arabic how step: "اذهب إلى Intercom ← Inbox ← فلتر Open ← رتِّب حسب Oldest first."
+
+INPUT: You will receive a JSON object with this structure:
+{
+  "summary": "...",
+  "data_quality_note": "...",
+  "consultant_hook": "...",
+  "actions": [
+    { "title": "...", "why": "...", "how": "..." }
+  ]
+}
+
+OUTPUT: Return ONLY a JSON object with this exact structure — no preamble, no markdown:
+{
+  "summary_ar": "...",
+  "data_quality_note_ar": "...",
+  "consultant_hook_ar": "...",
+  "actions_ar": [
+    { "title_ar": "...", "why_ar": "...", "how_ar": "..." }
+  ]
+}`
+
+export async function POST(request: NextRequest) {  try {
     // JSON only — digest generation is admin-controlled, not triggered by form POST
     const { founderId } = await request.json()
     if (!founderId) return NextResponse.json({ error: 'founderId required' }, { status: 400 })
@@ -524,6 +564,49 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
     }
 
     console.log(`[digest] Generated: ${digestRow.id} — ${connectedSources.join(', ')} — ${signals.length} signals`)
+
+    // ── Arabic translation call (fire-and-forget, non-blocking) ──
+    // Uses llama-3.1-8b-instant — translation only, no strategic reasoning needed
+    const translationInput = {
+      summary:            digest.summary ?? '',
+      data_quality_note:  digest.data_quality_note ?? '',
+      consultant_hook:    digest.consultant_hook ?? '',
+      actions: (Array.isArray(digest.actions) ? digest.actions : []).map((a: Record<string, unknown>) => ({
+        title: a.title ?? '',
+        why:   a.why ?? '',
+        how:   a.how ?? '',
+      })),
+    }
+
+    groq.chat.completions.create({
+      model:           'llama-3.1-8b-instant',
+      max_tokens:      4000,
+      temperature:     0.1,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: TRANSLATION_PROMPT },
+        { role: 'user',   content: JSON.stringify(translationInput) },
+      ],
+    }).then(async (arResponse) => {
+      const arText = arResponse.choices[0]?.message?.content ?? ''
+      const arFirstBrace = arText.indexOf('{')
+      if (arFirstBrace === -1) {
+        console.error('[digest] Arabic translation — no JSON found')
+        return
+      }
+      try {
+        const arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
+        await admin.from('action_digests')
+          .update({ digest_ar: arDigest })
+          .eq('id', digestRow.id)
+        console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
+      } catch (parseErr) {
+        console.error('[digest] Arabic translation parse failed:', parseErr)
+      }
+    }).catch(err => {
+      console.error('[digest] Arabic translation call failed:', err)
+    })
+
     return NextResponse.json({ success: true, digestId: digestRow.id })
 
   } catch (err) {
