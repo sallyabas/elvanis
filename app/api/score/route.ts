@@ -36,10 +36,10 @@ const WEIGHT_MATRICES: Record<string, Record<string, number>> = {
 
 // ── STATUS LABELS — deterministic, matching dashboard pattern ──
 function getOverallStatus(score: number): string {
-  if (score >= 80) return 'Healthy'
-  if (score >= 60) return 'Needs Attention'
-  if (score >= 40) return 'At Risk'
-  return 'Critical'
+  if (score >= 80) return 'assessment.status_healthy'
+  if (score >= 60) return 'assessment.status_needs_attention'
+  if (score >= 40) return 'assessment.status_at_risk'
+  return 'assessment.status_critical'
 }
 
 const SYSTEM_PROMPT = `You are Elvanis, an expert AI business health advisor for founder-led startups and SMEs in the UK and Gulf. Diagnose why the business is not growing and identify root causes not just symptoms.

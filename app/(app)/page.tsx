@@ -194,7 +194,7 @@ export default async function HomePage() {
               </div>
               <div style={{ width: 1, height: 48, background: '#E5E7EB', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{score.overall_status as string}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{t((score.overall_status as string) as Parameters<typeof t>[0])}</p>
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.5 }}>
                   {(score.overall_summary as string)?.substring(0, 120)}...
                 </p>
