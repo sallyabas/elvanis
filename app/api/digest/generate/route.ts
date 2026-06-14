@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-server'
 import Groq from 'groq-sdk'
+import { DIGEST_DIMENSIONS, DIGEST_EFFORT_LEVELS, DIGEST_CONFIDENCE_LEVELS, DIGEST_TIMEFRAMES } from '@/lib/digest-constants'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
@@ -92,7 +93,15 @@ JSON structure:
     }
   ],
   "consultant_hook": "one sentence on what a human strategist would add beyond this digest — make it specific to this business"
-}`
+}
+
+FIELD CONSTRAINTS (hard rules — no exceptions):
+- "impact" MUST be exactly one of: ${DIGEST_DIMENSIONS.map(d => `"${d}"`).join(', ')}. No other values permitted.
+- "effort" MUST be exactly one of: ${DIGEST_EFFORT_LEVELS.map(e => `"${e}"`).join(', ')}. No other values permitted.
+- "confidence" MUST be exactly one of: ${DIGEST_CONFIDENCE_LEVELS.map(c => `"${c}"`).join(', ')}. No other values permitted.
+- "timeframe" MUST be exactly one of: ${DIGEST_TIMEFRAMES.map(t => `"${t}"`).join(', ')}. No other values permitted.
+- "phase" MUST be exactly one of: 1, 2, 3. No other values permitted.`
+
 
 const TRANSLATION_PROMPT = `You are a professional Arabic business translator specialising in SaaS and e-commerce contexts.
 You will receive a JSON object containing an English action plan digest. Your job is to translate specific text fields into professional Gulf/MSA Arabic.
