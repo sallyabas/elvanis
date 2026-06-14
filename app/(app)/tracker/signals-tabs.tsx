@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useT, useLang } from '@/app/context/LanguageContext'
 
 type Signal = Record<string, unknown>
 
@@ -32,7 +33,6 @@ const dimensionIcon = (d: string) => ({ customer: '👥', team: '⚙️', market
 const trendIcon     = (t: string) => t === 'improving' ? '↑' : t === 'worsening' ? '↓' : t === 'new' ? '🆕' : '→'
 const trendColor    = (t: string) => t === 'improving' ? '#059669' : t === 'worsening' ? '#DC2626' : t === 'new' ? '#2563EB' : '#D97706'
 const trendBg       = (t: string) => t === 'improving' ? '#ECFDF5' : t === 'worsening' ? '#FEF2F2' : t === 'new' ? '#EFF6FF' : '#FFFBEB'
-const trendLabel    = (t: string) => t === 'improving' ? 'Improving' : t === 'worsening' ? 'Worsening' : t === 'new' ? 'New' : 'Unchanged'
 
 function formatValue(v: unknown): string {
   if (v === null || v === undefined) return '—'
@@ -55,18 +55,33 @@ function changePercentColor(signalType: string, pct: number): string {
   return pct > 0 ? '#059669' : '#DC2626'
 }
 
-function formatScanDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+function formatScanDate(iso: string, lang: string) {
+  return new Date(iso).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })
 }
 
 export default function SignalsTabs({ withComparison, newSignals, allSignals, latestScan, previousScan }: Props) {
+  const t    = useT()
+  const lang = useLang()
   const [activeTab, setActiveTab] = useState<'changes' | 'new' | 'sources'>('changes')
 
   const tabs = [
-    { id: 'changes' as const, label: 'Changes', count: withComparison.length },
-    { id: 'new'     as const, label: 'New',     count: newSignals.length     },
-    { id: 'sources' as const, label: 'By Source', count: null                },
+    { id: 'changes' as const, label: t('tracker.tab_changes'), count: withComparison.length },
+    { id: 'new'     as const, label: t('tracker.tab_new'),     count: newSignals.length     },
+    { id: 'sources' as const, label: t('tracker.tab_by_source'), count: null                },
   ]
+
+  const trendLabel = (trend: string) => {
+    if (trend === 'improving') return t('tracker.tab_improving')
+    if (trend === 'worsening') return t('tracker.tab_worsening')
+    if (trend === 'new')       return t('tracker.tab_new_label')
+    return t('tracker.tab_unchanged')
+  }
+
+  const severityLabel = (s: string) => {
+    if (s === 'critical') return t('signals.sev_critical')
+    if (s === 'warning')  return t('signals.sev_warning')
+    return t('signals.sev_watch')
+  }
 
   return (
     <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', overflow: 'hidden', marginBottom: 32 }}>
@@ -105,7 +120,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
         </div>
         {latestScan && previousScan && activeTab === 'changes' && (
           <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0 }}>
-            {formatScanDate(previousScan.scanned_at)} → {formatScanDate(latestScan.scanned_at)}
+            {formatScanDate(previousScan.scanned_at, lang)} → {formatScanDate(latestScan.scanned_at, lang)}
           </p>
         )}
       </div>
@@ -115,7 +130,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
         withComparison.length > 0 ? (
           <div style={{ overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 0.8fr 0.8fr 0.9fr 0.9fr 1fr', padding: '10px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-              {['Signal', 'Source', 'Severity', 'Previous', 'Current', 'Change'].map(h => (
+              {[t('tracker.col_signal'), t('tracker.col_source'), t('signals.confidence'), t('tracker.previous_scan').replace(':', ''), t('tracker.current_score'), t('tracker.tab_changes')].map(h => (
                 <p key={h} style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{h}</p>
               ))}
             </div>
@@ -124,6 +139,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
               const trend     = signal.trend as string
               const isLastRow = index === withComparison.length - 1
               const pctColor  = pct !== null ? changePercentColor(signal.signal_type as string, pct) : '#9CA3AF'
+              const insightKey = lang === 'ar' && signal.insight_summary_ar ? 'insight_summary_ar' : 'insight_summary'
               return (
                 <div key={signal.id as string} style={{
                   display: 'grid', gridTemplateColumns: '2.5fr 0.8fr 0.8fr 0.9fr 0.9fr 1fr',
@@ -138,7 +154,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                         {String(signal.signal_type).replace(/_/g, ' ')}
                       </p>
                       <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0, lineHeight: 1.3 }}>
-                        {String(signal.insight_summary ?? '').substring(0, 55)}{String(signal.insight_summary ?? '').length > 55 ? '…' : ''}
+                        {String(signal[insightKey] ?? '').substring(0, 55)}{String(signal[insightKey] ?? '').length > 55 ? '…' : ''}
                       </p>
                     </div>
                   </div>
@@ -146,8 +162,8 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                     <span style={{ fontSize: 11, color: '#6B7280' }}>{sourceLabel[signal.source as string]?.replace(/^[^\s]+ /, '') ?? String(signal.source)}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity as string), color: severityColor(signal.severity as string), textTransform: 'uppercase' as const }}>
-                      {String(signal.severity)}
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity as string), color: severityColor(signal.severity as string) }}>
+                      {severityLabel(signal.severity as string)}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -172,7 +188,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
           </div>
         ) : (
           <div style={{ padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>No comparison data yet. Run a second scan to see signal changes.</p>
+            <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>{t('tracker.tab_no_comparison')}</p>
           </div>
         )
       )}
@@ -181,29 +197,32 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
       {activeTab === 'new' && (
         newSignals.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {newSignals.map((signal, index) => (
-              <div key={signal.id as string} style={{
-                padding: '14px 20px',
-                borderBottom: index === newSignals.length - 1 ? 'none' : '1px solid #F3F4F6',
-                display: 'flex', alignItems: 'center', gap: 12,
-              }}>
-                <span style={{ fontSize: 16 }}>{dimensionIcon(signal.dimension as string)}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{String(signal.insight_summary ?? '')}</p>
-                  <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>
-                    {sourceLabel[signal.source as string] ?? String(signal.source)} · {String(signal.dimension)} ·{' '}
-                    {new Date(signal.created_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                  </p>
+            {newSignals.map((signal, index) => {
+              const insightKey = lang === 'ar' && signal.insight_summary_ar ? 'insight_summary_ar' : 'insight_summary'
+              return (
+                <div key={signal.id as string} style={{
+                  padding: '14px 20px',
+                  borderBottom: index === newSignals.length - 1 ? 'none' : '1px solid #F3F4F6',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                  <span style={{ fontSize: 16 }}>{dimensionIcon(signal.dimension as string)}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{String(signal[insightKey] ?? '')}</p>
+                    <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>
+                      {sourceLabel[signal.source as string] ?? String(signal.source)} · {String(signal.dimension)} ·{' '}
+                      {new Date(signal.created_at as string).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity as string), color: severityColor(signal.severity as string), flexShrink: 0 }}>
+                    {severityLabel(signal.severity as string)}
+                  </span>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: severityBg(signal.severity as string), color: severityColor(signal.severity as string), textTransform: 'uppercase' as const, flexShrink: 0 }}>
-                  {String(signal.severity)}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div style={{ padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>No new signals detected in this scan.</p>
+            <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>{t('tracker.tab_no_new')}</p>
           </div>
         )
       )}
@@ -225,44 +244,44 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>{sourceLabel[src] ?? src}</p>
                   {srcCritical > 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', background: '#FEF2F2', padding: '2px 8px', borderRadius: 20 }}>{srcCritical} critical</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', background: '#FEF2F2', padding: '2px 8px', borderRadius: 20 }}>{srcCritical} {t('tracker.tab_critical')}</span>
                   )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {srcNew > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 12, color: '#2563EB' }}>🆕 New</span>
+                      <span style={{ fontSize: 12, color: '#2563EB' }}>{t('tracker.tab_new_label')}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#2563EB' }}>{srcNew}</span>
                     </div>
                   )}
                   {srcImproving > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 12, color: '#059669' }}>↑ Improving</span>
+                      <span style={{ fontSize: 12, color: '#059669' }}>{t('tracker.tab_improving')}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>{srcImproving}</span>
                     </div>
                   )}
                   {srcWorsening > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 12, color: '#DC2626' }}>↓ Worsening</span>
+                      <span style={{ fontSize: 12, color: '#DC2626' }}>{t('tracker.tab_worsening')}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{srcWorsening}</span>
                     </div>
                   )}
                   {srcUnchanged > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 12, color: '#D97706' }}>→ Unchanged</span>
+                      <span style={{ fontSize: 12, color: '#D97706' }}>{t('tracker.tab_unchanged')}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#D97706' }}>{srcUnchanged}</span>
                     </div>
                   )}
                   <div style={{ height: 1, background: '#E5E7EB', margin: '4px 0' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>Active signals</span>
+                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>{t('tracker.tab_active_signals')}</span>
                     <span style={{ fontSize: 11, fontWeight: 600, color: '#374151' }}>{srcSignals.length}</span>
                   </div>
                   {latestScanAt && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>Last scanned</span>
+                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>{t('tracker.tab_last_scanned')}</span>
                       <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-                        {new Date(latestScanAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        {new Date(latestScanAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}
                       </span>
                     </div>
                   )}
@@ -272,7 +291,7 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
           })}
           {sourceTypes.every(src => !(allSignals ?? []).some(s => s.source === src)) && (
             <div style={{ gridColumn: '1 / -1', padding: '24px', textAlign: 'center' }}>
-              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>No source data available yet.</p>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>{t('tracker.tab_no_source')}</p>
             </div>
           )}
         </div>
