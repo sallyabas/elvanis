@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import type { DimensionStatus } from '@/lib/dimension-status'
 import { SIGNAL_DEPENDENCY_MAP, getDependencyAlertText, SignalType } from '@/lib/signal-dependency-map'
+import { DIMENSIONS } from '@/lib/gravity-engine'
 import { useT, useLang } from '@/app/context/LanguageContext'
 
 interface Signal {
@@ -105,28 +106,20 @@ export default function HeroCard({
     ? (SIGNAL_DEPENDENCY_MAP[criticalSignal.signal_type as SignalType]?.downstream ?? [])
         .slice(0, 2)
         .map(s => {
-          const dimMap: Record<string, string> = {
-            churn_spike:              'Revenue Engine',
-            aov_decline:              'Revenue Engine',
-            repeat_purchase_drop:     'Revenue Engine',
-            refund_spike:             'Revenue Engine',
-            conversion_fall:          'Growth & Acquisition',
-            engagement_drop:          'Growth & Acquisition',
-            traffic_source_shift:     'Growth & Acquisition',
-            session_duration_drop:    'Growth & Acquisition',
-            activation_drop:          'Product-Market Fit',
-            nps_decline:              'Customer Health',
-            csat_decline:             'Customer Health',
-            rating_decline:           'Customer Health',
-            repeat_complaint_pattern: 'Customer Health',
-            ticket_volume_increase:   'Customer Health',
-            response_time_increase:   'Customer Health',
-            velocity_drop:            'Execution Capacity',
-            cycle_time_increase:      'Execution Capacity',
-            bug_backlog_growth:       'Execution Capacity',
-            blocked_tickets_spike:    'Execution Capacity',
+          const SIGNAL_TO_DIM: Record<string, string> = {
+            churn_spike: 'customer', aov_decline: 'revenue', repeat_purchase_drop: 'revenue',
+            refund_spike: 'revenue', conversion_fall: 'marketing', engagement_drop: 'marketing',
+            traffic_source_shift: 'marketing', session_duration_drop: 'marketing',
+            activation_drop: 'product', nps_decline: 'customer', csat_decline: 'customer',
+            rating_decline: 'customer', repeat_complaint_pattern: 'customer',
+            ticket_volume_increase: 'customer', response_time_increase: 'customer',
+            velocity_drop: 'team', cycle_time_increase: 'team',
+            bug_backlog_growth: 'team', blocked_tickets_spike: 'team',
           }
-          return dimMap[s] ?? null
+          const dimId = SIGNAL_TO_DIM[s]
+          if (!dimId) return null
+          const dim = DIMENSIONS[dimId as keyof typeof DIMENSIONS]
+          return isAr ? (dim?.label_ar ?? dim?.label ?? null) : (dim?.label ?? null)
         })
         .filter((d): d is string => d !== null && d !== status.label)
         .filter((d, i, arr) => arr.indexOf(d) === i)
@@ -430,7 +423,7 @@ export default function HeroCard({
               {t('focus.chain_alert')}
             </p>
             <p style={{ fontSize: 13, color: '#92400E', margin: 0 }}>
-              {dependencyAlert}. {t('focus.chain_putting').replace('{dims}', downstreamDimensions.join(' and '))}
+            {dependencyAlert}. {t('focus.chain_putting').replace('{dims}', downstreamDimensions.join(isAr ? ' و ' : ' and '))}
             </p>
           </div>
         </div>
