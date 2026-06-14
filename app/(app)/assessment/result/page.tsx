@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
+import { getStatusLabel } from '@/lib/assessment-status'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -24,12 +25,7 @@ export default async function AssessmentResultPage() {
   if (!score) redirect('/assessment')
 
   const t    = getT((founder?.language ?? 'en') as 'en' | 'ar')
-  const STATUS_MAP: Record<string, string> = {
-    'Healthy':         t('assessment.status_healthy'),
-    'Needs Attention': t('assessment.status_needs_attention'),
-    'At Risk':         t('assessment.status_at_risk'),
-    'Critical':        t('assessment.status_critical'),
-  }
+
   const lang = founder?.language ?? 'en'
   const name = founder?.business_name ?? ''
 
@@ -81,7 +77,7 @@ export default async function AssessmentResultPage() {
             <span style={{ fontSize: 24, color: '#9CA3AF', marginBottom: 8 }}>/100</span>
           </div>
           {score.overall_status && (
-            <p style={{ color: '#374151', fontWeight: 600, marginBottom: 8 }}>{STATUS_MAP[score.overall_status] ?? score.overall_status}</p>
+            <p style={{ color: '#374151', fontWeight: 600, marginBottom: 8 }}>{getStatusLabel(score.overall_status as string, t as (k: string) => string)}</p>
           )}
           {displaySummary && (
             <>

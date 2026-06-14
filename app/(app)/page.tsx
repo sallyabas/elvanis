@@ -6,6 +6,7 @@ import { calculateHealthScore } from '@/lib/health-scoring'
 import { getT } from '@/lib/translations'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
+import { getStatusLabel } from '@/lib/assessment-status'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
@@ -194,7 +195,7 @@ export default async function HomePage() {
               </div>
               <div style={{ width: 1, height: 48, background: '#E5E7EB', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{t((score.overall_status as string) as Parameters<typeof t>[0])}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{getStatusLabel(score.overall_status as string, t as (k: string) => string)}</p>
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.5 }}>
                   {(score.overall_summary as string)?.substring(0, 120)}...
                 </p>
