@@ -1022,6 +1022,9 @@ const TRANSLATIONS = {
     'focus.ready_now':         'Ready now',
     'focus.on_upload':         'On upload',
     'focus.in_days':           'in {n}d',
+    'focus.complexity_low':    'low',
+    'focus.complexity_medium': 'medium',
+    'focus.complexity_high':   'high',
   },
 
   ar: {
@@ -2038,6 +2041,9 @@ const TRANSLATIONS = {
     'focus.ready_now':         'جاهز الآن',
     'focus.on_upload':         'عند الرفع',
     'focus.in_days':           'بعد {n} يوم',
+    'focus.complexity_low':    'منخفض',
+    'focus.complexity_medium': 'متوسط',
+    'focus.complexity_high':   'مرتفع',
   },
 } as const
 

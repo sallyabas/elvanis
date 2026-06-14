@@ -5,26 +5,10 @@ import { DashboardTour } from './guide'
 import { calculateHealthScore } from '@/lib/health-scoring'
 import { getT } from '@/lib/translations'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
+import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
-
-const AI_OPPORTUNITY_SIGNALS: Record<string, { title: string; description: string; saving: string; complexity: 'low' | 'medium' | 'high' }> = {
-  ticket_volume_increase:   { title: 'AI Support Agent',           description: 'Automate responses to repetitive support tickets',                          saving: '10-15 hrs/week', complexity: 'low'    },
-  response_time_increase:   { title: 'AI Ticket Triage',           description: 'Auto-categorise and prioritise incoming tickets',                           saving: '5-8 hrs/week',   complexity: 'low'    },
-  repeat_complaint_pattern: { title: 'AI Knowledge Base',          description: 'Answer common complaints automatically',                                    saving: '8-12 hrs/week',  complexity: 'low'    },
-  velocity_drop:            { title: 'AI Sprint Planning',         description: 'AI-assisted estimation and dependency detection',                           saving: '3-5 hrs/sprint', complexity: 'medium' },
-  bug_backlog_growth:       { title: 'AI Code Review',             description: 'Catch bugs before they ship',                                              saving: '6-10 hrs/week',  complexity: 'medium' },
-  engagement_drop:          { title: 'AI Personalisation',         description: 'Tailor user journeys by behaviour',                                        saving: 'Revenue impact', complexity: 'high'   },
-  conversion_fall:          { title: 'AI Conversion Optimisation', description: 'Automatically test and optimise conversion paths',                         saving: 'Revenue impact', complexity: 'high'   },
-  activation_drop:          { title: 'AI Onboarding Agent',        description: 'Automate activation sequences for new users',                              saving: '8-12 hrs/week',  complexity: 'medium' },
-  nps_decline:              { title: 'AI Feedback Analysis',       description: 'Automatically analyse and categorise NPS responses',                       saving: '4-6 hrs/week',   complexity: 'low'    },
-  csat_decline:             { title: 'AI Support Optimisation',    description: 'Identify root causes of low satisfaction automatically',                   saving: '5-8 hrs/week',   complexity: 'low'    },
-  cycle_time_increase:      { title: 'AI Workflow Automation',     description: 'Identify bottlenecks and automate handoffs',                               saving: '6-10 hrs/week',  complexity: 'medium' },
-  traffic_source_shift:     { title: 'AI SEO & Content Engine',    description: 'Reduce paid traffic dependency with AI-generated organic content',         saving: 'Revenue impact', complexity: 'high'   },
-  session_duration_drop:    { title: 'AI Personalisation',         description: 'Dynamically adapt content to keep users engaged',                          saving: 'Revenue impact', complexity: 'high'   },
-  blocked_tickets_spike:    { title: 'AI Workflow Automation',     description: 'Detect and resolve common blockers before they stall the team',            saving: '4-6 hrs/week',   complexity: 'medium' },
-}
 
 function calculateAIReadiness(
   signals: Array<{ status: string; signal_type: string; severity: string; source: string }>,
@@ -256,11 +240,11 @@ export default async function HomePage() {
                 {aiReadiness.opportunities.slice(0, 3).map(opp => (
                   <div key={opp.signal_type} style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', border: '1px solid #EDE9FE' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: 0 }}>{opp.title}</p>
-                      <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: '#F5F3FF', color: complexityColor(opp.complexity), fontWeight: 700 }}>{opp.complexity}</span>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: 0 }}>{founder.language === 'ar' ? opp.title_ar : opp.title}</p>
+                      <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: '#F5F3FF', color: complexityColor(opp.complexity), fontWeight: 700 }}>{t((`focus.complexity_${opp.complexity}`) as Parameters<typeof t>[0])}</span>
                     </div>
-                    <p style={{ fontSize: 12, color: '#6D28D9', margin: '0 0 6px', lineHeight: 1.5 }}>{opp.description}</p>
-                    <p style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, margin: 0 }}>⏱ {opp.saving}</p>
+                    <p style={{ fontSize: 12, color: '#6D28D9', margin: '0 0 6px', lineHeight: 1.5 }}>{founder.language === 'ar' ? opp.description_ar : opp.description}</p>
+                    <p style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, margin: 0 }}>⏱ {founder.language === 'ar' ? opp.saving_ar : opp.saving}</p>
                   </div>
                 ))}
               </div>
