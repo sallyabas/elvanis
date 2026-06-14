@@ -53,6 +53,7 @@ export default async function AssessmentResultPage() {
   const langMismatch    = scoreLang !== lang
   const canShowAlt      = langMismatch && !!score.is_translated && score.alt_language === lang
   const displaySummary  = getDisplaySummary(score as Record<string, unknown>, lang)
+  const displayConstraint = getDisplayConstraint(score as Record<string, unknown>, lang)
   const displayFindings = !langMismatch ? score.top_3_findings : (canShowAlt ? score.top_3_findings_alt : null)
 
   return (
