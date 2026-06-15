@@ -34,6 +34,12 @@ interface PriorityCardProps {
     effortMedium:    string
     effortHigh:      string
     effortLabel:     string
+    impactHigh:          string
+    impactMedium:        string
+    impactLow:           string
+    timeframeThisWeek:   string
+    timeframeNext2Weeks: string
+    timeframeWeeks9_12:  string
   }
 }
 
@@ -82,14 +88,14 @@ export function PriorityCard({ item, lang, labels }: PriorityCardProps) {
               {item.reason}
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#374151', fontWeight: 600 }}>
-                ⏱ {item.timeframe}
+            <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: '#374151', fontWeight: 600 }}>
+                ⏱ {item.timeframe === 'This week' ? labels.timeframeThisWeek : item.timeframe === 'Next 2 weeks' ? labels.timeframeNext2Weeks : labels.timeframeWeeks9_12}
               </span>
               <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: effortColor, fontWeight: 600 }}>
               {labels.effortLabel} {item.effort === 'low' ? labels.effortLow : item.effort === 'medium' ? labels.effortMedium : labels.effortHigh}
               </span>
               <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#EFF6FF', color: impactColor, fontWeight: 600 }}>
-                ↑ {item.impact}
+                ↑ {item.impact === 'high' ? labels.impactHigh : item.impact === 'medium' ? labels.impactMedium : labels.impactLow}
               </span>
             </div>
           </div>

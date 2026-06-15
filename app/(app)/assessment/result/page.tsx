@@ -230,6 +230,12 @@ export default async function AssessmentResultPage() {
                 effortLow:       t('plan.effort_low'),
                 effortMedium:    t('plan.effort_medium'),
                 effortHigh:      t('plan.effort_high'),
+                impactHigh:       t('assessment.impact_high'),
+                impactMedium:     t('assessment.impact_medium'),
+                impactLow:        t('assessment.impact_low'),
+                timeframeThisWeek:    t('assessment.timeframe_this_week'),
+                timeframeNext2Weeks:  t('assessment.timeframe_next_2_weeks'),
+                timeframeWeeks9_12:   t('assessment.timeframe_weeks_9_12'),
               }} />
             ))}
           </div>
