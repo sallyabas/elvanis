@@ -563,17 +563,17 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
         const translatePrompt = `Translate the following JSON fields from ${diagnosis.language} to ${altLanguage}. Preserve business tone and meaning exactly. If translating to Arabic, use Gulf Arabic dialect, and do NOT mix in any English words or Latin letters. Respond with valid JSON only, same structure, no preamble.
   
   ${JSON.stringify({
-          overall_summary:            diagnosis.overall_summary,
-          top_3_findings:             diagnosis.top_3_findings,
-          closing_message:            diagnosis.closing_message,
-          primary_constraint_summary: (diagnosis.primary_constraint as Record<string, string>)?.summary ?? '',
-          priority_order:             diagnosis.priority_order,
-          causal_chains:              diagnosis.causal_chains,
+    overall_summary:            diagnosis.overall_summary,
+    top_3_findings:             (diagnosis.top_3_findings as Array<Record<string, unknown>>)?.map(f => ({ finding: f.finding, impact: f.impact })),
+    closing_message:            diagnosis.closing_message,
+    primary_constraint_summary: (diagnosis.primary_constraint as Record<string, string>)?.summary ?? '',
+    causal_chains:              (diagnosis.causal_chains as Array<Record<string, unknown>>)?.map(c => ({ chain_name: c.chain_name, cause_signal: c.cause_signal, fix_order: c.fix_order })),
+    priority_order:             (diagnosis.priority_order as Array<Record<string, unknown>>)?.map(p => ({ action: p.action, reason: p.reason })),
         })}`
   
         const translateResponse = await groq.chat.completions.create({
           model:            'llama-3.1-8b-instant',
-          max_tokens:      2500,
+          max_tokens:      4000,
           temperature:     0.3,
           response_format: { type: 'json_object' },
           messages: [
@@ -586,12 +586,34 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
         const tCleaned      = tFirstBrace > 0 ? translateText.substring(tFirstBrace) : translateText
         const translated    = JSON.parse(tCleaned)
         overallSummaryAlt = translated.overall_summary ?? null
-        top3FindingsAlt   = translated.top_3_findings  ?? null
+        const translatedFindings = translated.top_3_findings
+        top3FindingsAlt = translatedFindings
+          ? (diagnosis.top_3_findings as Array<Record<string, unknown>>).map((orig, i) => ({
+              ...orig,
+              finding: translatedFindings[i]?.finding ?? orig.finding,
+              impact:  translatedFindings[i]?.impact  ?? orig.impact,
+            }))
+          : null
         closingMessageAlt = translated.closing_message ?? null
         primaryConstraintSummaryAlt = translated.primary_constraint_summary ?? null
-        priorityOrderAlt            = translated.priority_order             ?? null
-        causalChainsAlt             = translated.causal_chains              ?? null
-        isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt && primaryConstraintSummaryAlt)
+        const translatedPriority = translated.priority_order
+        const translatedChains = translated.causal_chains
+        causalChainsAlt = translatedChains
+          ? (diagnosis.causal_chains as Array<Record<string, unknown>>).map((orig, i) => ({
+              ...orig,
+              chain_name:   translatedChains[i]?.chain_name   ?? orig.chain_name,
+              cause_signal: translatedChains[i]?.cause_signal ?? orig.cause_signal,
+              fix_order:    translatedChains[i]?.fix_order    ?? orig.fix_order,
+            }))
+          : null
+          priorityOrderAlt = translatedPriority
+          ? (diagnosis.priority_order as Array<Record<string, unknown>>).map((orig, i) => ({
+              ...orig,
+              action: translatedPriority[i]?.action ?? orig.action,
+              reason: translatedPriority[i]?.reason ?? orig.reason,
+            }))
+          : null
+          isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt && primaryConstraintSummaryAlt && priorityOrderAlt && causalChainsAlt)
         console.log(`[score] translation to ${altLanguage}: ${isTranslated ? 'success' : 'partial/failed'}`)
       } catch (translateErr) {
         console.error('[score] translation call failed (non-fatal):', translateErr)
@@ -659,9 +681,11 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       primary_constraint_dimension: (diagnosis.primary_constraint as Record<string, string>)?.dimension,
       primary_constraint_summary:   (diagnosis.primary_constraint as Record<string, string>)?.summary,
       primary_constraint_summary_alt: primaryConstraintSummaryAlt,
-      priority_order_alt:                priorityOrderAlt,
-      causal_chains_alt:                 causalChainsAlt,
       primary_constraint_urgency:   (diagnosis.primary_constraint as Record<string, string>)?.urgency,
+      causal_chains:                diagnosis.causal_chains,
+      causal_chains_alt:            causalChainsAlt,
+      priority_order:               diagnosis.priority_order,
+      priority_order_alt:           priorityOrderAlt,
       alt_language:                 altLanguage,
       is_translated:                isTranslated,
       score_revenue:                scoreRevenue,
@@ -676,8 +700,6 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       label_customer:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.customer_retention?.status,
       label_marketing: (diagnosis.dimensions as Record<string, Record<string, string>>)?.marketing_growth?.status,
       label_strategy:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.strategy_goals?.status,
-      causal_chains:            diagnosis.causal_chains,
-      priority_order:           diagnosis.priority_order,
       implementation_roadmap:   diagnosis.implementation_roadmap,
       raw_ai_response:          diagnosis,
     })
