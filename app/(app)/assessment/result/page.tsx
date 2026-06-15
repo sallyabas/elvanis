@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
-import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions, getClosingMessage, getPriorityOrder, getCausalChains, getImplementationRoadmap, getPriorityOrderAlt, getCausalChainsAlt } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions, getClosingMessage, getPriorityOrder, getCausalChains, getImplementationRoadmap } from '@/lib/assessment-status'
 import { PriorityCard, CausalChainCard } from './result-client'
 import { DIMENSIONS } from '@/lib/gravity-engine'
 import { DIMENSION_LABELS } from '@/lib/types'
@@ -53,8 +53,8 @@ export default async function AssessmentResultPage() {
   const displayConstraint = getDisplayConstraint(score as Record<string, unknown>, lang)
   const displayFindings   = getDisplayFindings(score as Record<string, unknown>, lang)
   const closingMessage    = getClosingMessage(score as Record<string, unknown>, lang)
-  const priorityOrder     = getPriorityOrderAlt(score as Record<string, unknown>, lang) as Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }> | null
-  const causalChains      = getCausalChainsAlt(score as Record<string, unknown>, lang) as Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }> | null
+  const priorityOrder  = getPriorityOrder(score as Record<string, unknown>, lang) as Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }> | null
+  const causalChains   = getCausalChains(score as Record<string, unknown>, lang) as Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }> | null
   const implementationRoadmap = getImplementationRoadmap(score as Record<string, unknown>)
 
   // Merge priority_order with implementation_roadmap by priority number

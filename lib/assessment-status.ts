@@ -24,7 +24,7 @@ export function getStatusLabel(
   return map[status] ?? status
 }
 
-export function getPriorityOrderAlt(
+export function getPriorityOrder(
   score: Record<string, unknown>,
   lang: string
 ): unknown {
@@ -34,7 +34,7 @@ export function getPriorityOrderAlt(
   return !langMismatch ? score.priority_order : canShowAlt ? score.priority_order_alt : null
 }
 
-export function getCausalChainsAlt(
+export function getCausalChains(
   score: Record<string, unknown>,
   lang: string
 ): unknown {
@@ -56,18 +56,6 @@ export function getClosingMessage(
     : canShowAlt
       ? (score.closing_message_alt as string ?? null)
       : null
-}
-
-export function getPriorityOrder(
-  score: Record<string, unknown>
-): Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }> | null {
-  return (score.priority_order as Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }>) ?? null
-}
-
-export function getCausalChains(
-  score: Record<string, unknown>
-): Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }> | null {
-  return (score.causal_chains as Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }>) ?? null
 }
 
 export function getImplementationRoadmap(
