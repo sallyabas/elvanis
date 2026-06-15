@@ -132,7 +132,7 @@ export function PriorityCard({ item, lang, labels }: PriorityCardProps) {
           {labels.implSteps}
           </p>
           <p dir="ltr" style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6, textAlign: isAr ? 'right' : 'left' }}>
-            {item.roadmap.action}
+            {item.action}
           </p>
         </div>
       )}
