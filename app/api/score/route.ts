@@ -556,6 +556,8 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       let top3FindingsAlt: unknown = null
       let closingMessageAlt: string | null = null
       let primaryConstraintSummaryAlt: string | null = null
+      let priorityOrderAlt: unknown = null
+      let causalChainsAlt: unknown = null
       let isTranslated = false
       try {
         const translatePrompt = `Translate the following JSON fields from ${diagnosis.language} to ${altLanguage}. Preserve business tone and meaning exactly. If translating to Arabic, use Gulf Arabic dialect, and do NOT mix in any English words or Latin letters. Respond with valid JSON only, same structure, no preamble.
@@ -565,11 +567,13 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
           top_3_findings:             diagnosis.top_3_findings,
           closing_message:            diagnosis.closing_message,
           primary_constraint_summary: (diagnosis.primary_constraint as Record<string, string>)?.summary ?? '',
+          priority_order:             diagnosis.priority_order,
+          causal_chains:              diagnosis.causal_chains,
         })}`
   
         const translateResponse = await groq.chat.completions.create({
           model:            'llama-3.1-8b-instant',
-          max_tokens:      1500,
+          max_tokens:      2500,
           temperature:     0.3,
           response_format: { type: 'json_object' },
           messages: [
@@ -584,7 +588,9 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
         overallSummaryAlt = translated.overall_summary ?? null
         top3FindingsAlt   = translated.top_3_findings  ?? null
         closingMessageAlt = translated.closing_message ?? null
-        primaryConstraintSummaryAlt   = translated.primary_constraint_summary  ?? null
+        primaryConstraintSummaryAlt = translated.primary_constraint_summary ?? null
+        priorityOrderAlt            = translated.priority_order             ?? null
+        causalChainsAlt             = translated.causal_chains              ?? null
         isTranslated = !!(overallSummaryAlt && top3FindingsAlt && closingMessageAlt && primaryConstraintSummaryAlt)
         console.log(`[score] translation to ${altLanguage}: ${isTranslated ? 'success' : 'partial/failed'}`)
       } catch (translateErr) {
@@ -653,6 +659,8 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       primary_constraint_dimension: (diagnosis.primary_constraint as Record<string, string>)?.dimension,
       primary_constraint_summary:   (diagnosis.primary_constraint as Record<string, string>)?.summary,
       primary_constraint_summary_alt: primaryConstraintSummaryAlt,
+      priority_order_alt:                priorityOrderAlt,
+      causal_chains_alt:                 causalChainsAlt,
       primary_constraint_urgency:   (diagnosis.primary_constraint as Record<string, string>)?.urgency,
       alt_language:                 altLanguage,
       is_translated:                isTranslated,
