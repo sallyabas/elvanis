@@ -4,6 +4,7 @@ import { getT } from '@/lib/translations'
 import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions, getClosingMessage, getPriorityOrder, getCausalChains, getImplementationRoadmap } from '@/lib/assessment-status'
 import { PriorityCard, CausalChainCard } from './result-client'
 import { DIMENSIONS } from '@/lib/gravity-engine'
+import { DIMENSION_LABELS } from '@/lib/types'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -63,16 +64,14 @@ export default async function AssessmentResultPage() {
   }))
 
   // Map causal chain dimension IDs to readable labels
+  const getDimLabel = (id: string) => {
+    const meta = DIMENSION_LABELS[id as keyof typeof DIMENSION_LABELS]
+    return lang === 'ar' ? (meta?.ar ?? id) : (meta?.en ?? id)
+  }
   const mappedChains = (causalChains ?? []).map(chain => ({
     ...chain,
-    causeLabel:    lang === 'ar'
-      ? (DIMENSIONS[chain.cause_dimension as keyof typeof DIMENSIONS]?.label_ar ?? chain.cause_dimension)
-      : (DIMENSIONS[chain.cause_dimension as keyof typeof DIMENSIONS]?.label    ?? chain.cause_dimension),
-    symptomLabels: chain.symptom_dimensions.map(s =>
-      lang === 'ar'
-        ? (DIMENSIONS[s as keyof typeof DIMENSIONS]?.label_ar ?? s)
-        : (DIMENSIONS[s as keyof typeof DIMENSIONS]?.label    ?? s)
-    ),
+    causeLabel:    getDimLabel(chain.cause_dimension),
+    symptomLabels: chain.symptom_dimensions.map(s => getDimLabel(s)),
   }))
 
   return (
