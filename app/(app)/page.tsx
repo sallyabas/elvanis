@@ -222,7 +222,7 @@ export default async function HomePage() {
               ))}
               {closingMessage && (
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '6px 0 0', lineHeight: 1.5 }}>
-                  {closingMessage.substring(0, 120)}...
+                  {closingMessage}
                 </p>
               )}
             </div>
