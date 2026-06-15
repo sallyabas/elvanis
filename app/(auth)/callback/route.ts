@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
@@ -50,6 +49,7 @@ export async function GET(request: NextRequest) {
     const fullName = (user.user_metadata?.full_name as string | undefined)?.trim() ?? ''
     const businessName = (user.user_metadata?.business_name as string | undefined)?.trim() ?? ''
 
+    const preferredLang = (searchParams.get('lang') === 'ar') ? 'ar' : 'en'
     const { error: founderError } = await admin
       .from('founders')
       .insert({
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         email:                user.email ?? '',
         full_name:            fullName,
         business_name:        businessName,
-        language:             'en',
+        language:             preferredLang,
         subscription_tier:    'free',
         subscription_status:  'active',
         account_status:       'active',

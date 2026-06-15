@@ -1,18 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { getT } from '@/lib/translations'
 
 export default function LoginPage() {
   const router  = useRouter()
-  const [email, setEmail]       = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
+  const [lang, setLang]             = useState<'en' | 'ar'>('en')
+  const [email, setEmail]           = useState('')
+  const [password, setPassword]     = useState('')
+  const [loading, setLoading]       = useState(false)
+  const [error, setError]           = useState('')
   const [resendSent, setResendSent] = useState(false)
   const [resending, setResending]   = useState(false)
+
+  const t   = getT(lang)
+  const isAr = lang === 'ar'
+
+  useEffect(() => {
+    const saved = localStorage.getItem('preferred_lang')
+    if (saved === 'ar' || saved === 'en') setLang(saved)
+  }, [])
+
+  function toggleLang() {
+    const newLang = lang === 'en' ? 'ar' : 'en'
+    setLang(newLang)
+    localStorage.setItem('preferred_lang', newLang)
+  }
 
   const isUnconfirmed = error.toLowerCase().includes('email not confirmed')
 
@@ -43,18 +59,20 @@ export default function LoginPage() {
         .maybeSingle()
 
       if (!founder) {
-        const fullName     = (user.user_metadata?.full_name     as string | undefined)?.trim() ?? ''
-        const businessName = (user.user_metadata?.business_name as string | undefined)?.trim() ?? ''
+        const preferredLang = localStorage.getItem('preferred_lang') ?? 'en'
+        const fullName      = (user.user_metadata?.full_name     as string | undefined)?.trim() ?? ''
+        const businessName  = (user.user_metadata?.business_name as string | undefined)?.trim() ?? ''
         await supabase.from('founders').insert({
           user_id:              user.id,
           email:                user.email ?? '',
           full_name:            fullName,
           business_name:        businessName,
-          language:             'en',
+          language:             preferredLang,
           subscription_tier:    'free',
           subscription_status:  'inactive',
           onboarding_completed: false,
         })
+        localStorage.removeItem('preferred_lang')
         router.push('/onboarding')
         return
       }
@@ -77,33 +95,35 @@ export default function LoginPage() {
     setResending(false)
   }
 
-  return (
-    <div className="auth-layout" style={{ background: '#F9FAFB' }}>
+  const LOGIN_BENEFITS = [
+    { icon: '🔍', text: t('auth.login_benefit_1') },
+    { icon: '⚡', text: t('auth.login_benefit_2') },
+    { icon: '📈', text: t('auth.login_benefit_3') },
+    { icon: '✨', text: t('auth.login_benefit_4') },
+  ]
 
-      {/* Left — brand panel (hidden on mobile) */}
+  return (
+    <div className="auth-layout" dir={isAr ? 'rtl' : 'ltr'} style={{ background: '#F9FAFB' }}>
+
+      {/* Left — brand panel */}
       <div className="auth-brand-panel">
         <div style={{ maxWidth: 460 }}>
           <a href="/" style={{ textDecoration: 'none' }}>
             <span style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>Elvanis</span>
           </a>
-          <p style={{ fontSize: 13, color: '#A5B4FC', marginTop: 4, marginBottom: 56 }}>Business Health Platform</p>
+          <p style={{ fontSize: 13, color: '#A5B4FC', marginTop: 4, marginBottom: 56 }}>{t('auth.brand_tagline')}</p>
 
           <h2 style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.25, marginBottom: 16, letterSpacing: '-0.5px' }}>
-            Your signals are waiting.<br />
-            <span style={{ color: '#818CF8' }}>Let us show you what changed.</span>
+            {t('auth.brand_headline_login')}<br />
+            <span style={{ color: '#818CF8' }}>{t('auth.brand_headline_login_sub')}</span>
           </h2>
 
           <p style={{ fontSize: 15, color: '#C7D2FE', lineHeight: 1.7, marginBottom: 48 }}>
-            Sign in to see your latest business health score, active signals, and what to fix first.
+            {t('auth.brand_sub_login')}
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {[
-              { icon: '🔍', text: 'Real signals from your connected tools' },
-              { icon: '⚡', text: 'Prioritised actions updated every scan' },
-              { icon: '📈', text: 'Track whether your fixes are working' },
-              { icon: '✨', text: 'AI opportunities specific to your business' },
-            ].map(item => (
+            {LOGIN_BENEFITS.map(item => (
               <div key={item.text} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                 <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
                 <p style={{ fontSize: 14, color: '#C7D2FE', margin: 0 }}>{item.text}</p>
@@ -113,9 +133,9 @@ export default function LoginPage() {
 
           <div style={{ marginTop: 56, paddingTop: 28, borderTop: '1px solid #312E81' }}>
             <p style={{ fontSize: 13, color: '#818CF8', margin: 0 }}>
-              New to Elvanis?{' '}
+              {t('auth.new_to_elvanis')}{' '}
               <a href="/signup" style={{ color: '#A5B4FC', fontWeight: 700, textDecoration: 'none' }}>
-                Get your free health score →
+                {t('auth.no_account_signup')}
               </a>
             </p>
           </div>
@@ -126,7 +146,17 @@ export default function LoginPage() {
       <div className="auth-form-panel">
         <div style={{ maxWidth: 380, width: '100%', margin: '0 auto' }}>
 
-          {/* Mobile logo — only shows on mobile */}
+          {/* Language toggle */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+            <button
+              onClick={toggleLang}
+              style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {isAr ? t('auth.switch_to_en') : t('auth.switch_to_ar')}
+            </button>
+          </div>
+
+          {/* Mobile logo */}
           <div className="auth-mobile-logo" style={{ display: 'none', marginBottom: 28 }}>
             <a href="/" style={{ textDecoration: 'none' }}>
               <span style={{ fontSize: 26, fontWeight: 900, color: '#2563EB', letterSpacing: '-0.5px' }}>Elvanis</span>
@@ -134,17 +164,17 @@ export default function LoginPage() {
           </div>
 
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 6 }}>
-            Welcome back
+            {t('auth.welcome_back')}
           </h1>
           <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 36 }}>
-            Sign in to your Elvanis account
+            {t('auth.sign_in_account')}
           </p>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Email address
+                {t('auth.email_address')}
               </label>
               <input
                 type="email"
@@ -161,10 +191,10 @@ export default function LoginPage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Password
+                  {t('auth.password')}
                 </label>
                 <a href="/forgot-password" style={{ fontSize: 12, color: '#6B7280', textDecoration: 'none', fontWeight: 500 }}>
-                  Forgot password?
+                  {t('auth.forgot_password')}
                 </a>
               </div>
               <input
@@ -172,7 +202,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError('') }}
                 required
-                placeholder="Your password"
+                placeholder={t('auth.password_placeholder_login')}
                 style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 onFocus={e => e.target.style.borderColor = '#2563EB'}
                 onBlur={e => e.target.style.borderColor = '#E5E7EB'}
@@ -182,9 +212,7 @@ export default function LoginPage() {
             {error && (
               <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 14px' }}>
                 <p style={{ color: '#DC2626', fontSize: 13, margin: 0 }}>
-                  {isUnconfirmed
-                    ? 'Your email has not been confirmed yet. Please check your inbox or resend the confirmation.'
-                    : error}
+                  {isUnconfirmed ? t('auth.email_not_confirmed') : error}
                 </p>
                 {isUnconfirmed && (
                   <button
@@ -193,7 +221,7 @@ export default function LoginPage() {
                     disabled={resending || resendSent}
                     style={{ marginTop: 8, fontSize: 13, color: '#2563EB', fontWeight: 600, background: 'none', border: 'none', cursor: resending || resendSent ? 'default' : 'pointer', padding: 0 }}
                   >
-                    {resendSent ? '✓ Confirmation email sent' : resending ? 'Sending...' : 'Resend confirmation email →'}
+                    {resendSent ? t('auth.confirmation_sent') : resending ? t('auth.sending') : t('auth.resend_confirmation')}
                   </button>
                 )}
               </div>
@@ -202,24 +230,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              style={{
-                width: '100%', padding: '14px',
-                background: '#2563EB',
-                opacity: loading ? 0.7 : 1,
-                color: '#fff', fontWeight: 700, borderRadius: 12, border: 'none',
-                fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer',
-                marginTop: 4, transition: 'opacity 0.15s',
-              }}
+              style={{ width: '100%', padding: '14px', background: '#2563EB', opacity: loading ? 0.7 : 1, color: '#fff', fontWeight: 700, borderRadius: 12, border: 'none', fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4, transition: 'opacity 0.15s' }}
             >
-              {loading ? 'Signing in...' : 'Sign in →'}
+              {loading ? t('auth.signing_in') : t('auth.sign_in_cta')}
             </button>
 
           </form>
 
           <p style={{ textAlign: 'center', fontSize: 13, color: '#6B7280', marginTop: 28 }}>
-            No account yet?{' '}
+            {t('auth.no_account')}{' '}
             <Link href="/signup" style={{ color: '#2563EB', fontWeight: 700, textDecoration: 'none' }}>
-              Get your free health score
+              {t('auth.get_free_score')}
             </Link>
           </p>
 
