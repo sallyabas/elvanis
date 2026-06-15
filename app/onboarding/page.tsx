@@ -179,7 +179,7 @@ export default function OnboardingPage() {
                 { icon: '⭐', labelKey: 'onboarding.tool_trustpilot' as const },
                 { icon: '📁', labelKey: 'onboarding.tool_csv' as const },
               ].map(item => (
-                <div key={item.labelKey} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#F9FAFB', borderRadius: 10, textAlign: 'left' }}>
+                <div key={item.labelKey} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#F9FAFB', borderRadius: 10, textAlign: isAr ? 'right' : 'left' }}>
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
                   <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{t(item.labelKey)}</span>
                 </div>
@@ -207,7 +207,7 @@ export default function OnboardingPage() {
             <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>
               {t('onboarding.guidance_assess_sub')}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32, textAlign: 'left' }}>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32, textAlign: isAr ? 'right' : 'left' }}>
               {[
                 { icon: '🔍', titleKey: 'onboarding.assess_item1_title' as const, descKey: 'onboarding.assess_item1_desc' as const },
                 { icon: '⚡', titleKey: 'onboarding.assess_item2_title' as const, descKey: 'onboarding.assess_item2_desc' as const },
@@ -251,7 +251,7 @@ export default function OnboardingPage() {
                 style={{
                   padding: '18px 22px', border: `2px solid ${selectedFocus === option.id ? '#2563EB' : '#E5E7EB'}`,
                   borderRadius: 14, background: selectedFocus === option.id ? '#EFF6FF' : '#fff',
-                  textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
+                  textAlign: isAr ? 'right' : 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
                 }}
               >
                 <span style={{ fontSize: 28, flexShrink: 0 }}>{option.icon}</span>
@@ -295,7 +295,7 @@ export default function OnboardingPage() {
                   style={{
                     padding: '16px 20px', border: `2px solid ${selectedStage === stage.id ? '#2563EB' : '#E5E7EB'}`,
                     borderRadius: 14, background: selectedStage === stage.id ? '#EFF6FF' : '#fff',
-                    textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
+                     textAlign: isAr ? 'right' : 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
                   }}
                 >
                   <span style={{ fontSize: 26, flexShrink: 0 }}>{stage.icon}</span>
@@ -378,7 +378,7 @@ export default function OnboardingPage() {
           <p style={{ fontSize: 16, color: '#6B7280', lineHeight: 1.7, marginBottom: 36 }}>
             {t('onboarding.welcome_sub')}
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40, textAlign: 'left' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40, textAlign: isAr ? 'right' : 'left' }}>
             {[
               { icon: '🔍', titleKey: 'onboarding.feat1_title' as const, descKey: 'onboarding.feat1_desc' as const },
               { icon: '⚡', titleKey: 'onboarding.feat2_title' as const, descKey: 'onboarding.feat2_desc' as const },
