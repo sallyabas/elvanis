@@ -24,6 +24,39 @@ export function getStatusLabel(
   return map[status] ?? status
 }
 
+
+export function getClosingMessage(
+  score: Record<string, unknown>,
+  lang: string
+): string | null {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch
+    ? (score.closing_message as string ?? null)
+    : canShowAlt
+      ? (score.closing_message_alt as string ?? null)
+      : null
+}
+
+export function getPriorityOrder(
+  score: Record<string, unknown>
+): Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }> | null {
+  return (score.priority_order as Array<{ priority: number; action: string; dimension: string; reason: string; timeframe: string; effort: string; impact: string }>) ?? null
+}
+
+export function getCausalChains(
+  score: Record<string, unknown>
+): Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }> | null {
+  return (score.causal_chains as Array<{ chain_name: string; cause_dimension: string; cause_signal: string; symptom_dimensions: string[]; fix_order: string }>) ?? null
+}
+
+export function getImplementationRoadmap(
+  score: Record<string, unknown>
+): Array<{ priority: number; action: string; dimension: string; timeframe: string; effort: string; impact: string }> | null {
+  return (score.implementation_roadmap as Array<{ priority: number; action: string; dimension: string; timeframe: string; effort: string; impact: string }>) ?? null
+}
+
 export function getDisplayFindings(
   score: Record<string, unknown>,
   lang: string
