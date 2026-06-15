@@ -17,10 +17,6 @@ export default function ResetPasswordPage() {
   const t    = getT(lang)
   const isAr = lang === 'ar'
 
-  useEffect(() => {
-    const saved = localStorage.getItem('preferred_lang')
-    if (saved === 'ar' || saved === 'en') setLang(saved as 'en' | 'ar')
-  }, [])
 
   function toggleLang() {
     const newLang = lang === 'en' ? 'ar' : 'en'

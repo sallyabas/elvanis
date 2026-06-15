@@ -1,7 +1,6 @@
 // lib/health-scoring.ts
 // Pure math engine — no DB, no API, no filtering.
 // Caller is responsible for pre-filtering to active, non-manual signals only.
-// Used by: app/api/scan/route.ts, app/dashboard/page.tsx
 
 export type ScoringInput = {
   signal_type: string
