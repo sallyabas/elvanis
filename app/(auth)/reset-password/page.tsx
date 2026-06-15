@@ -36,7 +36,8 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password })
 
     if (updateError) {
-      setError(updateError.message)
+      const msg = updateError.message.toLowerCase()
+      setError(msg.includes('different') || msg.includes('same') ? t('auth.pw_same_as_old') : updateError.message)
       setLoading(false)
       return
     }
