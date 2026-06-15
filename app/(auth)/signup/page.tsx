@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { getT } from '@/lib/translations'
 
@@ -36,6 +35,11 @@ export default function SignupPage() {
   const t        = getT(lang)
   const strength = getStrength(password)
   const isAr     = lang === 'ar'
+
+  useEffect(() => {
+    const saved = localStorage.getItem('preferred_lang')
+    if (saved === 'ar' || saved === 'en') setLang(saved as 'en' | 'ar')
+  }, [])
 
   function toggleLang() {
     const newLang = lang === 'en' ? 'ar' : 'en'
