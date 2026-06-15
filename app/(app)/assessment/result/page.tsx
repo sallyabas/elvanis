@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
-import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions } from '@/lib/assessment-status'
-
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions, getClosingMessage, getPriorityOrder, getCausalChains, getImplementationRoadmap } from '@/lib/assessment-status'
+import { PriorityCard, CausalChainCard } from './result-client'
+import { DIMENSIONS } from '@/lib/gravity-engine'
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -49,7 +50,30 @@ export default async function AssessmentResultPage() {
   const canShowAlt      = langMismatch && !!score.is_translated && score.alt_language === lang
   const displaySummary  = getDisplaySummary(score as Record<string, unknown>, lang)
   const displayConstraint = getDisplayConstraint(score as Record<string, unknown>, lang)
-  const displayFindings = getDisplayFindings(score as Record<string, unknown>, lang)
+  const displayFindings   = getDisplayFindings(score as Record<string, unknown>, lang)
+  const closingMessage    = getClosingMessage(score as Record<string, unknown>, lang)
+  const priorityOrder     = getPriorityOrder(score as Record<string, unknown>)
+  const causalChains      = getCausalChains(score as Record<string, unknown>)
+  const implementationRoadmap = getImplementationRoadmap(score as Record<string, unknown>)
+
+  // Merge priority_order with implementation_roadmap by priority number
+  const mergedPriorities = (priorityOrder ?? []).map(p => ({
+    ...p,
+    roadmap: (implementationRoadmap ?? []).find(r => r.priority === p.priority),
+  }))
+
+  // Map causal chain dimension IDs to readable labels
+  const mappedChains = (causalChains ?? []).map(chain => ({
+    ...chain,
+    causeLabel:    lang === 'ar'
+      ? (DIMENSIONS[chain.cause_dimension as keyof typeof DIMENSIONS]?.label_ar ?? chain.cause_dimension)
+      : (DIMENSIONS[chain.cause_dimension as keyof typeof DIMENSIONS]?.label    ?? chain.cause_dimension),
+    symptomLabels: chain.symptom_dimensions.map(s =>
+      lang === 'ar'
+        ? (DIMENSIONS[s as keyof typeof DIMENSIONS]?.label_ar ?? s)
+        : (DIMENSIONS[s as keyof typeof DIMENSIONS]?.label    ?? s)
+    ),
+  }))
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>
@@ -168,6 +192,48 @@ export default async function AssessmentResultPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Causal Chains */}
+        {mappedChains.length > 0 && (
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 8 }}>
+              {t('assessment.causal_chains_title')}
+            </h3>
+            <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+              {t('assessment.causal_chains_sub')}
+            </p>
+            {mappedChains.map((chain, i) => (
+              <CausalChainCard key={i} chain={chain} lang={lang} t={t as (k: string) => string} />
+            ))}
+          </div>
+        )}
+
+        {/* Priority Order */}
+        {mergedPriorities.length > 0 && (
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '28px 32px', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 4 }}>
+              {t('assessment.priority_title')}
+            </h3>
+            <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>
+              {t('assessment.priority_sub')}
+            </p>
+            {mergedPriorities.map((item, i) => (
+              <PriorityCard key={i} item={item} lang={lang} t={t as (k: string) => string} />
+            ))}
+          </div>
+        )}
+
+        {/* Closing Message */}
+        {closingMessage && (
+          <div style={{ background: '#EFF6FF', borderRadius: 16, padding: '24px', marginBottom: 20 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
+              {t('assessment.consultant_insight')}
+            </p>
+            <p style={{ color: '#1D4ED8', fontSize: 15, lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
+              {closingMessage}
+            </p>
           </div>
         )}
 
