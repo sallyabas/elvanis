@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useT, useLang } from '@/app/context/LanguageContext'
-import { getT } from '@/lib/translations'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { STAGES, INDUSTRIES, MARKETS, FOCUS_OPTIONS } from '@/lib/profile-options'
@@ -24,15 +23,9 @@ function normaliseBrandUrl(raw: string): string {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const contextLang = useLang()
-  const [lang, setLang] = useState<'en' | 'ar'>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const urlLang = params.get('lang')
-      if (urlLang === 'ar' || urlLang === 'en') return urlLang
-    }
-    return contextLang
-  })
+  const lang = useLang()
+  const isAr = lang === 'ar'
+  const t = useT()
 
   const [step, setStep]                         = useState<Step>('welcome')
   const [selectedStage, setSelectedStage]       = useState<string | null>(null)
@@ -45,14 +38,6 @@ export default function OnboardingPage() {
   const [loading, setLoading]                   = useState(false)
   const [resuming, setResuming]                 = useState(true)
 
-  // ── Resume from last saved step on mount ─────────────────────
-  useEffect(() => {
-    const saved = localStorage.getItem('preferred_lang')
-    if (saved === 'ar' || saved === 'en') {
-      setLang(saved as 'en' | 'ar')
-      localStorage.removeItem('preferred_lang')
-    }
-  }, [])
 
   useEffect(() => {
     async function resumeProgress() {
