@@ -26,10 +26,18 @@ interface PriorityItem {
 interface PriorityCardProps {
   item: PriorityItem
   lang: string
-  t:    (key: string) => string
+  labels: {
+    detailsExpand:   string
+    detailsCollapse: string
+    implSteps:       string
+    effortLow:       string
+    effortMedium:    string
+    effortHigh:      string
+    effortLabel:     string
+  }
 }
 
-export function PriorityCard({ item, lang, t }: PriorityCardProps) {
+export function PriorityCard({ item, lang, labels }: PriorityCardProps) {
   const [expanded, setExpanded] = useState(false)
   const isAr = lang === 'ar'
 
@@ -78,7 +86,7 @@ export function PriorityCard({ item, lang, t }: PriorityCardProps) {
                 ⏱ {item.timeframe}
               </span>
               <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#F3F4F6', color: effortColor, fontWeight: 600 }}>
-                {t('plan.effort')} {t(`plan.effort_${item.effort}` as Parameters<typeof t>[0])}
+              {labels.effortLabel} {item.effort === 'low' ? labels.effortLow : item.effort === 'medium' ? labels.effortMedium : labels.effortHigh}
               </span>
               <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#EFF6FF', color: impactColor, fontWeight: 600 }}>
                 ↑ {item.impact}
@@ -101,7 +109,7 @@ export function PriorityCard({ item, lang, t }: PriorityCardProps) {
                 flexShrink:   0,
               }}
             >
-              {expanded ? '▲' : '▼'} {expanded ? t('assessment.details_collapse') : t('assessment.details_expand')}
+              {expanded ? '▲' : '▼'} {expanded ? labels.detailsCollapse : labels.detailsExpand}
             </button>
           )}
         </div>
@@ -115,7 +123,7 @@ export function PriorityCard({ item, lang, t }: PriorityCardProps) {
           borderTop:  '1px solid #E5E7EB',
         }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>
-            {t('assessment.impl_steps')}
+          {labels.implSteps}
           </p>
           <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>
             {item.roadmap.action}
@@ -140,10 +148,13 @@ interface CausalChain {
 interface CausalChainCardProps {
   chain: CausalChain
   lang:  string
-  t:     (key: string) => string
+  labels: {
+    signalLabel:   string
+    fixOrderLabel: string
+  }
 }
 
-export function CausalChainCard({ chain, lang, t }: CausalChainCardProps) {
+export function CausalChainCard({ chain, lang, labels }: CausalChainCardProps) {
   const [expanded, setExpanded] = useState(false)
   const isAr = lang === 'ar'
 
@@ -189,13 +200,13 @@ export function CausalChainCard({ chain, lang, t }: CausalChainCardProps) {
           borderTop:  '1px solid #FDE68A',
         }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {t('assessment.signal_label')}
+          {labels.signalLabel}
           </p>
           <p style={{ fontSize: 13, color: '#374151', margin: '0 0 12px', lineHeight: 1.5 }}>
             {chain.cause_signal}
           </p>
           <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {t('assessment.fix_order_label')}
+          {labels.fixOrderLabel}
           </p>
           <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.5 }}>
             {chain.fix_order}

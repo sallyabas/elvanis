@@ -205,7 +205,10 @@ export default async function AssessmentResultPage() {
               {t('assessment.causal_chains_sub')}
             </p>
             {mappedChains.map((chain, i) => (
-              <CausalChainCard key={i} chain={chain} lang={lang} t={t as (k: string) => string} />
+              <CausalChainCard key={i} chain={chain} lang={lang} labels={{
+                signalLabel:   t('assessment.signal_label'),
+                fixOrderLabel: t('assessment.fix_order_label'),
+              }} />
             ))}
           </div>
         )}
@@ -220,7 +223,15 @@ export default async function AssessmentResultPage() {
               {t('assessment.priority_sub')}
             </p>
             {mergedPriorities.map((item, i) => (
-              <PriorityCard key={i} item={item} lang={lang} t={t as (k: string) => string} />
+              <PriorityCard key={i} item={item} lang={lang} labels={{
+                detailsExpand:   t('assessment.details_expand'),
+                detailsCollapse: t('assessment.details_collapse'),
+                implSteps:       t('assessment.impl_steps'),
+                effortLabel:     t('plan.effort'),
+                effortLow:       t('plan.effort_low'),
+                effortMedium:    t('plan.effort_medium'),
+                effortHigh:      t('plan.effort_high'),
+              }} />
             ))}
           </div>
         )}
