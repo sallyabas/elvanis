@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import { getT } from '@/lib/translations'
-import { getStatusLabel, getDisplaySummary, getDisplayConstraint } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getDisplayFindings, getScoreDimensions } from '@/lib/assessment-status'
+
 
 export default async function AssessmentResultPage() {
   const supabase = await createServerComponentClient()
@@ -37,14 +38,8 @@ export default async function AssessmentResultPage() {
     ? t('assessment.report_title_named').replace('{name}', name)
     : t('assessment.report_title')
 
-  const dimensions = [
-    { label: t('assessment.dim_revenue'),   val: score.score_revenue   as number | null },
-    { label: t('assessment.dim_pmf'),       val: score.score_pmf       as number | null },
-    { label: t('assessment.dim_team'),      val: score.score_team      as number | null },
-    { label: t('assessment.dim_customer'),  val: score.score_customer  as number | null },
-    { label: t('assessment.dim_marketing'), val: score.score_marketing as number | null },
-    { label: t('assessment.dim_strategy'),  val: score.score_strategy  as number | null },
-  ]
+  const dimensions = getScoreDimensions(score as Record<string, unknown>, t as (k: string) => string)
+
   const LANG_NAMES: Record<string, string> = {
     en: t('assessment.lang_name_en'),
     ar: t('assessment.lang_name_ar'),
@@ -54,7 +49,7 @@ export default async function AssessmentResultPage() {
   const canShowAlt      = langMismatch && !!score.is_translated && score.alt_language === lang
   const displaySummary  = getDisplaySummary(score as Record<string, unknown>, lang)
   const displayConstraint = getDisplayConstraint(score as Record<string, unknown>, lang)
-  const displayFindings = !langMismatch ? score.top_3_findings : (canShowAlt ? score.top_3_findings_alt : null)
+  const displayFindings = getDisplayFindings(score as Record<string, unknown>, lang)
 
   return (
     <main style={{ minHeight: '100vh', background: '#F9FAFB', fontFamily: 'Inter, sans-serif' }}>

@@ -6,8 +6,7 @@ import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health
 import { getT } from '@/lib/translations'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
-import { getStatusLabel, getDisplaySummary } from '@/lib/assessment-status'
-
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getScoreDimensions } from '@/lib/assessment-status'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
@@ -674,14 +673,7 @@ console.log("--- DEBUG END ---");
                 </div>
               </div>
               <div className="grid-3-col" style={{ marginBottom: 16 }}>
-              {[
-                  { label: t('assessment.dim_revenue'),  val: score.score_revenue   as number | null },
-                  { label: t('assessment.dim_pmf'),      val: score.score_pmf       as number | null },
-                  { label: t('assessment.dim_team'),     val: score.score_team      as number | null },
-                  { label: t('assessment.dim_customer'), val: score.score_customer  as number | null },
-                  { label: t('assessment.dim_marketing'),val: score.score_marketing as number | null },
-                  { label: t('assessment.dim_strategy'), val: score.score_strategy  as number | null },
-                ].map(({ label, val }) => {
+              {getScoreDimensions(score as Record<string, unknown>, t as (k: string) => string).map(({ label, val }) => {
                   const v     = val ?? 0
                   const color = v >= 66 ? '#059669' : v >= 41 ? '#D97706' : '#DC2626'
                   return (

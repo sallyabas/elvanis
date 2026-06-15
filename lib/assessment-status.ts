@@ -24,6 +24,33 @@ export function getStatusLabel(
   return map[status] ?? status
 }
 
+export function getDisplayFindings(
+  score: Record<string, unknown>,
+  lang: string
+): Array<{ rank: number; finding: string; impact: string }> | null {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch
+    ? (score.top_3_findings as Array<{ rank: number; finding: string; impact: string }> ?? null)
+    : canShowAlt ? (score.top_3_findings_alt as Array<{ rank: number; finding: string; impact: string }> ?? null) : null
+}
+
+export function getScoreDimensions(
+  score: Record<string, unknown>,
+  t: (key: string) => string
+): Array<{ label: string; val: number | null }> {
+  return [
+    { label: t('assessment.dim_revenue'),   val: score.score_revenue   as number | null },
+    { label: t('assessment.dim_pmf'),       val: score.score_pmf       as number | null },
+    { label: t('assessment.dim_team'),      val: score.score_team      as number | null },
+    { label: t('assessment.dim_customer'),  val: score.score_customer  as number | null },
+    { label: t('assessment.dim_marketing'), val: score.score_marketing as number | null },
+    { label: t('assessment.dim_strategy'),  val: score.score_strategy  as number | null },
+  ]
+}
+
+
 export function getDisplayConstraint(
   score: Record<string, unknown>,
   lang: string
