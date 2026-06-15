@@ -81,10 +81,10 @@ export function PriorityCard({ item, lang, labels }: PriorityCardProps) {
             {item.priority}
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+            <p dir="ltr" style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 6px', textAlign: isAr ? 'right' : 'left' }}>
               {item.action}
             </p>
-            <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5 }}>
+            <p dir="ltr" style={{ fontSize: 13, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>
               {item.reason}
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -131,7 +131,7 @@ export function PriorityCard({ item, lang, labels }: PriorityCardProps) {
           <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>
           {labels.implSteps}
           </p>
-          <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>
+          <p dir="ltr" style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6, textAlign: isAr ? 'right' : 'left' }}>
             {item.roadmap.action}
           </p>
         </div>
@@ -208,13 +208,13 @@ export function CausalChainCard({ chain, lang, labels }: CausalChainCardProps) {
           <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {labels.signalLabel}
           </p>
-          <p style={{ fontSize: 13, color: '#374151', margin: '0 0 12px', lineHeight: 1.5 }}>
+          <p dir="ltr" style={{ fontSize: 13, color: '#374151', margin: '0 0 12px', lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>
             {chain.cause_signal}
           </p>
           <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {labels.fixOrderLabel}
           </p>
-          <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.5 }}>
+          <p dir="ltr" style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>
             {chain.fix_order}
           </p>
         </div>
