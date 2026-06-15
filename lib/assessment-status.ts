@@ -24,6 +24,25 @@ export function getStatusLabel(
   return map[status] ?? status
 }
 
+export function getPriorityOrderAlt(
+  score: Record<string, unknown>,
+  lang: string
+): unknown {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch ? score.priority_order : canShowAlt ? score.priority_order_alt : null
+}
+
+export function getCausalChainsAlt(
+  score: Record<string, unknown>,
+  lang: string
+): unknown {
+  const scoreLang    = (score.language as string) ?? 'en'
+  const langMismatch = scoreLang !== lang
+  const canShowAlt   = langMismatch && !!score.is_translated && score.alt_language === lang
+  return !langMismatch ? score.causal_chains : canShowAlt ? score.causal_chains_alt : null
+}
 
 export function getClosingMessage(
   score: Record<string, unknown>,
