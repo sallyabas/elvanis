@@ -13,7 +13,7 @@ export default async function AssessmentPage() {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!founder) redirect('/onboarding')
+    if (!founder || !founder.onboarding_completed) redirect('/onboarding')
 
   return (
     <AssessmentClient

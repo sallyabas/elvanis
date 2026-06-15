@@ -83,9 +83,12 @@ export default function LoginPage() {
         if (savedLang === 'ar' || savedLang === 'en') {
           await supabase.from('founders').update({ language: savedLang }).eq('user_id', user.id)
           localStorage.removeItem('preferred_lang')
+          router.push(`/onboarding?lang=${savedLang}`)
+        } else {
+          router.push('/onboarding')
         }
-        router.push('/onboarding')
         return
+
       }
     }
 

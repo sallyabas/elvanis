@@ -58,12 +58,12 @@ export default async function HomePage() {
 
   const { data: founder } = await supabase
     .from('founders')
-    .select('id, full_name, business_name, founder_stage, focus_metric, subscription_tier, logo_url, guide_dismissed, language')
+    .select('id, full_name, business_name, founder_stage, focus_metric, subscription_tier, logo_url, guide_dismissed, language, onboarding_completed')
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!founder) redirect('/onboarding')
-    const t = getT((founder.language ?? 'en') as 'en' | 'ar')
+    if (!founder || !founder.onboarding_completed) redirect('/onboarding')
+      const t = getT((founder.language ?? 'en') as 'en' | 'ar')
 
   const { data: signals } = await supabase
     .from('diagnostic_signals')
