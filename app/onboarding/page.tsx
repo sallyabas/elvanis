@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { useT } from '@/app/context/LanguageContext'
+import { useLang, useT } from '@/app/context/LanguageContext'
 import { STAGES, INDUSTRIES, MARKETS, FOCUS_OPTIONS } from '@/lib/profile-options'
 
 type Step = 'welcome' | 'profile' | 'focus' | 'guidance'
@@ -23,6 +23,8 @@ function normaliseBrandUrl(raw: string): string {
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const lang = useLang()
+  const isAr = lang === 'ar'
   const t = useT()
 
   const [step, setStep]                         = useState<Step>('welcome')
@@ -151,7 +153,7 @@ export default function OnboardingPage() {
   // Loading while resuming
   if (resuming) {
     return (
-      <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
+      <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
         <p style={{ color: '#9CA3AF', fontSize: 14 }}>{t('onboarding.loading_progress')}</p>
       </main>
     )
@@ -160,10 +162,10 @@ export default function OnboardingPage() {
   // ── STEP 3A: Connect guidance — product + customers ───────────
   if (step === 'guidance' && stageHasData) {
     return (
-      <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-        <div style={{ maxWidth: 560, width: '100%' }}>
-          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 20 }}>🔌</div>
+      <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
+      <div style={{ maxWidth: 560, width: '100%' }}>
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>🔌</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>{t('onboarding.guidance_product_title')}</h2>
             <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>
               {t('onboarding.guidance_product_sub')}
@@ -197,10 +199,10 @@ export default function OnboardingPage() {
   // ── STEP 3B: Assessment guidance — early stage ────────────────
   if (step === 'guidance' && !stageHasData) {
     return (
-      <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-        <div style={{ maxWidth: 560, width: '100%' }}>
-          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 20 }}>🎯</div>
+      <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
+      <div style={{ maxWidth: 560, width: '100%' }}>
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>🎯</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>{t('onboarding.guidance_assess_title')}</h2>
             <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>
               {t('onboarding.guidance_assess_sub')}
@@ -234,11 +236,11 @@ export default function OnboardingPage() {
   // ── STEP 2: Focus metric ──────────────────────────────────────
   if (step === 'focus') {
     return (
-      <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-        <div style={{ maxWidth: 560, width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <span style={{ fontSize: 26, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginTop: 24, marginBottom: 8 }}>{t('onboarding.focus_title')}</h1>
+      <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
+      <div style={{ maxWidth: 560, width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <span style={{ fontSize: 26, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginTop: 24, marginBottom: 8 }}>{t('onboarding.focus_title')}</h1>
             <p style={{ fontSize: 15, color: '#6B7280', margin: 0 }}>{t('onboarding.focus_sub')}</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
@@ -274,7 +276,7 @@ export default function OnboardingPage() {
   // ── STEP 1: Profile ───────────────────────────────────────────
   if (step === 'profile') {
     return (
-      <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
+      <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
         <div style={{ maxWidth: 600, width: '100%' }}>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <span style={{ fontSize: 26, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
@@ -368,7 +370,7 @@ export default function OnboardingPage() {
 
   // ── STEP 0: Welcome ───────────────────────────────────────────
   return (
-    <main style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
+    <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
       <div style={{ maxWidth: 560, width: '100%' }}>
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '48px 40px', textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 20 }}>📊</div>
