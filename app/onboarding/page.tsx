@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useT, useLang } from '@/app/context/LanguageContext'
-import { useSearchParams } from 'next/navigation'
 import { getT } from '@/lib/translations'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -25,9 +24,8 @@ function normaliseBrandUrl(raw: string): string {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const contextLang = useLang()
-  const lang = (searchParams.get('lang') as 'en' | 'ar') ?? contextLang
+  const [lang, setLang] = useState<'en' | 'ar'>(contextLang)
   const isAr = lang === 'ar'
   const t = getT(lang)
 
@@ -43,6 +41,14 @@ export default function OnboardingPage() {
   const [resuming, setResuming]                 = useState(true)
 
   // ── Resume from last saved step on mount ─────────────────────
+  useEffect(() => {
+    const saved = localStorage.getItem('preferred_lang')
+    if (saved === 'ar' || saved === 'en') {
+      setLang(saved as 'en' | 'ar')
+      localStorage.removeItem('preferred_lang')
+    }
+  }, [])
+
   useEffect(() => {
     async function resumeProgress() {
       const supabase = createClient()
