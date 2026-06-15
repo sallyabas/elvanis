@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [error, setError]           = useState('')
   const [resendSent, setResendSent] = useState(false)
   const [resending, setResending]   = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const t   = getT(lang)
   const isAr = lang === 'ar'
@@ -197,22 +198,28 @@ export default function LoginPage() {
                   {t('auth.forgot_password')}
                 </a>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError('') }}
-                required
-                placeholder={t('auth.password_placeholder_login')}
-                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
-                onFocus={e => e.target.style.borderColor = '#2563EB'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  required
+                  placeholder={t('auth.password_placeholder_login')}
+                  style={{ width: '100%', padding: '11px 44px 11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
+                  onFocus={e => e.target.style.borderColor = '#2563EB'}
+                  onBlur={e => e.target.style.borderColor = '#E5E7EB'}
+                />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
 
             {error && (
               <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 14px' }}>
                 <p style={{ color: '#DC2626', fontSize: 13, margin: 0 }}>
-                  {isUnconfirmed ? t('auth.email_not_confirmed') : error}
+                {isUnconfirmed ? t('auth.email_not_confirmed') : error.toLowerCase().includes('invalid') ? t('auth.invalid_credentials') : error}
                 </p>
                 {isUnconfirmed && (
                   <button
