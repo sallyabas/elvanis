@@ -58,9 +58,10 @@ export default async function AssessmentResultPage() {
   const implementationRoadmap = getImplementationRoadmap(score as Record<string, unknown>)
 
   // Merge priority_order with implementation_roadmap by priority number
-  const mergedPriorities = (priorityOrder ?? []).map(p => ({
+  const mergedPriorities = (priorityOrder ?? []).map((p, idx) => ({
     ...p,
-    roadmap: (implementationRoadmap ?? []).find(r => r.priority === p.priority),
+    priority: p.priority ?? (p as Record<string, unknown>).rank ?? idx + 1,
+    roadmap: (implementationRoadmap ?? []).find(r => r.priority === (p.priority ?? (p as Record<string, unknown>).rank ?? idx + 1)),
   }))
 
   // Map causal chain dimension IDs to readable labels
