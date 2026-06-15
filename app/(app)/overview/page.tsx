@@ -174,7 +174,8 @@ console.log("--- DEBUG END ---");
   const hour        = new Date().getHours()
   const greeting    = hour < 12 ? t('greeting.morning') : hour < 17 ? t('greeting.afternoon') : t('greeting.evening')
 
-  const displaySummary = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const displaySummary    = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const displayConstraint = score ? getDisplayConstraint(score as Record<string, unknown>, founder.language ?? 'en') : null
    const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
@@ -690,10 +691,10 @@ console.log("--- DEBUG END ---");
                   )
                 })}
               </div>
-              {score.primary_constraint_summary && (
+              {displayConstraint && (
                 <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px' }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{t('assessment.constraint')} </span>
-                  <span style={{ fontSize: 13, color: '#374151' }}>{score.primary_constraint_summary as string}</span>
+                  <span style={{ fontSize: 13, color: '#374151' }}>{displayConstraint}</span>
                 </div>
               )}
             </div>
