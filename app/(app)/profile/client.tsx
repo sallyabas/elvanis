@@ -413,7 +413,7 @@ export default function ProfileClient({
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>{t('profile.language')} / اللغة</label>
+        <label style={labelStyle}>{t('profile.language')}</label>
           <div style={{ display: 'flex', gap: 10 }}>
             <button
               type="button"
