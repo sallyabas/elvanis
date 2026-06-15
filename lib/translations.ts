@@ -2154,7 +2154,7 @@ const TRANSLATIONS = {
     'auth.password':                'كلمة المرور',
     'auth.password_placeholder':    '8 أحرف على الأقل',
     'auth.creating_account':        'جارٍ إنشاء حسابك...',
-    'auth.get_score_cta':           'احصل على درجتي المجانية ←',
+    'auth.get_score_cta':           '← إنشاء حسابي المجاني',
     'auth.already_account':         'لديك حساب بالفعل؟',
     'auth.sign_in':                 'تسجيل الدخول',
     'auth.terms_agree':             'بالتسجيل توافق على',

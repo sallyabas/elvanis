@@ -262,7 +262,7 @@ export default function SignupPage() {
                   style={{ width: '100%', padding: '11px 44px 11px 14px', border: `1.5px solid ${password.length > 0 ? strength.color : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.15s' }}
                 />
                 <button type="button" onClick={() => setShowPassword(s => !s)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
+                  style={{ position: 'absolute', [isAr ? 'left' : 'right']: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
                   {showPassword ? '🙈' : '👁'}
                 </button>
               </div>

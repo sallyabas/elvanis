@@ -210,7 +210,7 @@ export default function LoginPage() {
                   onBlur={e => e.target.style.borderColor = '#E5E7EB'}
                 />
                 <button type="button" onClick={() => setShowPassword(s => !s)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
+                  style={{ position: 'absolute', [isAr ? 'left' : 'right']: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9CA3AF', padding: 0, lineHeight: 1 }}>
                   {showPassword ? '🙈' : '👁'}
                 </button>
               </div>
@@ -247,7 +247,7 @@ export default function LoginPage() {
           <p style={{ textAlign: 'center', fontSize: 13, color: '#6B7280', marginTop: 28 }}>
             {t('auth.no_account')}{' '}
             <Link href="/signup" style={{ color: '#2563EB', fontWeight: 700, textDecoration: 'none' }}>
-              {t('auth.get_free_score')}
+              {t('auth.create_account')}
             </Link>
           </p>
 
