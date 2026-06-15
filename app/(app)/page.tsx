@@ -212,6 +212,21 @@ export default async function HomePage() {
               </div>
             </div>
           )}
+          {score && (priorityOrder ?? []).length > 0 && (
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #E5E7EB' }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
+                {t('assessment.priority_title')}
+              </p>
+              {(priorityOrder ?? []).slice(0, 1).map((p, i) => (
+                <p key={i} style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0, lineHeight: 1.5 }}>{p.action}</p>
+              ))}
+              {closingMessage && (
+                <p style={{ fontSize: 12, color: '#6B7280', margin: '6px 0 0', lineHeight: 1.5 }}>
+                  {closingMessage.substring(0, 120)}...
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── AI Readiness ── */}
@@ -261,7 +276,7 @@ export default async function HomePage() {
             </>
           )}
         </div>
-        
+
         {/* ── Action Digest ── */}
         {!isFreeTier ? (
           <div id="tour-digest-card" style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
