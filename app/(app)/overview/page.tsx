@@ -700,34 +700,29 @@ console.log("--- DEBUG END ---");
                   <span style={{ fontSize: 13, color: '#374151' }}>{displayConstraint}</span>
                 </div>
               )}
+              {(priorityOrder ?? []).length > 0 && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #E5E7EB' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px' }}>
+                    {t('assessment.priority_title')}
+                  </p>
+                  {(priorityOrder ?? []).slice(0, 2).map((p, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 8 }}>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#2563EB', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {i + 1}
+                      </div>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0, lineHeight: 1.5 }}>{p.action}</p>
+                    </div>
+                  ))}
+                  {closingMessage && (
+                    <p style={{ fontSize: 12, color: '#6B7280', margin: '10px 0 0', lineHeight: 1.5, borderTop: '1px solid #E5E7EB', paddingTop: 10 }}>
+                      {closingMessage}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
-
-                {/* ── Priority Actions Widget ── */}
-                {topPriority && (
-          <div style={{ background: '#EFF6FF', borderRadius: 16, border: '1px solid #BFDBFE', padding: '24px 28px', marginBottom: 20 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>
-              {t('assessment.priority_title')}
-            </p>
-            {(priorityOrder ?? []).slice(0, 2).map((p, i) => (
-              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#2563EB', color: '#fff', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {i + 1}
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: 0, lineHeight: 1.5 }}>{p.action}</p>
-              </div>
-            ))}
-            {closingMessage && (
-              <p style={{ fontSize: 13, color: '#6B7280', margin: '12px 0 0', lineHeight: 1.5, borderTop: '1px solid #BFDBFE', paddingTop: 12 }}>
-                {closingMessage}
-              </p>
-            )}
-            <a href="/assessment/result" style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
-              {t('assessment.full_report')} →
-            </a>
-          </div>
-        )}
 
         {/* ── AI Readiness + Opportunities ── */}
         {aiReadiness.hasEnoughData && aiReadiness.opportunities.length > 0 && (
