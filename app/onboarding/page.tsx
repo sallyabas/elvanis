@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useT, useLang } from '@/app/context/LanguageContext'
+import { useSearchParams } from 'next/navigation'
+import { getT } from '@/lib/translations'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { useLang, useT } from '@/app/context/LanguageContext'
 import { STAGES, INDUSTRIES, MARKETS, FOCUS_OPTIONS } from '@/lib/profile-options'
 
 type Step = 'welcome' | 'profile' | 'focus' | 'guidance'
@@ -23,9 +25,11 @@ function normaliseBrandUrl(raw: string): string {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const lang = useLang()
+  const searchParams = useSearchParams()
+  const contextLang = useLang()
+  const lang = (searchParams.get('lang') as 'en' | 'ar') ?? contextLang
   const isAr = lang === 'ar'
-  const t = useT()
+  const t = getT(lang)
 
   const [step, setStep]                         = useState<Step>('welcome')
   const [selectedStage, setSelectedStage]       = useState<string | null>(null)
