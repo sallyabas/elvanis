@@ -6,7 +6,7 @@ import { calculateHealthScore } from '@/lib/health-scoring'
 import { getT } from '@/lib/translations'
 import type { FounderStage, FocusMetric } from '@/lib/gravity-engine'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
-import { getStatusLabel, getDisplaySummary, getDisplayConstraint } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getScoreDimensions, getPriorityOrder, getClosingMessage } from '@/lib/assessment-status'
 
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
@@ -125,7 +125,10 @@ export default async function HomePage() {
 
   const isFreeTier      = !founder || founder.subscription_tier === 'free'
   const displaySummary    = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
-  const displayConstraint = score ? getDisplayConstraint(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const displayConstraint  = score ? getDisplayConstraint(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const priorityOrder      = score ? getPriorityOrder(score as Record<string, unknown>, founder.language ?? 'en') as Array<{ priority: number; action: string; reason: string; timeframe: string; effort: string; impact: string }> | null : null
+  const closingMessage     = score ? getClosingMessage(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const topPriority        = priorityOrder?.[0] ?? null
   const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
@@ -259,6 +262,25 @@ export default async function HomePage() {
           )}
         </div>
 
+    {/* ── Priority Widget — free tier only, no digest ── */}
+    {!latestDigest && topPriority && (
+          <div style={{ background: '#EFF6FF', borderRadius: 16, border: '1px solid #BFDBFE', padding: '20px 24px', marginBottom: 16 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
+              {t('assessment.priority_title')}
+            </p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+              {topPriority.action}
+            </p>
+            {closingMessage && (
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5 }}>
+                {closingMessage}
+              </p>
+            )}
+            <a href="/assessment/result" style={{ fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
+              {t('assessment.go_dashboard')} →
+            </a>
+          </div>
+        )}
         {/* ── Action Digest ── */}
         {!isFreeTier ? (
           <div id="tour-digest-card" style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>

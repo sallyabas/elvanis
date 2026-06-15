@@ -6,7 +6,7 @@ import { calculateHealthScore, getHealthLabel, ScoringInput } from '@/lib/health
 import { getT } from '@/lib/translations'
 import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 import { AI_OPPORTUNITY_SIGNALS } from '@/lib/ai-opportunities'
-import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getScoreDimensions } from '@/lib/assessment-status'
+import { getStatusLabel, getDisplaySummary, getDisplayConstraint, getScoreDimensions, getPriorityOrder, getClosingMessage } from '@/lib/assessment-status'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
 
@@ -175,7 +175,10 @@ console.log("--- DEBUG END ---");
   const greeting    = hour < 12 ? t('greeting.morning') : hour < 17 ? t('greeting.afternoon') : t('greeting.evening')
 
   const displaySummary    = score ? getDisplaySummary(score as Record<string, unknown>, founder.language ?? 'en') : null
-  const displayConstraint = score ? getDisplayConstraint(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const displayConstraint  = score ? getDisplayConstraint(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const priorityOrder      = score ? getPriorityOrder(score as Record<string, unknown>, founder.language ?? 'en') as Array<{ priority: number; action: string; reason: string; timeframe: string; effort: string; impact: string }> | null : null
+  const closingMessage     = score ? getClosingMessage(score as Record<string, unknown>, founder.language ?? 'en') : null
+  const topPriority        = priorityOrder?.[0] ?? null
    const overallScoreColor = score
     ? ((score.overall_score as number) >= 66 ? '#059669' : (score.overall_score as number) >= 41 ? '#D97706' : '#DC2626')
     : '#6B7280'
@@ -700,6 +703,31 @@ console.log("--- DEBUG END ---");
             </div>
           )}
         </div>
+
+                {/* ── Priority Actions Widget ── */}
+                {topPriority && (
+          <div style={{ background: '#EFF6FF', borderRadius: 16, border: '1px solid #BFDBFE', padding: '24px 28px', marginBottom: 20 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>
+              {t('assessment.priority_title')}
+            </p>
+            {(priorityOrder ?? []).slice(0, 2).map((p, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#2563EB', color: '#fff', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {i + 1}
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: 0, lineHeight: 1.5 }}>{p.action}</p>
+              </div>
+            ))}
+            {closingMessage && (
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '12px 0 0', lineHeight: 1.5, borderTop: '1px solid #BFDBFE', paddingTop: 12 }}>
+                {closingMessage}
+              </p>
+            )}
+            <a href="/assessment/result" style={{ display: 'inline-block', marginTop: 12, fontSize: 13, color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>
+              {t('assessment.full_report')} →
+            </a>
+          </div>
+        )}
 
         {/* ── AI Readiness + Opportunities ── */}
         {aiReadiness.hasEnoughData && aiReadiness.opportunities.length > 0 && (
