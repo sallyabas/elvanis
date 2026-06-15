@@ -103,10 +103,10 @@ export default async function AssessmentResultPage() {
         </div>
 
         {/* Primary constraint */}
-        {getDisplayConstraint(score as Record<string, unknown>, lang) && (
+        {displayConstraint && (
           <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '12px 16px' }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{t('assessment.primary_constraint')} </span>
-            <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{getDisplayConstraint(score as Record<string, unknown>, lang)}</p>
+            <p style={{ color: '#1F2937', lineHeight: 1.65, fontSize: 15, margin: 0 }}>{displayConstraint}</p>
           </div>
         )}
 
