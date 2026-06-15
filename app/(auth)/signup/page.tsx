@@ -40,6 +40,12 @@ export default function SignupPage() {
   useEffect(() => {
     const saved = localStorage.getItem('preferred_lang')
     if (saved === 'ar' || saved === 'en') setLang(saved as 'en' | 'ar')
+    const savedEmail = localStorage.getItem('email_sent')
+    if (savedEmail) {
+      setEmail(savedEmail)
+      setIsResend(localStorage.getItem('email_sent_resend') === 'true')
+      setEmailSent(true)
+    }
   }, [])
 
   function toggleLang() {
@@ -118,6 +124,8 @@ export default function SignupPage() {
     }
 
     const isExistingUnconfirmed = data.user.created_at !== data.user.updated_at
+    localStorage.setItem('email_sent', email.trim())
+    localStorage.setItem('email_sent_resend', String(isExistingUnconfirmed))
     setIsResend(isExistingUnconfirmed)
     setEmailSent(true)
     setLoading(false)
@@ -150,7 +158,9 @@ export default function SignupPage() {
               <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
                 {t('auth.wrong_email')}{' '}
                 <button
-                  onClick={() => setEmailSent(false)}
+                      onClick={() => { setEmailSent(false); 
+                    localStorage.removeItem('email_sent'); 
+                    localStorage.removeItem('email_sent_resend') }}
                   style={{ color: '#2563EB', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, padding: 0 }}
                 >
                   {t('auth.go_back_change')}
