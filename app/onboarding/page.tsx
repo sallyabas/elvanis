@@ -25,9 +25,14 @@ function normaliseBrandUrl(raw: string): string {
 export default function OnboardingPage() {
   const router = useRouter()
   const contextLang = useLang()
-  const [lang, setLang] = useState<'en' | 'ar'>(contextLang)
-  const isAr = lang === 'ar'
-  const t = getT(lang)
+  const [lang, setLang] = useState<'en' | 'ar'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const urlLang = params.get('lang')
+      if (urlLang === 'ar' || urlLang === 'en') return urlLang
+    }
+    return contextLang
+  })
 
   const [step, setStep]                         = useState<Step>('welcome')
   const [selectedStage, setSelectedStage]       = useState<string | null>(null)
