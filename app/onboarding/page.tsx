@@ -259,9 +259,9 @@ export default function OnboardingPage() {
                   <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{t(option.labelKey)}</p>
                   <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{t(option.descKey)}</p>
                 </div>
-                {selectedFocus === option.id && (
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, flexShrink: 0 }}>✓</span>
-                )}
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: selectedFocus === option.id ? '#2563EB' : '#fff', border: selectedFocus === option.id ? 'none' : '2px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, flexShrink: 0 }}>
+                  {selectedFocus === option.id ? '✓' : ''}
+                </span>
               </button>
             ))}
           </div>
@@ -303,9 +303,9 @@ export default function OnboardingPage() {
                     <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{t(stage.labelKey)}</p>
                     <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{t(stage.descKey)}</p>
                   </div>
-                  {selectedStage === stage.id && (
-                    <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, flexShrink: 0 }}>✓</span>
-                  )}
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: selectedStage === stage.id ? '#2563EB' : '#fff', border: selectedStage === stage.id ? 'none' : '2px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, flexShrink: 0 }}>
+                    {selectedStage === stage.id ? '✓' : ''}
+                  </span>
                 </button>
               ))}
             </div>
