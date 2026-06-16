@@ -34,6 +34,8 @@ export default function OnboardingPage() {
   const [selectedMarket, setSelectedMarket]     = useState('')
   const [brandUrl, setBrandUrl]                 = useState('')
   const [noWebsite, setNoWebsite]               = useState(false)
+  const [industryOpen, setIndustryOpen]         = useState(false)
+  const [marketOpen, setMarketOpen]             = useState(false)
   const [selectedFocus, setSelectedFocus]       = useState<string | null>(null)
   const [loading, setLoading]                   = useState(false)
   const [resuming, setResuming]                 = useState(true)
@@ -73,8 +75,16 @@ export default function OnboardingPage() {
     resumeProgress()
   }, [])
 
-  const stageHasData = STAGES.find(s => s.id === selectedStage)?.hasData ?? false
+  useEffect(() => {
+    function handleClickOutside() {
+      setIndustryOpen(false)
+      setMarketOpen(false)
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
 
+  const stageHasData = STAGES.find(s => s.id === selectedStage)?.hasData ?? false
   const step1Valid = !!selectedStage && !!selectedIndustry && !!selectedMarket
     && (selectedIndustry !== 'Other' || industryOther.trim().length > 0)
 
@@ -313,21 +323,60 @@ export default function OnboardingPage() {
 
           {/* Industry + Market */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-            <div>
+            {/* Industry */}
+            <div style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.industry')}</label>
-              <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); if (e.target.value !== 'Other') setIndustryOther('') }} style={selectStyle}
-                onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
-                <option value="">{t('profile.select_industry')}</option>
-                {INDUSTRIES.map(i => <option key={i.value} value={i.value}>{t(i.key)}</option>)}
-              </select>
+              <button
+                type="button"
+                onClick={e => { e.stopPropagation(); setIndustryOpen(o => !o); setMarketOpen(false) }}
+                style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${industryOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedIndustry ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
+              >
+                <span>{selectedIndustry ? t(INDUSTRIES.find(i => i.value === selectedIndustry)?.key ?? 'profile.select_industry' as Parameters<typeof t>[0]) : t('profile.select_industry')}</span>
+                <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 8 }}>{industryOpen ? '▲' : '▼'}</span>
+              </button>
+              {industryOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1.5px solid #2563EB', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, maxHeight: 240, overflowY: 'auto', marginTop: 4 }}>
+                  {INDUSTRIES.map(i => (
+                    <button
+                      key={i.value}
+                      type="button"
+                      onClick={() => { setSelectedIndustry(i.value); if (i.value !== 'Other') setIndustryOther(''); setIndustryOpen(false) }}
+                      style={{ width: '100%', padding: '10px 14px', background: selectedIndustry === i.value ? '#EFF6FF' : 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, color: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', textAlign: isAr ? 'right' : 'left' }}
+                    >
+                      <span>{t(i.key)}</span>
+                      {selectedIndustry === i.value && <span style={{ color: '#2563EB', fontSize: 12 }}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div>
+
+            {/* Market */}
+            <div style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.market')}</label>
-              <select value={selectedMarket} onChange={e => setSelectedMarket(e.target.value)} style={selectStyle}
-                onFocus={e => e.target.style.borderColor = '#2563EB'} onBlur={e => e.target.style.borderColor = '#E5E7EB'}>
-                <option value="">{t('profile.select_market')}</option>
-                {MARKETS.map(m => <option key={m.value} value={m.value}>{t(m.key)}</option>)}
-              </select>
+              <button
+                type="button"
+                onClick={e => { e.stopPropagation(); setMarketOpen(o => !o); setIndustryOpen(false) }}
+                style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${marketOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedMarket ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
+              >
+                <span>{selectedMarket ? t(MARKETS.find(m => m.value === selectedMarket)?.key ?? 'profile.select_market' as Parameters<typeof t>[0]) : t('profile.select_market')}</span>
+                <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 8 }}>{marketOpen ? '▲' : '▼'}</span>
+              </button>
+              {marketOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1.5px solid #2563EB', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, maxHeight: 240, overflowY: 'auto', marginTop: 4 }}>
+                  {MARKETS.map(m => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => { setSelectedMarket(m.value); setMarketOpen(false) }}
+                      style={{ width: '100%', padding: '10px 14px', background: selectedMarket === m.value ? '#EFF6FF' : 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, color: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', textAlign: isAr ? 'right' : 'left' }}
+                    >
+                      <span>{t(m.key)}</span>
+                      {selectedMarket === m.value && <span style={{ color: '#2563EB', fontSize: 12 }}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
