@@ -1,9 +1,25 @@
 import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@/lib/supabase-server'
+import { unstable_cache } from 'next/cache'
+import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/Sidebar'
 import DirProvider from '@/components/DirProvider'
 import type { Lang } from '@/lib/translations'
 import { LanguageProvider } from '../context/LanguageContext'
+
+
+const getHelpArticles = unstable_cache(
+  async () => {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('help_articles')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+    return data ?? []
+  },
+  ['help-articles'],
+  { revalidate: 86400, tags: ['help-articles'] }
+)
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerComponentClient()
@@ -24,8 +40,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('severity', 'critical')
     .in('status', ['new', 'acknowledged'])
 
-  const lang = (founder?.language ?? 'en') as Lang
-
+    const helpArticles = await getHelpArticles()
+    const lang = (founder?.language ?? 'en') as Lang
   return (
     <LanguageProvider lang={lang}>
       <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -37,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           logoUrl={founder?.logo_url ?? null}
           criticalCount={criticalCount ?? 0}
           language={founder?.language ?? 'en'}
+          helpArticles={helpArticles}
         />
         <div style={{ flex: 1, overflowX: 'hidden', background: '#F9FAFB' }} className="app-main">
           {children}

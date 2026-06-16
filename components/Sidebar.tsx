@@ -2,9 +2,11 @@
 
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { HelpPanel } from './HelpPanel'
+import { HelpPanel, type HelpArticle } from './HelpPanel'
 import Link from 'next/link'
 import { getT } from '@/lib/translations'
+
+
 
 
 interface SidebarProps {
@@ -13,6 +15,7 @@ interface SidebarProps {
   subscriptionTier:  string | null
   logoUrl?:          string | null
   criticalCount?:    number
+  helpArticles?:     HelpArticle[]
   language?:         string
 }
 
@@ -21,6 +24,7 @@ export default function Sidebar({
   founderName,
   subscriptionTier,
   criticalCount = 0,
+  helpArticles = [],
   language,
 
 }: SidebarProps) {
@@ -262,7 +266,7 @@ export default function Sidebar({
           <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>{t('nav.signout')}</span>
         </a>
       </div>
-      <HelpPanel onRestartTour={() => {}} />
+      <HelpPanel onRestartTour={() => {}} articles={helpArticles ?? []} />
     </>
   )
 
