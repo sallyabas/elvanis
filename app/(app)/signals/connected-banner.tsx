@@ -43,7 +43,7 @@ export default function ConnectedBanner({ connected }: { connected: string }) {
           {t('connect.scanning_now')}
         </p>
       </div>
-      <a href="/signals" style={{ fontSize: 13, color: '#059669', fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+      <a href="/signals" style={{ fontSize: 13, color: '#059669', fontWeight: 600, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap', marginInlineStart: 8 }}>
         {t('connect.refresh')}
       </a>
     </div>
