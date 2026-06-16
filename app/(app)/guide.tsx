@@ -5,6 +5,9 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { dismissGuide } from './actions'
+import { useT, useLang } from '@/app/context/LanguageContext'
+
+
 const TOUR_STEPS = [
   {
     id:    'tour-sidebar',
@@ -92,6 +95,18 @@ export function SectionTooltip({ text }: { text: string }) {
 // ── Main tour ─────────────────────────────────────────────────
 export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
   const router = useRouter()
+  const t      = useT()
+  const lang   = useLang()
+  const isAr   = lang === 'ar'
+  const TOUR_STEPS_T = [
+    { id: 'tour-sidebar',         title: t('tour.step1_title'), body: t('tour.step1_body') },
+    { id: 'tour-focus-hero',      title: t('tour.step2_title'), body: t('tour.step2_body') },
+    { id: 'tour-dim-grid',        title: t('tour.step3_title'), body: t('tour.step3_body') },
+    { id: 'tour-assessment-card', title: t('tour.step4_title'), body: t('tour.step4_body') },
+    { id: 'tour-ai-card',         title: t('tour.step5_title'), body: t('tour.step5_body') },
+    { id: 'tour-digest-card',     title: t('tour.step6_title'), body: t('tour.step6_body') },
+    { id: 'tour-done',            title: t('tour.step7_title'), body: t('tour.step7_body') },
+  ]
   const [step, setStep]       = useState(0)
   const [active, setActive]   = useState(false)
   const [rect, setRect]       = useState<DOMRect | null>(null)
@@ -115,7 +130,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
 
   // Measure element on step change
   const measure = useCallback(() => {
-    const el = document.getElementById(TOUR_STEPS[step]?.id ?? '')
+     const el = document.getElementById(TOUR_STEPS_T[step]?.id ?? '')
     if (!el) {
       setRect({
         top: window.innerHeight / 2 - 120,
@@ -191,7 +206,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
 
   const PAD    = 6
   const CARD_W = 300
-  const isLast = step === TOUR_STEPS.length - 1
+  const isLast = step === TOUR_STEPS_T.length - 1
 
   let cardTop = 0, cardLeft = 0
   if (rect) {
@@ -227,25 +242,26 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
             width: '100%',
             fontFamily: 'Inter, -apple-system, sans-serif',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            textAlign: 'center'
+            textAlign: 'center',
+            direction: isAr ? 'rtl' : 'ltr',
           }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-              System Initialized Successfully
+           <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              {t('tour.welcome_badge')}
             </span>
             <h2 style={{ fontSize: 22, fontWeight: 600, color: '#F1F5F9', margin: '0 0 12px', letterSpacing: '-0.025em' }}>
-              Welcome to your Elvanis Workspace
+              {t('tour.welcome_title')}
             </h2>
             <p style={{ fontSize: 14, color: '#94A3B8', margin: '0 0 28px', lineHeight: 1.6 }}>
-              Your workspace data profile has populated. To navigate your business metrics, active signals, and AI roadmap smoothly, take a brief platform overview.
+              {t('tour.welcome_sub')}
             </p>
 
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', alignItems: 'center' }}>
-              <button
+            <button
                 type="button"
                 onClick={doSkip}
                 style={{ background: 'none', border: 'none', color: '#64748B', fontSize: 14, fontWeight: 500, cursor: 'pointer', padding: '10px 16px' }}
               >
-                Skip Overview
+                {t('tour.skip_overview')}
               </button>
               <button
                 type="button"
@@ -265,7 +281,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
                 onMouseOver={(e) => e.currentTarget.style.background = '#1D4ED8'}
                 onMouseOut={(e) => e.currentTarget.style.background = '#2563EB'}
               >
-                Start Workspace Tour →
+                {t('tour.start_tour')}
               </button>
             </div>
           </div>
@@ -299,18 +315,18 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
                   style={{ position: 'fixed', top: isLast ? '50%' : cardTop, left: isLast ? '50%' : cardLeft, transform: isLast ? 'translate(-50%, -50%)' : 'none', width: CARD_W, zIndex: 10002, background: '#0F172A', borderRadius: 14, border: '1px solid #334155', padding: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.8)', fontFamily: 'Inter, -apple-system, sans-serif', animation: 'tourIn 0.22s ease' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{step + 1} / {TOUR_STEPS.length}</span>
+                     <span style={{ fontSize: 10, fontWeight: 700, color: '#3B82F6', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{step + 1} / {TOUR_STEPS_T.length}</span>
                     <button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 16, padding: 0, lineHeight: 1 }}>✕</button>
                   </div>
                   <div style={{ height: 2, background: '#1E293B', borderRadius: 99, marginBottom: 14 }}>
                     <div style={{ height: 2, background: '#3B82F6', borderRadius: 99, width: `${((step+1)/TOUR_STEPS.length)*100}%`, transition: 'width 0.3s ease' }} />
                   </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{TOUR_STEPS[step].title}</h3>
-                  <p  style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.65, margin: '0 0 18px' }}>{TOUR_STEPS[step].body}</p>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{TOUR_STEPS_T[step].title}</h3>
+                  <p  style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.65, margin: '0 0 18px', textAlign: isAr ? 'right' : 'left' }}>{TOUR_STEPS_T[step].body}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-<button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#94A3B8', padding: 0, fontFamily: 'inherit' }}>Skip tour</button>
+                  <button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#94A3B8', padding: 0, fontFamily: 'inherit' }}>{t('tour.skip_tour')}</button>
                     <button onClick={doNext} style={{ padding: '9px 20px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                      {isLast ? "Got it, let's go →" : 'Next →'}
+                      {isLast ? t('tour.got_it') : t('tour.next')}
                     </button>
                   </div>
                 </div>
@@ -319,12 +335,12 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
           )}
 
           {/* ── Persistent Floating Help Widget ── */}
-          <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999 }}>
+          <div style={{ position: 'fixed', bottom: 28, [isAr ? 'left' : 'right']: 28, zIndex: 9999 }}>
             {helpOpen && (
-              <div style={{ position: 'absolute', bottom: 56, right: 0, background: '#0F172A', borderRadius: 12, border: '1px solid #1E293B', padding: '18px', width: 220, boxShadow: '0 8px 32px rgba(0,0,0,0.4)', fontFamily: 'Inter, sans-serif' }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>Need help?</p>
-                <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.65 }}>Restart the tour to see what each section does.</p>
-                <button onClick={doRestart} style={{ width: '100%', padding: '9px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Restart tour →</button>
+               <div style={{ position: 'absolute', bottom: 56, [isAr ? 'left' : 'right']: 0, background: '#0F172A', borderRadius: 12, border: '1px solid #1E293B', padding: '18px', width: 220, boxShadow: '0 8px 32px rgba(0,0,0,0.4)', fontFamily: 'Inter, sans-serif', direction: isAr ? 'rtl' : 'ltr', textAlign: isAr ? 'right' : 'left' }}>
+                 <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{t('tour.help_title')}</p>
+                <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.65 }}>{t('tour.help_sub')}</p>
+                <button onClick={doRestart} style={{ width: '100%', padding: '9px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{t('tour.restart')}</button>
               </div>
             )}
             <button
