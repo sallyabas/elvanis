@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-
+import { useT, useLang } from '@/app/context/LanguageContext'
 // ── FAQ DATA ──────────────────────────────────────────────────
 // To add a new section: add a new object to this array
 // To add a new article: add to the articles array inside any section
@@ -114,6 +114,9 @@ const FAQ = [
 
 // ── Help Panel ────────────────────────────────────────────────
 export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
+  const t    = useT()
+  const lang = useLang()
+  const isAr = lang === 'ar'
   const [open,       setOpen]       = useState(false)
   const [search,     setSearch]     = useState('')
   const [expanded,   setExpanded]   = useState<string | null>(null)
@@ -177,6 +180,7 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
           transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
           display: 'flex', flexDirection: 'column',
           fontFamily: 'Inter, -apple-system, sans-serif',
+          direction: isAr ? 'rtl' : 'ltr',
           overflowY: 'auto',
         }}
       >
@@ -184,8 +188,8 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
         <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #F1F5F9', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 2px' }}>Help & Support</h2>
-              <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>Search articles or browse by topic</p>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 2px' }}>{t('help.title')}</h2>
+              <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>{t('help.subtitle')}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -200,7 +204,7 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#94A3B8' }}>🔍</span>
             <input
               type="text"
-              placeholder="Search articles..."
+              placeholder={t('help.search_placeholder')}
               value={search}
               onChange={e => { setSearch(e.target.value); setExpanded(null) }}
               style={{
@@ -221,8 +225,8 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <p style={{ fontSize: 14, color: '#64748B', marginBottom: 8 }}>No articles found for "{search}"</p>
-              <button onClick={() => setSearch('')} style={{ fontSize: 13, color: '#2563EB', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Clear search</button>
+             <p style={{ fontSize: 14, color: '#64748B', marginBottom: 8 }}>{t('help.no_results')} "{search}"</p>
+              <button onClick={() => setSearch('')} style={{ fontSize: 13, color: '#2563EB', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>{t('help.clear_search')}</button>
             </div>
           ) : (
             filtered.map(section => (
@@ -285,7 +289,7 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
             onMouseEnter={e => { e.currentTarget.style.background = '#EFF6FF'; e.currentTarget.style.borderColor = '#BFDBFE' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.borderColor = '#E2E8F0' }}
           >
-            🎯 Take the dashboard tour again
+           🎯 {t('help.restart_tour')}
           </button>
 
           {/* HubSpot chat */}
@@ -305,7 +309,7 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}
           >
-            💬 Chat with us
+           💬 {t('help.chat')}
           </button>
         </div>
       </div>
