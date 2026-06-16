@@ -172,11 +172,11 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
       <div
         ref={panelRef}
         style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0,
+          position: 'fixed', top: 0, [isAr ? 'left' : 'right']: 0, bottom: 0,
           width: 420, background: '#fff',
-          boxShadow: '-8px 0 32px rgba(15,23,42,0.12)',
+          boxShadow: isAr ? '8px 0 32px rgba(15,23,42,0.12)' : '-8px 0 32px rgba(15,23,42,0.12)',
           zIndex: 401,
-          transform: open ? 'translateX(0)' : 'translateX(100%)',
+          transform: open ? 'translateX(0)' : isAr ? 'translateX(-100%)' : 'translateX(100%)',
           transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
           display: 'flex', flexDirection: 'column',
           fontFamily: 'Inter, -apple-system, sans-serif',
@@ -201,14 +201,14 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
 
           {/* Search */}
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#94A3B8' }}>🔍</span>
+          <span style={{ position: 'absolute', [isAr ? 'right' : 'left']: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#94A3B8' }}>🔍</span>
             <input
               type="text"
               placeholder={t('help.search_placeholder')}
               value={search}
               onChange={e => { setSearch(e.target.value); setExpanded(null) }}
               style={{
-                width: '100%', padding: '10px 12px 10px 36px',
+                width: '100%', padding: isAr ? '10px 36px 10px 12px' : '10px 12px 10px 36px',
                 border: '1.5px solid #E2E8F0', borderRadius: 10,
                 fontSize: 14, color: '#0F172A', outline: 'none',
                 boxSizing: 'border-box' as const,
@@ -253,7 +253,7 @@ export function HelpPanel({ onRestartTour }: { onRestartTour: () => void }) {
                             width: '100%', padding: '12px 14px',
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
                             background: 'none', border: 'none', cursor: 'pointer',
-                            fontFamily: 'inherit', textAlign: 'left',
+                            fontFamily: 'inherit', textAlign: isAr ? 'right' : 'left',
                           }}
                         >
                           <span style={{ fontSize: 14, fontWeight: 500, color: '#0F172A', lineHeight: 1.4 }}>{article.q}</span>
