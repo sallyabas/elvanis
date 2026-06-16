@@ -67,8 +67,7 @@ export default function HeaderUser({ name, businessName, logoUrl }: Props) {
           </a>
           
             <a
-          href="/api/signout"
-          onClick={() => localStorage.removeItem('preferred_lang')}
+           href="/api/signout"
           style={{ display: 'block', padding: '12px 16px', fontSize: 14, color: '#DC2626', textDecoration: 'none', fontWeight: 500, borderTop: '1px solid #F3F4F6' }}
           onMouseEnter={e => (e.currentTarget.style.background = '#FEF2F2')}
           onMouseLeave={e => (e.currentTarget.style.background = 'none')}
