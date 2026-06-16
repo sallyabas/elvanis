@@ -82,8 +82,11 @@ function ServiceRequestPageContent() {
   const goalTarget   = searchParams.get('target')  ?? ''
   const goalUnit     = searchParams.get('unit')    ?? ''
   const hasGoalContext = !!goalSignal
-  const goalLabel    = goalSignal ? (SIGNAL_GOAL_MAP[goalSignal]?.label ?? goalSignal.replace(/_/g, ' ')) : ''
-
+  const goalLabel = goalSignal
+    ? (lang === 'ar'
+        ? (SIGNAL_GOAL_MAP[goalSignal]?.label_ar ?? SIGNAL_GOAL_MAP[goalSignal]?.label ?? goalSignal.replace(/_/g, ' '))
+        : (SIGNAL_GOAL_MAP[goalSignal]?.label ?? goalSignal.replace(/_/g, ' ')))
+    : ''
   const [selectedService, setSelectedService] = useState(defaultType)
   const [note, setNote]                       = useState('')
   const [submitted, setSubmitted]             = useState(false)
