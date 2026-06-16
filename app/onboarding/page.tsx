@@ -467,18 +467,19 @@ export default function OnboardingPage() {
           <h2 style={{ fontSize: 26, fontWeight: 900, color: '#111827', marginBottom: 12, letterSpacing: '-0.5px' }}>{t('onboarding.welcome_title')}</h2>
           <p style={{ fontSize: 16, color: '#6B7280', lineHeight: 1.7, marginBottom: 36 }}>{t('onboarding.welcome_sub')}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40, textAlign: isAr ? 'right' : 'left' }}>
-            {[
+          {[
               { icon: '🔍', titleKey: 'onboarding.feat1_title' as const, descKey: 'onboarding.feat1_desc' as const },
               { icon: '⚡', titleKey: 'onboarding.feat2_title' as const, descKey: 'onboarding.feat2_desc' as const },
               { icon: '📈', titleKey: 'onboarding.feat3_title' as const, descKey: 'onboarding.feat3_desc' as const },
               { icon: '✨', titleKey: 'onboarding.feat4_title' as const, descKey: 'onboarding.feat4_desc' as const },
             ].map(item => (
-              <div key={item.titleKey} style={{ display: 'flex', gap: 14, padding: '14px 16px', background: '#F9FAFB', borderRadius: 12 }}>
+              <div key={item.titleKey} style={{ display: 'flex', gap: 14, padding: '14px 16px', background: '#F9FAFB', borderRadius: 12, borderLeft: isAr ? 'none' : '3px solid #10B981', borderRight: isAr ? '3px solid #10B981' : 'none' }}>
                 <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
-                <div>
+                <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{t(item.titleKey)}</p>
                   <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>{t(item.descKey)}</p>
                 </div>
+                <span style={{ fontSize: 14, color: '#10B981', fontWeight: 700, flexShrink: 0, alignSelf: 'center' }}>✓</span>
               </div>
             ))}
           </div>
