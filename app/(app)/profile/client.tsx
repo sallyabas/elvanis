@@ -355,7 +355,7 @@ export default function ProfileClient({
                         </div>
                         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 12, color: '#6B7280' }}>{formatShortDate(payment.created_at)}</span>
-                          {payment.period_start && payment.period_end && <span style={{ fontSize: 12, color: '#94A3B8' }}>{formatShortDate(payment.period_start)} → {formatShortDate(payment.period_end)}</span>}
+                          {payment.period_start && payment.period_end && <span style={{ fontSize: 12, color: '#94A3B8' }}>{formatShortDate(payment.period_start)} {lang === 'ar' ? '←' : '→'} {formatShortDate(payment.period_end)}</span>}
                           {payment.reference && <span style={{ fontSize: 11, color: '#94A3B8', fontFamily: 'monospace' }}>{payment.reference}</span>}
                           {payment.cancelled_at && <span style={{ fontSize: 11, color: '#DC2626' }}>{t('profile.cancelled_on')} {formatShortDate(payment.cancelled_at)}</span>}
                         </div>
