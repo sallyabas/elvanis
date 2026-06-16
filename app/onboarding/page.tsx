@@ -203,7 +203,7 @@ export default function OnboardingPage() {
                 { icon: '⭐', labelKey: 'onboarding.tool_trustpilot' as const },
                 { icon: '📁', labelKey: 'onboarding.tool_csv' as const },
               ].map(item => (
-                <div key={item.labelKey} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#F9FAFB', borderRadius: 10, textAlign: isAr ? 'right' : 'left' }}>
+                <div key={item.labelKey} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#F0F7FF', borderRadius: 10, textAlign: isAr ? 'right' : 'left', borderLeft: isAr ? 'none' : '3px solid #2563EB', borderRight: isAr ? '3px solid #2563EB' : 'none' }}>
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
                   <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{t(item.labelKey)}</span>
                 </div>
@@ -241,13 +241,13 @@ export default function OnboardingPage() {
                 { icon: '📈', titleKey: 'onboarding.assess_item3_title' as const, descKey: 'onboarding.assess_item3_desc' as const },
                 { icon: '✨', titleKey: 'onboarding.assess_item4_title' as const, descKey: 'onboarding.assess_item4_desc' as const },
               ].map(item => (
-                <div key={item.titleKey} style={{ display: 'flex', gap: 14, padding: '14px 16px', background: '#F9FAFB', borderRadius: 12 }}>
-                  <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{t(item.titleKey)}</p>
-                    <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>{t(item.descKey)}</p>
-                  </div>
+                <div key={item.titleKey} style={{ display: 'flex', gap: 14, padding: '14px 16px', background: '#F0F7FF', borderRadius: 12, borderLeft: isAr ? 'none' : '3px solid #2563EB', borderRight: isAr ? '3px solid #2563EB' : 'none' }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{t(item.titleKey)}</p>
+                  <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>{t(item.descKey)}</p>
                 </div>
+              </div>
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
