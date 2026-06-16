@@ -8,44 +8,6 @@ import { dismissGuide } from './actions'
 import { useT, useLang } from '@/app/context/LanguageContext'
 
 
-const TOUR_STEPS = [
-  {
-    id:    'tour-sidebar',
-    title: 'Your OS Command Centre',
-    body:  'Intelligence — diagnose your business. Execution — act on what matters. Advisory — get expert help when you need it. Everything you need to run your business OS.',
-  },
-  {
-    id:    'tour-focus-hero',
-    title: 'Your Primary Strategic Lever',
-    body:  'This is the dimension that matters most right now — based on your focus metric and business stage. Elvanis recalculates this automatically as your data changes.',
-  },
-  {
-    id:    'tour-dim-grid',
-    title: 'All 6 Dimensions',
-    body:  'Revenue, Customer, Growth, Execution, PMF, Strategy. Click any card to drill into its signals. Each dimension has a live score and status driven by your connected tools.',
-  },
-  {
-    id:    'tour-assessment-card',
-    title: 'Assessment Score',
-    body:  'Your baseline businessis across 6 dimensions. Takes 10 minutes. No tools needed. Retake it after major business changes.',
-  },
-  {
-    id:    'tour-ai-card',
-    title: 'AI Readiness',
-    body:  'Where your biggest automation opportunities lie right now. Based on your active signals and business profile. Higher score means more hours or revenue AI could recover.',
-  },
-  {
-    id:    'tour-digest-card',
-    title: 'Action Digest',
-    body:  'Your AI-generated 90-day action plan — built from every signal across all your tools. Updated each scan cycle. Navigator plan only.',
-  },
-  {
-    id:    'tour-done',
-    title: 'Ready to start',
-    body:  'Select a dimension to explore your signals, or take your assessment to generate your first diagnosis. Need the full picture? Check Overview in the sidebar. Your business OS is ready.',
-  },
-]
-
 // ── Section tooltip ───────────────────────────────────────────
 export function SectionTooltip({ text }: { text: string }) {
   const [open, setOpen] = useState(false)
@@ -182,7 +144,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
   }
 
   async function doNext() {
-    if (step < TOUR_STEPS.length - 1) {
+    if (step < TOUR_STEPS_T.length - 1) {
       setStep(s => s + 1)
     } else {
       await doSkip()
@@ -319,7 +281,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
                     <button onClick={doSkip} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 16, padding: 0, lineHeight: 1 }}>✕</button>
                   </div>
                   <div style={{ height: 2, background: '#1E293B', borderRadius: 99, marginBottom: 14 }}>
-                    <div style={{ height: 2, background: '#3B82F6', borderRadius: 99, width: `${((step+1)/TOUR_STEPS.length)*100}%`, transition: 'width 0.3s ease' }} />
+                   <div style={{ height: 2, background: '#3B82F6', borderRadius: 99, width: `${((step+1)/TOUR_STEPS_T.length)*100}%`, transition: 'width 0.3s ease' }} />
                   </div>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{TOUR_STEPS_T[step].title}</h3>
                   <p  style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.65, margin: '0 0 18px', textAlign: isAr ? 'right' : 'left' }}>{TOUR_STEPS_T[step].body}</p>
@@ -346,7 +308,7 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
             <button
               onClick={() => setHelpOpen(o => !o)}
               style={{ width: 44, height: 44, borderRadius: '50%', background: helpOpen ? '#1E293B' : '#0F172A', border: '2px solid #1E293B', color: helpOpen ? '#3B82F6' : '#94A3B8', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', transition: 'all 0.15s' }}
-              title="Help"
+              title={t('nav.help')}
             >
               ?
             </button>
