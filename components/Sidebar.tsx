@@ -247,7 +247,7 @@ export default function Sidebar({
           <span style={{ fontSize: 13, color: '#4B5563' }}>⚙️</span>
         </Link>
 
-        <a href="/api/signout" title="Sign out" style={{
+        <a href="/api/signout" title={t('nav.signout')} style={{
           display:     'flex',
           alignItems:  'center',
           gap:         8,

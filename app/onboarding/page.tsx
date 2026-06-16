@@ -8,13 +8,6 @@ import { STAGES, INDUSTRIES, MARKETS, FOCUS_OPTIONS } from '@/lib/profile-option
 
 type Step = 'welcome' | 'profile' | 'focus' | 'guidance'
 
-const selectStyle = {
-  width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB',
-  borderRadius: 10, fontSize: 14, color: '#111827', outline: 'none',
-  background: '#fff', boxSizing: 'border-box' as const, cursor: 'pointer',
-  appearance: 'none' as const, transition: 'border-color 0.15s',
-}
-
 function normaliseBrandUrl(raw: string): string {
   if (!raw.trim()) return ''
   const t = raw.trim()
@@ -40,43 +33,34 @@ export default function OnboardingPage() {
   const [loading, setLoading]                   = useState(false)
   const [resuming, setResuming]                 = useState(true)
 
+  const industryRef = useRef<HTMLDivElement>(null)
+  const marketRef   = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function resumeProgress() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setResuming(false); return }
-
       const { data: founder } = await supabase
         .from('founders')
         .select('onboarding_step, founder_stage, industry, industry_other, market, brand_url, focus_metric')
         .eq('user_id', user.id)
         .maybeSingle()
-
       if (!founder) { setResuming(false); return }
-
-      // Restore saved values
       if (founder.founder_stage)   setSelectedStage(founder.founder_stage)
       if (founder.industry)        setSelectedIndustry(founder.industry)
       if (founder.industry_other)  setIndustryOther(founder.industry_other)
       if (founder.market)          setSelectedMarket(founder.market)
       if (founder.brand_url)       setBrandUrl(founder.brand_url)
       if (founder.focus_metric)    setSelectedFocus(founder.focus_metric)
-
-      // Resume from correct step
       const savedStep = founder.onboarding_step ?? 0
       if (savedStep >= 2) setStep('guidance')
       else if (savedStep >= 1) setStep('focus')
       else if (savedStep >= 0 && founder.founder_stage) setStep('profile')
-      // else stay on welcome
-
       setResuming(false)
     }
     resumeProgress()
   }, [])
-
-  const industryRef = useRef<HTMLDivElement>(null)
-  const marketRef   = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -91,56 +75,47 @@ export default function OnboardingPage() {
   const step1Valid = !!selectedStage && !!selectedIndustry && !!selectedMarket
     && (selectedIndustry !== 'Other' || industryOther.trim().length > 0)
 
-  // ── Step 1: Save profile data and advance to focus ────────────
   async function handleStep1Continue() {
     if (!step1Valid) return
     setLoading(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
-
     await supabase.from('founders').update({
-      founder_stage:  selectedStage ?? 'early_stage',
-      industry:       selectedIndustry || null,
-      industry_other: selectedIndustry === 'Other' ? industryOther.trim() || null : null,
-      market:         selectedMarket || null,
-      brand_url:      noWebsite ? null : normaliseBrandUrl(brandUrl) || null,
+      founder_stage:   selectedStage ?? 'early_stage',
+      industry:        selectedIndustry || null,
+      industry_other:  selectedIndustry === 'Other' ? industryOther.trim() || null : null,
+      market:          selectedMarket || null,
+      brand_url:       noWebsite ? null : normaliseBrandUrl(brandUrl) || null,
       onboarding_step: 1,
     }).eq('user_id', user.id)
-
     setLoading(false)
     setStep('focus')
   }
 
-  // ── Step 2: Save focus and advance to guidance ────────────────
   async function handleStep2Continue() {
     if (!selectedFocus) return
     setLoading(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
-
     await supabase.from('founders').update({
       focus_metric:    selectedFocus,
       onboarding_step: 2,
     }).eq('user_id', user.id)
-
     setLoading(false)
     setStep('guidance')
   }
 
-  // ── Step 3: Complete onboarding and route ─────────────────────
   async function completeOnboarding(destination: string) {
     setLoading(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
-
     await supabase.from('founders').update({
       onboarding_completed: true,
       onboarding_step:      3,
     }).eq('user_id', user.id)
-
     router.push(destination)
   }
 
@@ -163,7 +138,45 @@ export default function OnboardingPage() {
     cursor: loading ? 'not-allowed' : 'pointer',
   })
 
-  // Loading while resuming
+  const dropdownItem = (selected: boolean) => ({
+    width: '100%', padding: '10px 16px',
+    background: selected ? '#F0F7FF' : 'transparent',
+    border: 'none', cursor: 'pointer', fontSize: 14,
+    color: selected ? '#2563EB' : '#111827',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    fontFamily: 'inherit',
+    textAlign: (isAr ? 'right' : 'left') as 'right' | 'left',
+    fontWeight: selected ? 600 : 400,
+  })
+
+  const chevron = (open: boolean) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+      style={{ flexShrink: 0, marginLeft: 8, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: '#9CA3AF' }}>
+      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+
+  const checkmark = (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ pointerEvents: 'none', flexShrink: 0 }}>
+      <path d="M3 8l4 4 6-6" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+
+  const dropdownPanel = {
+    position: 'absolute' as const, top: 'calc(100% + 6px)', left: 0, right: 0,
+    background: '#fff', borderRadius: 14,
+    boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)',
+    zIndex: 100, maxHeight: 260, overflowY: 'auto' as const, padding: '6px 0',
+  }
+
+  const triggerBtn = (open: boolean, hasValue: boolean) => ({
+    width: '100%', padding: '12px 16px', border: '1.5px solid #E5E7EB', borderRadius: 12,
+    fontSize: 14, color: hasValue ? '#111827' : '#9CA3AF', background: '#fff',
+    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    fontFamily: 'inherit', boxSizing: 'border-box' as const,
+    boxShadow: open ? '0 0 0 3px #DBEAFE' : 'none', transition: 'box-shadow 0.15s',
+  })
+
   if (resuming) {
     return (
       <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
@@ -172,17 +185,15 @@ export default function OnboardingPage() {
     )
   }
 
-  // ── STEP 3A: Connect guidance — product + customers ───────────
+  // ── STEP 3A: Guidance — product + customers ───────────────────
   if (step === 'guidance' && stageHasData) {
     return (
       <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-      <div style={{ maxWidth: 560, width: '100%' }}>
-        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>🔌</div>
+        <div style={{ maxWidth: 560, width: '100%' }}>
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 20 }}>🔌</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>{t('onboarding.guidance_product_title')}</h2>
-            <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>
-              {t('onboarding.guidance_product_sub')}
-            </p>
+            <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>{t('onboarding.guidance_product_sub')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 { icon: '🛍️', labelKey: 'onboarding.tool_shopify' as const },
@@ -201,7 +212,7 @@ export default function OnboardingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button onClick={() => completeOnboarding('/connect')}    disabled={loading} style={btnPrimary()}>{t('onboarding.connect_tools_cta')}</button>
               <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnSecondary()}>{t('onboarding.take_assessment_first')}</button>
-              <button onClick={() => completeOnboarding('/focus')}  disabled={loading} style={btnGhost()}>{t('onboarding.explore_dashboard')}</button>
+              <button onClick={() => completeOnboarding('/')}           disabled={loading} style={btnGhost()}>{t('onboarding.explore_dashboard')}</button>
             </div>
           </div>
         </div>
@@ -209,18 +220,16 @@ export default function OnboardingPage() {
     )
   }
 
-  // ── STEP 3B: Assessment guidance — early stage ────────────────
+  // ── STEP 3B: Guidance — early stage ──────────────────────────
   if (step === 'guidance' && !stageHasData) {
     return (
       <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-      <div style={{ maxWidth: 560, width: '100%' }}>
-        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>🎯</div>
+        <div style={{ maxWidth: 560, width: '100%' }}>
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '40px 36px', textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 20 }}>🎯</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 8 }}>{t('onboarding.guidance_assess_title')}</h2>
-            <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>
-              {t('onboarding.guidance_assess_sub')}
-            </p>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32, textAlign: isAr ? 'right' : 'left' }}>
+            <p style={{ fontSize: 15, color: '#6B7280', marginBottom: 28, lineHeight: 1.6 }}>{t('onboarding.guidance_assess_sub')}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32, textAlign: isAr ? 'right' : 'left' }}>
               {[
                 { icon: '🔍', titleKey: 'onboarding.assess_item1_title' as const, descKey: 'onboarding.assess_item1_desc' as const },
                 { icon: '⚡', titleKey: 'onboarding.assess_item2_title' as const, descKey: 'onboarding.assess_item2_desc' as const },
@@ -238,7 +247,7 @@ export default function OnboardingPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnPrimary()}>{t('onboarding.start_assessment_cta')}</button>
-              <button onClick={() => completeOnboarding('/focus')}  disabled={loading} style={btnSecondary()}>{t('onboarding.explore_dashboard')}</button>
+              <button onClick={() => completeOnboarding('/')}           disabled={loading} style={btnSecondary()}>{t('onboarding.explore_dashboard')}</button>
             </div>
           </div>
         </div>
@@ -250,10 +259,10 @@ export default function OnboardingPage() {
   if (step === 'focus') {
     return (
       <main dir={isAr ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', padding: 24 }}>
-      <div style={{ maxWidth: 560, width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <span style={{ fontSize: 26, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginTop: 24, marginBottom: 8 }}>{t('onboarding.focus_title')}</h1>
+        <div style={{ maxWidth: 560, width: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <span style={{ fontSize: 26, fontWeight: 800, color: '#2563EB' }}>Elvanis</span>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginTop: 24, marginBottom: 8 }}>{t('onboarding.focus_title')}</h1>
             <p style={{ fontSize: 15, color: '#6B7280', margin: 0 }}>{t('onboarding.focus_sub')}</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
@@ -262,9 +271,11 @@ export default function OnboardingPage() {
                 key={option.id}
                 onClick={() => setSelectedFocus(option.id)}
                 style={{
-                  padding: '18px 22px', border: `2px solid ${selectedFocus === option.id ? '#2563EB' : '#E5E7EB'}`,
+                  padding: '18px 22px',
+                  border: `2px solid ${selectedFocus === option.id ? '#2563EB' : '#E5E7EB'}`,
                   borderRadius: 14, background: selectedFocus === option.id ? '#EFF6FF' : '#fff',
-                  textAlign: isAr ? 'right' : 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
+                  textAlign: isAr ? 'right' : 'left', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 16,
                 }}
               >
                 <span style={{ fontSize: 28, flexShrink: 0 }}>{option.icon}</span>
@@ -272,7 +283,13 @@ export default function OnboardingPage() {
                   <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{t(option.labelKey)}</p>
                   <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{t(option.descKey)}</p>
                 </div>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: selectedFocus === option.id ? '#2563EB' : '#fff', border: selectedFocus === option.id ? 'none' : '2px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, flexShrink: 0 }}>
+                <span style={{
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: selectedFocus === option.id ? '#2563EB' : '#fff',
+                  border: selectedFocus === option.id ? 'none' : '2px solid #D1D5DB',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: 12, flexShrink: 0,
+                }}>
                   {selectedFocus === option.id ? '✓' : ''}
                 </span>
               </button>
@@ -306,9 +323,11 @@ export default function OnboardingPage() {
                   key={stage.id}
                   onClick={() => setSelectedStage(stage.id)}
                   style={{
-                    padding: '16px 20px', border: `2px solid ${selectedStage === stage.id ? '#2563EB' : '#E5E7EB'}`,
+                    padding: '16px 20px',
+                    border: `2px solid ${selectedStage === stage.id ? '#2563EB' : '#E5E7EB'}`,
                     borderRadius: 14, background: selectedStage === stage.id ? '#EFF6FF' : '#fff',
-                     textAlign: isAr ? 'right' : 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
+                    textAlign: isAr ? 'right' : 'left', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 14,
                   }}
                 >
                   <span style={{ fontSize: 26, flexShrink: 0 }}>{stage.icon}</span>
@@ -316,7 +335,13 @@ export default function OnboardingPage() {
                     <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{t(stage.labelKey)}</p>
                     <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>{t(stage.descKey)}</p>
                   </div>
-                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: selectedStage === stage.id ? '#2563EB' : '#fff', border: selectedStage === stage.id ? 'none' : '2px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, flexShrink: 0 }}>
+                  <span style={{
+                    width: 20, height: 20, borderRadius: '50%',
+                    background: selectedStage === stage.id ? '#2563EB' : '#fff',
+                    border: selectedStage === stage.id ? 'none' : '2px solid #D1D5DB',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontSize: 11, flexShrink: 0,
+                  }}>
                     {selectedStage === stage.id ? '✓' : ''}
                   </span>
                 </button>
@@ -326,28 +351,29 @@ export default function OnboardingPage() {
 
           {/* Industry + Market */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+
             {/* Industry */}
             <div ref={industryRef} style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.industry')}</label>
-              <button
-                type="button"
-                onClick={() => { setIndustryOpen(o => !o); setMarketOpen(false) }}
-                style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${industryOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedIndustry ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
-              >
-                <span>{selectedIndustry ? t(INDUSTRIES.find(i => i.value === selectedIndustry)?.key ?? 'profile.select_industry' as Parameters<typeof t>[0]) : t('profile.select_industry')}</span>
-                <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 8 }}>{industryOpen ? '▲' : '▼'}</span>
+              <button type="button" onClick={() => { setIndustryOpen(o => !o); setMarketOpen(false) }} style={triggerBtn(industryOpen, !!selectedIndustry)}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedIndustry ? t((INDUSTRIES.find(i => i.value === selectedIndustry)?.key ?? 'profile.select_industry') as Parameters<typeof t>[0]) : t('profile.select_industry')}
+                </span>
+                {chevron(industryOpen)}
               </button>
               {industryOpen && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1.5px solid #2563EB', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, maxHeight: 240, overflowY: 'auto', marginTop: 4 }}>
+                <div style={dropdownPanel}>
                   {INDUSTRIES.map(i => (
                     <button
                       key={i.value}
                       type="button"
                       onClick={() => { setSelectedIndustry(i.value); if (i.value !== 'Other') setIndustryOther(''); setIndustryOpen(false) }}
-                      style={{ width: '100%', padding: '10px 14px', background: selectedIndustry === i.value ? '#EFF6FF' : 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, color: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', textAlign: isAr ? 'right' : 'left' }}
+                      style={dropdownItem(selectedIndustry === i.value)}
+                      onMouseEnter={e => { if (selectedIndustry !== i.value) (e.currentTarget as HTMLButtonElement).style.background = '#F9FAFB' }}
+                      onMouseLeave={e => { if (selectedIndustry !== i.value) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <span>{t(i.key)}</span>
-                      {selectedIndustry === i.value && <span style={{ color: '#2563EB', fontSize: 12 }}>✓</span>}
+                      {selectedIndustry === i.value && checkmark}
                     </button>
                   ))}
                 </div>
@@ -357,32 +383,34 @@ export default function OnboardingPage() {
             {/* Market */}
             <div ref={marketRef} style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.market')}</label>
-              <button
-                type="button"
-                onClick={() => { setMarketOpen(o => !o); setIndustryOpen(false) }}
-                style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${marketOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedMarket ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
-              >
-                <span>{selectedMarket ? t(MARKETS.find(m => m.value === selectedMarket)?.key ?? 'profile.select_market' as Parameters<typeof t>[0]) : t('profile.select_market')}</span>
-                <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 8 }}>{marketOpen ? '▲' : '▼'}</span>
+              <button type="button" onClick={() => { setMarketOpen(o => !o); setIndustryOpen(false) }} style={triggerBtn(marketOpen, !!selectedMarket)}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedMarket ? t((MARKETS.find(m => m.value === selectedMarket)?.key ?? 'profile.select_market') as Parameters<typeof t>[0]) : t('profile.select_market')}
+                </span>
+                {chevron(marketOpen)}
               </button>
               {marketOpen && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1.5px solid #2563EB', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, maxHeight: 240, overflowY: 'auto', marginTop: 4 }}>
+                <div style={dropdownPanel}>
                   {MARKETS.map(m => (
                     <button
                       key={m.value}
                       type="button"
                       onClick={() => { setSelectedMarket(m.value); setMarketOpen(false) }}
-                      style={{ width: '100%', padding: '10px 14px', background: selectedMarket === m.value ? '#EFF6FF' : 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, color: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', textAlign: isAr ? 'right' : 'left' }}
+                      style={dropdownItem(selectedMarket === m.value)}
+                      onMouseEnter={e => { if (selectedMarket !== m.value) (e.currentTarget as HTMLButtonElement).style.background = '#F9FAFB' }}
+                      onMouseLeave={e => { if (selectedMarket !== m.value) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <span>{t(m.key)}</span>
-                      {selectedMarket === m.value && <span style={{ color: '#2563EB', fontSize: 12 }}>✓</span>}
+                      {selectedMarket === m.value && checkmark}
                     </button>
                   ))}
                 </div>
               )}
             </div>
+
           </div>
 
+          {/* Industry Other */}
           {selectedIndustry === 'Other' && (
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.describe_industry')}</label>
@@ -427,9 +455,7 @@ export default function OnboardingPage() {
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', padding: '48px 40px', textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 20 }}>📊</div>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: '#111827', marginBottom: 12, letterSpacing: '-0.5px' }}>{t('onboarding.welcome_title')}</h2>
-          <p style={{ fontSize: 16, color: '#6B7280', lineHeight: 1.7, marginBottom: 36 }}>
-            {t('onboarding.welcome_sub')}
-          </p>
+          <p style={{ fontSize: 16, color: '#6B7280', lineHeight: 1.7, marginBottom: 36 }}>{t('onboarding.welcome_sub')}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40, textAlign: isAr ? 'right' : 'left' }}>
             {[
               { icon: '🔍', titleKey: 'onboarding.feat1_title' as const, descKey: 'onboarding.feat1_desc' as const },
@@ -446,10 +472,8 @@ export default function OnboardingPage() {
               </div>
             ))}
           </div>
-          <button
-            onClick={() => setStep('profile')}
-            style={{ width: '100%', padding: '16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}
-          >
+          <button onClick={() => setStep('profile')}
+            style={{ width: '100%', padding: '16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
             {t('onboarding.setup_profile_cta')}
           </button>
         </div>
