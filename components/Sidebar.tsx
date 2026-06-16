@@ -68,7 +68,7 @@ export default function Sidebar({
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  const tierLabel = subscriptionTier === 'navigator' ? 'Navigator' : 'Free'
+  const tierLabel = subscriptionTier === 'navigator' ? t('profile.tier_navigator') : t('profile.tier_free')
   const initials  = founderName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
 
   function openHelp() {
@@ -244,7 +244,7 @@ export default function Sidebar({
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {founderName ?? 'Founder'}
+            {founderName ?? t('common.founder_fallback')}
             </p>
             <p style={{ fontSize: 10, color: '#6B7280', margin: 0 }}>{tierLabel}</p>
           </div>

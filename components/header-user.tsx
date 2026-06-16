@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useT } from '@/app/context/LanguageContext'
 
 type Props = {
   name: string
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export default function HeaderUser({ name, businessName, logoUrl }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -40,7 +42,7 @@ export default function HeaderUser({ name, businessName, logoUrl }: Props) {
         </div>
         {/* Name */}
         <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>
-          {name || businessName || 'Account'}
+        {name || businessName || t('common.account_fallback')}
         </span>
         {/* Arrow */}
         <span style={{ fontSize: 10, color: '#9CA3AF', transform: open ? 'rotate(180deg)' : 'none', display: 'inline-block', transition: 'transform 0.15s' }}>▾</span>
@@ -51,7 +53,7 @@ export default function HeaderUser({ name, businessName, logoUrl }: Props) {
           {/* Business name header */}
           {businessName && (
             <div style={{ padding: '12px 16px', borderBottom: '1px solid #F3F4F6' }}>
-              <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 2px' }}>Signed in as</p>
+             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 2px' }}>{t('common.signed_in_as')}</p>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>{businessName}</p>
             </div>
           )}
@@ -61,7 +63,7 @@ export default function HeaderUser({ name, businessName, logoUrl }: Props) {
             onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}
           >
-            👤 View profile
+           👤 {t('common.view_profile')}
           </a>
           
             <a
@@ -70,7 +72,7 @@ export default function HeaderUser({ name, businessName, logoUrl }: Props) {
             onMouseEnter={e => (e.currentTarget.style.background = '#FEF2F2')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}
           >
-            → Sign out
+          {t('nav.signout')}
           </a>
         </div>
       )}

@@ -8,12 +8,6 @@ interface DimensionCardProps {
   onClick: () => void
 }
 
-function getScoreLabel(score: number): { label: string; color: string } {
-  if (score === -1) return { label: 'No data',        color: '#9CA3AF' }
-  if (score >= 70)  return { label: 'Healthy',         color: '#10B981' }
-  if (score >= 40)  return { label: 'Needs attention', color: '#F59E0B' }
-  return               { label: 'Critical',         color: '#EF4444' }
-}
 
 function getTrendArrow(trend: string | null): string {
   if (trend === 'improving') return '↑'
