@@ -210,7 +210,12 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button onClick={() => completeOnboarding('/connect')}    disabled={loading} style={btnPrimary()}>{t('onboarding.connect_tools_cta')}</button>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -10, [isAr ? 'left' : 'right']: 12, background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>
+                  ⭐ {t('onboarding.recommended')}
+                </span>
+                <button onClick={() => completeOnboarding('/connect')} disabled={loading} style={btnPrimary()}>{t('onboarding.connect_tools_cta')}</button>
+              </div>
               <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnSecondary()}>{t('onboarding.take_assessment_first')}</button>
               <button onClick={() => completeOnboarding('/')}           disabled={loading} style={btnGhost()}>{t('onboarding.explore_dashboard')}</button>
             </div>
@@ -246,8 +251,13 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnPrimary()}>{t('onboarding.start_assessment_cta')}</button>
-              <button onClick={() => completeOnboarding('/')}           disabled={loading} style={btnSecondary()}>{t('onboarding.explore_dashboard')}</button>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -10, [isAr ? 'left' : 'right']: 12, background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>
+                  ⭐ {t('onboarding.recommended')}
+                </span>
+                <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnPrimary()}>{t('onboarding.start_assessment_cta')}</button>
+              </div>
+              <button onClick={() => completeOnboarding('/')} disabled={loading} style={btnSecondary()}>{t('onboarding.explore_dashboard')}</button>
             </div>
           </div>
         </div>
