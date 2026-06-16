@@ -72,7 +72,6 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
   const [step, setStep]       = useState(0)
   const [active, setActive]   = useState(false)
   const [rect, setRect]       = useState<DOMRect | null>(null)
-  const [helpOpen, setHelpOpen] = useState(false)
   const [portalEl, setPortalEl] = useState<HTMLElement | null>(null)
   
   // Track welcome card layout overlay separate from active steps
@@ -158,11 +157,6 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
     setActive(true)
   }
 
-  function doRestart() {
-    hasDismissed.current = false
-    setHelpOpen(false)
-    startInteractiveTour()
-  }
 
   if (!portalEl) return null
 
@@ -296,23 +290,6 @@ export function DashboardTour({ guideDismissed }: { guideDismissed: boolean }) {
             </>
           )}
 
-          {/* ── Persistent Floating Help Widget ── */}
-          <div style={{ position: 'fixed', bottom: 28, [isAr ? 'left' : 'right']: 28, zIndex: 9999 }}>
-            {helpOpen && (
-               <div style={{ position: 'absolute', bottom: 56, [isAr ? 'left' : 'right']: 0, background: '#0F172A', borderRadius: 12, border: '1px solid #1E293B', padding: '18px', width: 220, boxShadow: '0 8px 32px rgba(0,0,0,0.4)', fontFamily: 'Inter, sans-serif', direction: isAr ? 'rtl' : 'ltr', textAlign: isAr ? 'right' : 'left' }}>
-                 <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', margin: '0 0 8px' }}>{t('tour.help_title')}</p>
-                <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.65 }}>{t('tour.help_sub')}</p>
-                <button onClick={doRestart} style={{ width: '100%', padding: '9px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{t('tour.restart')}</button>
-              </div>
-            )}
-            <button
-              onClick={() => setHelpOpen(o => !o)}
-              style={{ width: 44, height: 44, borderRadius: '50%', background: helpOpen ? '#1E293B' : '#0F172A', border: '2px solid #1E293B', color: helpOpen ? '#3B82F6' : '#94A3B8', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', transition: 'all 0.15s' }}
-              title={t('nav.help')}
-            >
-              ?
-            </button>
-          </div>
 
           <style>{`
             @keyframes tourIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
