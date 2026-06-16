@@ -69,8 +69,7 @@ export default function ConflictTrustButton({
       setIsChanging(false)
       router.refresh()
     } catch (err) {
-      console.error('Failed to save conflict preference:', err)
-      setError(err instanceof Error ? err.message : 'Failed to save — please try again')
+      setError(err instanceof Error ? err.message : t('signals.save_failed'))
     } finally {
       setSaving(false)
     }
@@ -82,7 +81,7 @@ export default function ConflictTrustButton({
   if (showGreen) {
     const chosenLabel = sources.find(s => s.source === effectiveChoice)?.label ?? effectiveChoice
     const message = isDeprioritised
-      ? t('signals.trusted_other').replace('{label}', trustedLabel ?? 'Other source')
+    ? t('signals.trusted_other').replace('{label}', trustedLabel ?? t('signals.other_source'))
       : t('signals.trusted_choice').replace('{label}', chosenLabel)
 
     return (
