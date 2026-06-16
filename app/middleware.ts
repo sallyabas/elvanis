@@ -78,25 +78,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Session exists — check onboarding for non-onboarding routes
-  if (pathname !== '/onboarding' && !pathname.startsWith('/onboarding/')) {
-    const { data: founder } = await supabase
-      .from('founders')
-      .select('onboarding_completed, account_status')
-      .eq('user_id', user.id)
-      .maybeSingle()
+  // Session exists — fetch founder for all protected routes
+  const { data: founder } = await supabase
+    .from('founders')
+    .select('onboarding_completed, account_status')
+    .eq('user_id', user.id)
+    .maybeSingle()
 
-      if (!founder || !founder.onboarding_completed) {
-        return NextResponse.redirect(new URL('/onboarding', request.url))
-      }
-  
-      if (pathname === '/onboarding' && founder.onboarding_completed) {
-        return NextResponse.redirect(new URL('/', request.url))
-      }
+  const isOnboarding = pathname === '/onboarding' || pathname.startsWith('/onboarding/')
 
-    if (founder.account_status === 'suspended' && pathname !== '/suspended') {
-      return NextResponse.redirect(new URL('/suspended', request.url))
-    }
+  // Completed founders trying to access onboarding → redirect home
+  if (isOnboarding && founder?.onboarding_completed) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  // Incomplete founders on non-onboarding routes → redirect to onboarding
+  if (!isOnboarding && (!founder || !founder.onboarding_completed)) {
+    return NextResponse.redirect(new URL('/onboarding', request.url))
+  }
+
+  // Suspended accounts
+  if (founder?.account_status === 'suspended' && pathname !== '/suspended') {
+    return NextResponse.redirect(new URL('/suspended', request.url))
   }
 
   return response
