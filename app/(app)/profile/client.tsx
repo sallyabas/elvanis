@@ -265,6 +265,7 @@ export default function ProfileClient({
     const supabase = createClient()
     await supabase.from('founders').update({ subscription_tier: 'deactivated' }).eq('id', founderId)
     await supabase.auth.signOut()
+    localStorage.removeItem('preferred_lang')
     router.push('/')
   }
 
