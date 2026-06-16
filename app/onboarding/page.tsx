@@ -210,8 +210,8 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -10, [isAr ? 'left' : 'right']: 12, background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>
+              <div style={{ position: 'relative', paddingTop: 16 }}>
+                <span style={{ position: 'absolute', top: 0, right: isAr ? 'auto' : 12, left: isAr ? 12 : 'auto', background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                   ⭐ {t('onboarding.recommended')}
                 </span>
                 <button onClick={() => completeOnboarding('/connect')} disabled={loading} style={btnPrimary()}>{t('onboarding.connect_tools_cta')}</button>
@@ -251,8 +251,8 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -10, [isAr ? 'left' : 'right']: 12, background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>
+              <div style={{ position: 'relative', paddingTop: 16 }}>
+                <span style={{ position: 'absolute', top: 0, right: isAr ? 'auto' : 12, left: isAr ? 12 : 'auto', background: '#2563EB', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                   ⭐ {t('onboarding.recommended')}
                 </span>
                 <button onClick={() => completeOnboarding('/assessment')} disabled={loading} style={btnPrimary()}>{t('onboarding.start_assessment_cta')}</button>
