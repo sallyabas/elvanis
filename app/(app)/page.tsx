@@ -139,7 +139,7 @@ export default async function HomePage() {
 
       <FocusView
         founderId={founder.id}
-        founderName={founder.full_name ?? 'Founder'}
+        founderName={founder.full_name ?? t('common.founder_fallback')}
         founderStage={(founder.founder_stage as FounderStage) ?? null}
         focusMetric={(founder.focus_metric as FocusMetric) ?? null}
         signals={signals ?? []}
