@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useT, useLang } from '@/app/context/LanguageContext'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -75,13 +75,16 @@ export default function OnboardingPage() {
     resumeProgress()
   }, [])
 
+  const industryRef = useRef<HTMLDivElement>(null)
+  const marketRef   = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    function handleClickOutside() {
-      setIndustryOpen(false)
-      setMarketOpen(false)
+    function handleClickOutside(e: MouseEvent) {
+      if (industryRef.current && !industryRef.current.contains(e.target as Node)) setIndustryOpen(false)
+      if (marketRef.current  && !marketRef.current.contains(e.target as Node))  setMarketOpen(false)
     }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const stageHasData = STAGES.find(s => s.id === selectedStage)?.hasData ?? false
@@ -324,11 +327,11 @@ export default function OnboardingPage() {
           {/* Industry + Market */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
             {/* Industry */}
-            <div style={{ position: 'relative' }}>
+            <div ref={industryRef} style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.industry')}</label>
               <button
                 type="button"
-                onClick={e => { e.stopPropagation(); setIndustryOpen(o => !o); setMarketOpen(false) }}
+                onClick={() => { setIndustryOpen(o => !o); setMarketOpen(false) }}
                 style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${industryOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedIndustry ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
               >
                 <span>{selectedIndustry ? t(INDUSTRIES.find(i => i.value === selectedIndustry)?.key ?? 'profile.select_industry' as Parameters<typeof t>[0]) : t('profile.select_industry')}</span>
@@ -352,11 +355,11 @@ export default function OnboardingPage() {
             </div>
 
             {/* Market */}
-            <div style={{ position: 'relative' }}>
+            <div ref={marketRef} style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('profile.market')}</label>
               <button
                 type="button"
-                onClick={e => { e.stopPropagation(); setMarketOpen(o => !o); setIndustryOpen(false) }}
+                onClick={() => { setMarketOpen(o => !o); setIndustryOpen(false) }}
                 style={{ width: '100%', padding: '11px 14px', border: `1.5px solid ${marketOpen ? '#2563EB' : '#E5E7EB'}`, borderRadius: 10, fontSize: 14, color: selectedMarket ? '#111827' : '#9CA3AF', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
               >
                 <span>{selectedMarket ? t(MARKETS.find(m => m.value === selectedMarket)?.key ?? 'profile.select_market' as Parameters<typeof t>[0]) : t('profile.select_market')}</span>
