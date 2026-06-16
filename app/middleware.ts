@@ -86,9 +86,13 @@ export async function middleware(request: NextRequest) {
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (!founder || !founder.onboarding_completed) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
-    }
+      if (!founder || !founder.onboarding_completed) {
+        return NextResponse.redirect(new URL('/onboarding', request.url))
+      }
+  
+      if (pathname === '/onboarding' && founder.onboarding_completed) {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
 
     if (founder.account_status === 'suspended' && pathname !== '/suspended') {
       return NextResponse.redirect(new URL('/suspended', request.url))

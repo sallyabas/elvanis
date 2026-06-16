@@ -552,7 +552,7 @@ export default function GoalsSection({ founderId, activeSignals, subscriptionTie
                 value={targetValue}
                 onChange={e => { setTargetValue(e.target.value.replace(/[^0-9.]/g, '')); setFormMsg(null); setTouched(t => ({ ...t, target: true })) }}
                 onBlur={() => setTouched(t => ({ ...t, target: true }))}
-                placeholder={selectedMeta ? (selectedMeta.lowerBetter ? 'e.g. 5' : 'e.g. 80') : t('tracker.goals_target_lbl')}
+                placeholder={selectedMeta ? (selectedMeta.lowerBetter ? t('tracker.goals_placeholder_low') : t('tracker.goals_placeholder_high')) : t('tracker.goals_target_lbl')}
                 style={inputStyle(fieldMissing.target)}
               />
               {fieldMissing.target && <p style={{ fontSize: 11, color: '#DC2626', margin: '3px 0 0' }}>{t('tracker.goals_required')}</p>}
