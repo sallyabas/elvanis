@@ -18,7 +18,7 @@ const getHelpArticles = unstable_cache(
     return data ?? []
   },
   ['help-articles'],
-  { revalidate: 86400, tags: ['help-articles'] }
+  { revalidate: 3600, tags: ['help-articles'] }
 )
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
