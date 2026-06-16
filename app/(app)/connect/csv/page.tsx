@@ -153,7 +153,7 @@ function CSVUploadContent() {
     const res = await fetch('/api/csv/upload', { method: 'POST', body: formData })
     const data = await res.json()
     if (!res.ok) {
-      setError(data.error ?? 'Upload failed')
+      setError(data.error ?? t('connect.csv_upload_failed'))
       setUploading(false)
       return
     }
