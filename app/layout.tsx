@@ -35,6 +35,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
 {children}
+<style>{`
+  html[lang="en"] #hubspot-messages-iframe-container {
+    right: 20px !important;
+    left: auto !important;
+  }
+  html[lang="ar"] #hubspot-messages-iframe-container,
+  html[dir="rtl"] #hubspot-messages-iframe-container {
+    left: 20px !important;
+    right: auto !important;
+  }
+`}</style>
 <Script
   id="hs-script-loader"
   src="https://js-eu1.hs-scripts.com/148538653.js"
