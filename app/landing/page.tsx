@@ -348,15 +348,6 @@ function ScrollStory({ isAr }: { isAr: boolean }) {
     return () => observers.forEach(obs => obs?.disconnect())
   }, [])
 
-  const canvases = [
-    <CanvasStep1 isAr={isAr} />,
-    <CanvasStep2 isAr={isAr} />,
-    <CanvasStep3 isAr={isAr} />,
-    <CanvasStep4 isAr={isAr} />,
-    <CanvasStep5 isAr={isAr} />,
-    <CanvasStep6 isAr={isAr} />,
-  ]
-
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'flex-start', maxWidth: 1080, margin: '0 auto' }}>
       {/* Left — scroll steps */}
@@ -385,12 +376,19 @@ function ScrollStory({ isAr }: { isAr: boolean }) {
             <span style={{ fontSize: 11, color: '#9CA3AF', marginInlineStart: 8 }}>app.elvanis.com</span>
             <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 4 }}>
               {[0,1,2,3,4,5].map(i => (
-                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: activeStep === i ? '#4B35CC' : '#E5E7EB', transition: 'background 0.3s' }} />
+                <div key={i} onClick={() => setActiveStep(i)} style={{ width: 6, height: 6, borderRadius: '50%', background: activeStep === i ? '#4B35CC' : '#E5E7EB', transition: 'background 0.3s', cursor: 'pointer' }} />
               ))}
             </div>
           </div>
           <div style={{ padding: 20, minHeight: 320 }}>
-            {canvases[activeStep]}
+            <div key={`step-${activeStep}`}>
+              {activeStep === 0 && <CanvasStep1 isAr={isAr} />}
+              {activeStep === 1 && <CanvasStep2 isAr={isAr} />}
+              {activeStep === 2 && <CanvasStep3 isAr={isAr} />}
+              {activeStep === 3 && <CanvasStep4 isAr={isAr} />}
+              {activeStep === 4 && <CanvasStep5 isAr={isAr} />}
+              {activeStep === 5 && <CanvasStep6 isAr={isAr} />}
+            </div>
           </div>
         </div>
       </div>
@@ -746,7 +744,7 @@ export default function LandingPage() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         html{scroll-behavior:smooth;}
-        .hl{background:linear-gradient(135deg,#4B35CC,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900;font-style:italic;}
+        .hl{background:linear-gradient(135deg,#4B35CC,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900;font-style:italic;padding:0 6px;display:inline-block;line-height:1.2;}
         .btn{display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#4B35CC,#7C3AED);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;font-family:inherit;box-shadow:0 4px 20px rgba(75,53,204,0.3);}
         .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(75,53,204,0.4);}
         .btn-o{display:inline-block;padding:14px 28px;background:transparent;color:#E2E8F0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:inherit;}
@@ -764,15 +762,15 @@ export default function LandingPage() {
             <span style={{ fontSize: 20, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', lineHeight: 1.15 }}>Elvanis</span>
             <span style={{ fontSize: 9, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>AI Business OS</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={toggleLang} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-              {lang === 'en' ? 'عربي' : 'English'}
-            </button>
-            <Link href="/login" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <Link href="/login" style={{ fontSize: 13, color: '#64748B', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
             <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="hm" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }}>
               {isAr ? 'احجز عرضاً' : 'Book a demo'}
             </a>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '8px 18px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
+            <button onClick={toggleLang} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#64748B', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' as const }}>
+              {lang === 'en' ? 'عربي' : 'EN'}
+            </button>
+            <Link href="/signup" style={{ display: 'inline-block', padding: '9px 20px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
           </div>
         </div>
       </nav>
