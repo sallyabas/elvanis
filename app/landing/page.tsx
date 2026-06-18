@@ -158,13 +158,40 @@ const CONTENT = {
       ],
     },
     cta: { headline: 'Your business is sending signals.', sub: 'Start reading them.', button: 'Diagnose my business →' },
+    demo_cta: {
+      eyebrow: 'See it live',
+      headline: 'Watch Elvanis diagnose a real business.',
+      body: 'Book a free 30-minute live walkthrough. We connect to a real tool, run a scan, and show you exactly what your business would see on day one.',
+      button: 'Book a live demo →',
+      note: 'Free. No commitment. 30 minutes.',
+    },
     footer: {
       tagline: 'AI-powered business diagnostics for founder-led companies.',
-      links: [
-        { label: 'Terms of Service', href: '/terms' },
-        { label: 'Privacy Policy', href: '/privacy' },
-        { label: 'Sign in', href: '/login' },
-        { label: 'Get started', href: '/signup' },
+      groups: [
+        {
+          title: 'Product',
+          links: [
+            { label: 'Start free', href: '/signup' },
+            { label: 'Pricing', href: '/landing#pricing' },
+            { label: 'Book a demo', href: 'https://calendly.com/elvanis/book-demo-session' },
+          ],
+        },
+        {
+          title: 'Services',
+          links: [
+            { label: 'Strategic Roadmap', href: '/signup' },
+            { label: 'CPO Advisory', href: '/signup' },
+            { label: 'Contact us', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' },
+          ],
+        },
+        {
+          title: 'Legal',
+          links: [
+            { label: 'Terms of Service', href: '/terms' },
+            { label: 'Privacy Policy', href: '/privacy' },
+            { label: 'Sign in', href: '/login' },
+          ],
+        },
       ],
       copy: '© 2026 Elvanis. All rights reserved.',
     },
@@ -321,13 +348,40 @@ const CONTENT = {
       ],
     },
     cta: { headline: 'أعمالك ترسل إشارات.', sub: 'ابدأ قراءتها.', button: 'شخّص أعمالي ←' },
+    demo_cta: {
+      eyebrow: 'شاهده مباشرة',
+      headline: 'شاهد إلفانيس يشخّص أعمالاً حقيقية.',
+      body: 'احجز جلسة مباشرة مجانية لمدة 30 دقيقة. نربط أداة حقيقية، نجري فحصاً، ونريك بالضبط ما ستراه أعمالك في اليوم الأول.',
+      button: 'احجز عرضاً مباشراً ←',
+      note: 'مجاني. بدون التزام. 30 دقيقة.',
+    },
     footer: {
       tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للشركات التي يقودها المؤسسون.',
-      links: [
-        { label: 'شروط الخدمة', href: '/terms' },
-        { label: 'سياسة الخصوصية', href: '/privacy' },
-        { label: 'تسجيل الدخول', href: '/login' },
-        { label: 'ابدأ الآن', href: '/signup' },
+      groups: [
+        {
+          title: 'المنتج',
+          links: [
+            { label: 'ابدأ مجاناً', href: '/signup' },
+            { label: 'الأسعار', href: '/landing#pricing' },
+            { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis/book-demo-session' },
+          ],
+        },
+        {
+          title: 'الخدمات',
+          links: [
+            { label: 'خارطة طريق استراتيجية', href: '/signup' },
+            { label: 'استشارة CPO', href: '/signup' },
+            { label: 'تواصل معنا', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' },
+          ],
+        },
+        {
+          title: 'قانوني',
+          links: [
+            { label: 'شروط الخدمة', href: '/terms' },
+            { label: 'سياسة الخصوصية', href: '/privacy' },
+            { label: 'تسجيل الدخول', href: '/login' },
+          ],
+        },
       ],
       copy: '© 2026 إلفانيس. جميع الحقوق محفوظة.',
     },
@@ -337,23 +391,32 @@ const CONTENT = {
 // ── Demo tab panels ───────────────────────────────────────────
 function DemoConnect({ isAr }: { isAr: boolean }) {
   const tools = [
-    { name: 'Shopify',          icon: '🛍️', connected: true,  scanning: false },
-    { name: 'Jira',             icon: '🔧', connected: true,  scanning: false },
-    { name: 'Google Analytics', icon: '📊', connected: true,  scanning: false },
-    { name: 'Intercom',         icon: '💬', connected: false, scanning: true  },
-    { name: 'Trustpilot',       icon: '⭐', connected: false, scanning: false },
+    { name: 'Shopify',          icon: '🛍️', href: '/connect/shopify',     connected: true,  scanning: false },
+    { name: 'Jira',             icon: '🔧', href: '/connect/jira',        connected: true,  scanning: false },
+    { name: 'Google Analytics', icon: '📊', href: '/connect/ga4',         connected: true,  scanning: false },
+    { name: 'Intercom',         icon: '💬', href: '/connect/intercom',    connected: false, scanning: true  },
+    { name: 'Trustpilot',       icon: '⭐', href: '/connect/trustpilot',  connected: false, scanning: false },
   ]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', textAlign: isAr ? 'right' : 'left' }}>
+        {isAr ? 'اربط أدواتك — انقر لربط أي أداة' : 'Connect your tools — click any to connect'}
+      </p>
       {tools.map(tool => (
         <div key={tool.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18 }}>{tool.icon}</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{tool.name}</span>
           </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: tool.connected ? '#059669' : tool.scanning ? '#D97706' : '#9CA3AF' }}>
-            {tool.connected ? (isAr ? 'متصل ✓' : 'Connected ✓') : tool.scanning ? (isAr ? 'جارٍ الفحص...' : 'Scanning...') : (isAr ? 'غير متصل' : 'Not connected')}
-          </span>
+          {tool.connected ? (
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#059669' }}>{isAr ? 'متصل ✓' : 'Connected ✓'}</span>
+          ) : tool.scanning ? (
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#D97706' }}>{isAr ? 'جارٍ الفحص...' : 'Scanning...'}</span>
+          ) : (
+            <Link href={tool.href} style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#4B35CC', padding: '5px 12px', borderRadius: 7, textDecoration: 'none' }}>
+              {isAr ? 'ربط ←' : 'Connect →'}
+            </Link>
+          )}
         </div>
       ))}
     </div>
@@ -361,38 +424,57 @@ function DemoConnect({ isAr }: { isAr: boolean }) {
 }
 
 function DemoSignals({ isAr }: { isAr: boolean }) {
+  const [expanded, setExpanded] = useState<number | null>(null)
   const sev: Record<string, { bg: string; border: string; color: string }> = {
     critical: { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626' },
     warning:  { bg: '#FFFBEB', border: '#FDE68A', color: '#D97706' },
     watch:    { bg: '#F9FAFB', border: '#E5E7EB', color: '#6B7280' },
   }
   const signals = isAr ? [
-    { s: 'critical', dim: 'الإيرادات',  title: 'معدل الاسترداد يتجاوز 8%',                src: 'Shopify',   val: '8.3%',  label: 'حرجة'   },
-    { s: 'warning',  dim: 'العملاء',    title: 'انخفض NPS 18 نقطة في 30 يوماً',           src: 'Intercom',  val: '-18',   label: 'تحذير'  },
-    { s: 'watch',    dim: 'المنتج',     title: 'سرعة السبرينت تتراجع للمرة الثالثة',       src: 'Jira',      val: '↓22%',  label: 'مراقبة' },
+    { s: 'critical', dim: 'الإيرادات',  title: 'معدل الاسترداد يتجاوز 8%',             src: 'Shopify',  val: '8.3%', label: 'حرجة',   action: 'افحص عملية التوصيل وحدّد أبرز فئات الاسترداد خلال 48 ساعة.' },
+    { s: 'warning',  dim: 'العملاء',   title: 'انخفض NPS 18 نقطة في 30 يوماً',        src: 'Intercom', val: '-18',  label: 'تحذير',  action: 'صنّف المعترضين وجدوِل مكالمات متابعة خلال 48 ساعة.' },
+    { s: 'watch',    dim: 'المنتج',    title: 'سرعة السبرينت تتراجع للمرة الثالثة',    src: 'Jira',     val: '↓22%', label: 'مراقبة', action: 'راجع عملية تخطيط السبرينت وأزل العوائق الأسبوع القادم.' },
   ] : [
-    { s: 'critical', dim: 'Revenue',  title: 'Refund rate exceeding 8%',              src: 'Shopify',  val: '8.3%', label: 'Critical' },
-    { s: 'warning',  dim: 'Customer', title: 'NPS dropped 18 points in 30 days',      src: 'Intercom', val: '-18',  label: 'Warning'  },
-    { s: 'watch',    dim: 'Product',  title: 'Sprint velocity declining — 3rd sprint', src: 'Jira',     val: '↓22%', label: 'Watch'    },
+    { s: 'critical', dim: 'Revenue',  title: 'Refund rate exceeding 8%',              src: 'Shopify',  val: '8.3%', label: 'Critical', action: 'Audit fulfilment process and identify top refund categories within 48 hours.' },
+    { s: 'warning',  dim: 'Customer', title: 'NPS dropped 18 points in 30 days',      src: 'Intercom', val: '-18',  label: 'Warning',  action: 'Segment detractors and schedule follow-up calls within 48 hours.' },
+    { s: 'watch',    dim: 'Product',  title: 'Sprint velocity declining — 3rd sprint', src: 'Jira',     val: '↓22%', label: 'Watch',    action: 'Review sprint planning process and remove blockers next week.' },
   ]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', textAlign: isAr ? 'right' : 'left' }}>
+        {isAr ? 'انقر على أي إشارة لرؤية الإجراء الموصى به' : 'Click any signal to see the recommended action'}
+      </p>
       {signals.map((sig, i) => {
         const st = sev[sig.s]
+        const isOpen = expanded === i
         return (
-          <div key={i} style={{ background: st.bg, border: `1px solid ${st.border}`, borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: st.color, display: 'inline-block' }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: st.color, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{sig.label}</span>
-                <span style={{ fontSize: 11, color: '#9CA3AF' }}>· {sig.dim}</span>
+          <div key={i} style={{ background: st.bg, border: `1px solid ${isOpen ? st.color : st.border}`, borderRadius: 10, overflow: 'hidden', transition: 'border-color 0.2s', cursor: 'pointer' }} onClick={() => setExpanded(isOpen ? null : i)}>
+            <div style={{ padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: st.color, display: 'inline-block' }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: st.color, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{sig.label}</span>
+                  <span style={{ fontSize: 11, color: '#9CA3AF' }}>· {sig.dim}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: '#9CA3AF' }}>{sig.src}</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: st.color }}>{sig.val}</span>
+                  <span style={{ fontSize: 11, color: st.color, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'inline-block' }}>▾</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <span style={{ fontSize: 11, color: '#9CA3AF' }}>{sig.src}</span>
-                <span style={{ fontSize: 13, fontWeight: 800, color: st.color }}>{sig.val}</span>
-              </div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0, textAlign: isAr ? 'right' : 'left' }}>{sig.title}</p>
             </div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0, textAlign: isAr ? 'right' : 'left' }}>{sig.title}</p>
+            {isOpen && (
+              <div style={{ padding: '0 14px 14px', borderTop: `1px solid ${st.border}` }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: st.color, margin: '10px 0 4px', textAlign: isAr ? 'right' : 'left' }}>
+                  {isAr ? '→ الإجراء الموصى به:' : '→ Recommended action:'}
+                </p>
+                <p style={{ fontSize: 13, color: '#374151', margin: '0 0 10px', lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>{sig.action}</p>
+                <Link href="/signup" style={{ fontSize: 12, fontWeight: 700, color: st.color, textDecoration: 'none' }}>
+                  {isAr ? 'ابدأ التشخيص لرؤية جميع إشاراتك ←' : 'Start your diagnostic to see all your signals →'}
+                </Link>
+              </div>
+            )}
           </div>
         )
       })}
@@ -464,6 +546,9 @@ function DemoDigest({ isAr }: { isAr: boolean }) {
           </div>
         ))}
       </div>
+      <Link href="/signup" style={{ display: 'block', marginTop: 14, padding: '10px', background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', textAlign: 'center' }}>
+        {isAr ? 'احصل على ملخص الإجراءات الكامل ←' : 'Get your full Action Digest →'}
+      </Link>
     </div>
   )
 }
@@ -509,6 +594,9 @@ function DemoAssessment({ isAr }: { isAr: boolean }) {
           </div>
         ))}
       </div>
+      <Link href="/signup" style={{ display: 'block', marginTop: 14, padding: '10px', background: '#FFF7ED', border: '1px solid #FDE68A', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#D97706', textDecoration: 'none', textAlign: 'center' }}>
+        {isAr ? 'أجرِ تقييمك الخاص ←' : 'Take your own assessment →'}
+      </Link>
     </div>
   )
 }
@@ -574,11 +662,12 @@ export default function LandingPage() {
         <div style={{ ...WRAP, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <span style={{ fontSize: 20, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', lineHeight: 1.15 }}>Elvanis</span>
-            <span style={{ fontSize: 9, color: '#4B5563', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>AI Business OS</span>
+            <span style={{ fontSize: 9, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>AI Business OS</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={toggleLang} title={lang === 'en' ? 'Arabic' : 'English'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, opacity: 0.7, padding: 4 }}>🌐</button>
+            <button onClick={toggleLang} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{lang === 'en' ? 'عربي' : 'English'}</button>
             <Link href="/login" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
+            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }} className="hm">{isAr ? 'احجز عرضاً' : 'Book a demo'}</a>
             <Link href="/signup" style={{ display: 'inline-block', padding: '8px 18px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
           </div>
         </div>
@@ -802,6 +891,19 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Book a Demo */}
+      <section style={{ padding: '80px 24px', background: '#fff' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
+          <span className="ey">{c.demo_cta.eyebrow}</span>
+          <h2 className="sh" style={{ marginBottom: 16 }}>{c.demo_cta.headline}</h2>
+          <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.75, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px' }}>{c.demo_cta.body}</p>
+          <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '15px 32px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(75,53,204,0.3)', marginBottom: 12 }}>
+            {c.demo_cta.button}
+          </a>
+          <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{c.demo_cta.note}</p>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section style={SEC('#F8F4EE')}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -860,21 +962,35 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer style={{ background: '#09071A', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '40px 24px' }}>
+      <footer style={{ background: '#09071A', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '56px 24px 40px' }}>
         <div style={WRAP}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap' as const, gap: 24, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, marginBottom: 48 }} className="g2">
+            {/* Brand */}
             <div>
-              <span style={{ fontSize: 18, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', marginBottom: 4 }}>Elvanis</span>
-              <p style={{ fontSize: 13, color: '#4B5563', maxWidth: 260, lineHeight: 1.6, margin: 0 }}>{c.footer.tagline}</p>
+              <span style={{ fontSize: 18, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', marginBottom: 8 }}>Elvanis</span>
+              <p style={{ fontSize: 13, color: '#6B7280', maxWidth: 240, lineHeight: 1.7, margin: '0 0 20px' }}>{c.footer.tagline}</p>
+              <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '9px 18px', background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+                {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
+              </a>
             </div>
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' as const }}>
-              {c.footer.links.map(link => (
-                <Link key={link.label} href={link.href} style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none', fontWeight: 500 }}>{link.label}</Link>
-              ))}
-            </div>
+            {/* Link groups */}
+            {c.footer.groups.map(group => (
+              <div key={group.title}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase' as const, letterSpacing: '0.1em', margin: '0 0 14px' }}>{group.title}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {group.links.map(link => (
+                    link.href.startsWith('http') ? (
+                      <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#9CA3AF', textDecoration: 'none', fontWeight: 500 }}>{link.label}</a>
+                    ) : (
+                      <Link key={link.label} href={link.href} style={{ fontSize: 13, color: '#9CA3AF', textDecoration: 'none', fontWeight: 500 }}>{link.label}</Link>
+                    )
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20 }}>
-            <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{c.footer.copy}</p>
+            <p style={{ fontSize: 12, color: '#4B5563', margin: 0 }}>{c.footer.copy}</p>
           </div>
         </div>
       </footer>
