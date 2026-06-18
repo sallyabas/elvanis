@@ -744,7 +744,7 @@ export default function LandingPage() {
   const S = (bg: string): React.CSSProperties => ({ padding: '96px 24px', background: bg })
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} style={{ fontFamily: "'Inter',-apple-system,sans-serif", color: '#111827', overflowX: 'hidden' }}>
+ <div dir={isAr ? 'rtl' : 'ltr'} style={{ fontFamily: "'Inter',-apple-system,sans-serif", color: '#111827' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
@@ -760,7 +760,7 @@ export default function LandingPage() {
       `}</style>
 
       {/* Nav */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(9,7,26,0.96)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 24px' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(9,7,26,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '0 24px' }}>
         <div style={{ ...W, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <span style={{ fontSize: 20, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', lineHeight: 1.15 }}>Elvanis</span>
