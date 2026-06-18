@@ -1,34 +1,434 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 type Lang = 'en' | 'ar'
 
+// ── Scroll story steps ────────────────────────────────────────
+const STEPS_EN = [
+  {
+    num: '01',
+    title: 'Connect your tools',
+    body: '60 seconds. No code. No config. Elvanis connects to your real operational data — not exports, not reports. The actual numbers your business runs on.',
+  },
+  {
+    num: '02',
+    title: 'Data flows in',
+    body: 'Elvanis reads your live data continuously — orders, tickets, sprints, reviews, traffic. Every scan processes thousands of data points across all your connected tools.',
+  },
+  {
+    num: '03',
+    title: 'Signals surface',
+    body: 'Every issue is detected and ranked by business impact. Critical first, always. No noise — just the problems that are actually hurting your business right now.',
+  },
+  {
+    num: '04',
+    title: 'Conflicts caught',
+    body: 'When two tools disagree, Elvanis flags it before you waste a week chasing the wrong number. You decide which source to trust. Your diagnosis stays accurate.',
+  },
+  {
+    num: '05',
+    title: 'Your action plan',
+    body: 'Not a dashboard. A diagnosis. A 90-day AI-generated action plan tells you exactly what to fix, in what order, and why — built from every signal across all your tools.',
+  },
+  {
+    num: '06',
+    title: 'Your business OS is ready',
+    body: 'This is what day one looks like. A health score, a ranked action plan, and a clear view of everything your business needs to fix. Start reading the signals.',
+  },
+]
+
+const STEPS_AR = [
+  {
+    num: '٠١',
+    title: 'اربط أدواتك',
+    body: '60 ثانية. بدون كود. بدون إعداد. يتصل إلفانيس ببياناتك التشغيلية الحقيقية — لا تصديرات، لا تقارير. الأرقام الفعلية التي يعمل عليها عملك.',
+  },
+  {
+    num: '٠٢',
+    title: 'البيانات تتدفق',
+    body: 'يقرأ إلفانيس بياناتك الحية باستمرار — الطلبات، التذاكر، السبرينتات، التقييمات، الزيارات. كل فحص يعالج آلاف نقاط البيانات عبر جميع أدواتك المتصلة.',
+  },
+  {
+    num: '٠٣',
+    title: 'الإشارات تظهر',
+    body: 'كل مشكلة مكتشفة ومرتّبة حسب الأثر التجاري. الحرجة أولاً دائماً. لا ضوضاء — فقط المشاكل التي تضر أعمالك الآن فعلاً.',
+  },
+  {
+    num: '٠٤',
+    title: 'التعارضات مرصودة',
+    body: 'عندما تختلف أداتان، يرصد إلفانيس التعارض قبل أن تضيع أسبوعاً في تتبع الرقم الخاطئ. أنت تقرر أي مصدر تثق به. تشخيصك يبقى دقيقاً.',
+  },
+  {
+    num: '٠٥',
+    title: 'خطة عملك',
+    body: 'ليس لوحة تحكم. تشخيص. خطة عمل مولّدة بالذكاء الاصطناعي لمدة 90 يوماً تخبرك بالضبط ماذا تصلح، وبأي ترتيب، ولماذا — مبنية من كل إشارة عبر أدواتك.',
+  },
+  {
+    num: '٠٦',
+    title: 'نظام أعمالك جاهز',
+    body: 'هذا ما يبدو عليه اليوم الأول. درجة صحة، وخطة إجراءات مرتّبة، ورؤية واضحة لكل ما يحتاج عملك إلى إصلاحه. ابدأ قراءة الإشارات.',
+  },
+]
+
+// ── Canvas states for each step ───────────────────────────────
+function CanvasStep1({ isAr }: { isAr: boolean }) {
+  const [connected, setConnected] = useState<number[]>([])
+  const tools = [
+    { name: 'Shopify', icon: '🛍️', color: '#96BF48' },
+    { name: 'Jira', icon: '🔧', color: '#0052CC' },
+    { name: 'GA4', icon: '📊', color: '#E37400' },
+    { name: 'Intercom', icon: '💬', color: '#1F8EFF' },
+    { name: 'Trustpilot', icon: '⭐', color: '#00B67A' },
+  ]
+  useEffect(() => {
+    setConnected([])
+    tools.forEach((_, i) => {
+      setTimeout(() => setConnected(prev => [...prev, i]), i * 400 + 300)
+    })
+  }, [])
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {tools.map((tool, i) => {
+        const done = connected.includes(i)
+        return (
+          <div key={tool.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: done ? '#F0FDF4' : '#F9FAFB', border: `1px solid ${done ? tool.color + '40' : '#E5E7EB'}`, borderRadius: 10, transition: 'all 0.4s ease', opacity: done ? 1 : 0.5 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>{tool.icon}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{tool.name}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {done && <span style={{ width: 8, height: 8, borderRadius: '50%', background: tool.color, display: 'inline-block', boxShadow: `0 0 6px ${tool.color}` }} />}
+              <span style={{ fontSize: 12, fontWeight: 600, color: done ? '#059669' : '#9CA3AF' }}>
+                {done ? (isAr ? 'متصل ✓' : 'Connected ✓') : (isAr ? 'جارٍ...' : 'Connecting...')}
+              </span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function CanvasStep2({ isAr }: { isAr: boolean }) {
+  const [pulse, setPulse] = useState(0)
+  const dataPoints = isAr
+    ? ['8,432 طلب', '1,204 تذكرة دعم', '3 سبرينتات', '847 تقييم', '124K زيارة']
+    : ['8,432 orders', '1,204 support tickets', '3 sprints tracked', '847 reviews', '124K sessions']
+  useEffect(() => {
+    const iv = setInterval(() => setPulse(p => (p + 1) % 3), 700)
+    return () => clearInterval(iv)
+  }, [])
+  return (
+    <div>
+      <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 12, padding: '16px', marginBottom: 12, textAlign: 'center' }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: '#0284C7', margin: '0 0 8px', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
+          {isAr ? '⚡ جارٍ الفحص' : '⚡ Scanning'}
+          <span style={{ opacity: pulse === 0 ? 1 : 0.3 }}>.</span>
+          <span style={{ opacity: pulse === 1 ? 1 : 0.3 }}>.</span>
+          <span style={{ opacity: pulse === 2 ? 1 : 0.3 }}>.</span>
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, flexWrap: 'wrap' as const }}>
+          {dataPoints.map((dp, i) => (
+            <span key={i} style={{ fontSize: 11, padding: '3px 10px', background: '#fff', border: '1px solid #BAE6FD', borderRadius: 20, color: '#0284C7', fontWeight: 600 }}>{dp}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {[
+          { w: '85%', label: isAr ? 'الإيرادات' : 'Revenue', color: '#4B35CC' },
+          { w: '62%', label: isAr ? 'العملاء' : 'Customer', color: '#059669' },
+          { w: '44%', label: isAr ? 'التسويق' : 'Marketing', color: '#D97706' },
+          { w: '71%', label: isAr ? 'المنتج' : 'Product', color: '#7C3AED' },
+        ].map((bar, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 11, color: '#6B7280', width: 72, textAlign: isAr ? 'right' : 'left', flexShrink: 0 }}>{bar.label}</span>
+            <div style={{ flex: 1, height: 6, background: '#F3F4F6', borderRadius: 99 }}>
+              <div style={{ height: 6, background: bar.color, borderRadius: 99, width: bar.w, transition: 'width 1.5s ease', opacity: 0.7 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CanvasStep3({ isAr }: { isAr: boolean }) {
+  const [shown, setShown] = useState(0)
+  const signals = isAr ? [
+    { s: 'critical', label: 'حرجة',   dim: 'الإيرادات', title: 'معدل الاسترداد يتجاوز 8%',          src: 'Shopify',  val: '8.3%', color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', action: 'افحص عملية التوصيل وحدّد أبرز فئات الاسترداد' },
+    { s: 'warning',  label: 'تحذير',  dim: 'العملاء',   title: 'انخفض NPS 18 نقطة في 30 يوماً',     src: 'Intercom', val: '-18',   color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', action: 'صنّف المعترضين وجدوِل مكالمات متابعة' },
+    { s: 'watch',    label: 'مراقبة', dim: 'المنتج',    title: 'سرعة السبرينت تتراجع — الثالث',     src: 'Jira',     val: '↓22%',  color: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB', action: 'راجع عملية تخطيط السبرينت وأزل العوائق' },
+  ] : [
+    { s: 'critical', label: 'Critical', dim: 'Revenue',  title: 'Refund rate exceeding 8%',              src: 'Shopify',  val: '8.3%', color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', action: 'Audit fulfilment process and identify top refund categories' },
+    { s: 'warning',  label: 'Warning',  dim: 'Customer', title: 'NPS dropped 18 points in 30 days',      src: 'Intercom', val: '-18',   color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', action: 'Segment detractors and schedule follow-up calls within 48hrs' },
+    { s: 'watch',    label: 'Watch',    dim: 'Product',  title: 'Sprint velocity declining — 3rd sprint', src: 'Jira',     val: '↓22%',  color: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB', action: 'Review sprint planning process and remove blockers' },
+  ]
+  useEffect(() => {
+    setShown(0)
+    signals.forEach((_, i) => setTimeout(() => setShown(i + 1), i * 500 + 200))
+  }, [isAr])
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {signals.map((sig, i) => (
+        <div key={i} style={{ background: sig.bg, border: `1px solid ${sig.border}`, borderRadius: 10, padding: '12px 14px', opacity: shown > i ? 1 : 0, transform: shown > i ? 'translateY(0)' : 'translateY(10px)', transition: 'opacity 0.4s ease, transform 0.4s ease' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: sig.color, display: 'inline-block' }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: sig.color, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{sig.label}</span>
+              <span style={{ fontSize: 11, color: '#9CA3AF' }}>· {sig.dim}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <span style={{ fontSize: 11, color: '#9CA3AF' }}>{sig.src}</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: sig.color }}>{sig.val}</span>
+            </div>
+          </div>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 4px', textAlign: isAr ? 'right' : 'left' }}>{sig.title}</p>
+          <p style={{ fontSize: 12, color: '#6B7280', margin: 0, textAlign: isAr ? 'right' : 'left' }}>→ {sig.action}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CanvasStep4({ isAr }: { isAr: boolean }) {
+  const [trusted, setTrusted] = useState<string | null>(null)
+  return (
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+        {[
+          { tool: 'GA4', icon: '📊', stat: isAr ? 'الزيارات ↑12%' : 'Traffic ↑12%', color: '#059669', bg: '#F0FDF4', border: '#A7F3D0' },
+          { tool: 'Shopify', icon: '🛍️', stat: isAr ? 'الإيرادات ↓8%' : 'Revenue ↓8%', color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
+        ].map(item => (
+          <div key={item.tool} style={{ background: item.bg, border: `2px solid ${item.border}`, borderRadius: 10, padding: '14px', textAlign: 'center' }}>
+            <span style={{ fontSize: 24, display: 'block', marginBottom: 6 }}>{item.icon}</span>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{item.tool}</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: item.color, margin: 0 }}>{item.stat}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: '#FFFBEB', border: '2px solid #FDE68A', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px' }}>⚠ {isAr ? 'تعارض مرصود' : 'Conflict detected'}</p>
+        <p style={{ fontSize: 13, color: '#92400E', margin: '0 0 12px', lineHeight: 1.5 }}>
+          {isAr ? 'GA4 يُظهر ارتفاع الزيارات 12% بينما Shopify يُظهر انخفاض الإيرادات 8%. أيهما تثق به؟' : 'GA4 shows traffic up 12% while Shopify shows revenue down 8%. Which do you trust?'}
+        </p>
+        {trusted ? (
+          <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>✅</span>
+            <span style={{ fontSize: 13, color: '#059669', fontWeight: 600 }}>
+              {isAr ? `تم اختيار ${trusted} كمصدر موثوق` : `${trusted} set as trusted source`}
+            </span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 8 }}>
+            {['GA4', 'Shopify'].map(src => (
+              <button key={src} onClick={() => setTrusted(src)} style={{ flex: 1, padding: '9px', background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {isAr ? `ثق بـ ${src}` : `Trust ${src}`}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CanvasStep5({ isAr }: { isAr: boolean }) {
+  const items = isAr ? [
+    { num: '١', title: 'معالجة ارتفاع معدل الاسترداد', why: 'يؤثر على الإيرادات ورضا العملاء', who: 'المنتج + العمليات', urgent: true },
+    { num: '٢', title: 'إطلاق برنامج استرداد العملاء المعرّضين للتسرب', why: 'خطر انخفاض NPS مستمر', who: 'نجاح العملاء', urgent: false },
+    { num: '٣', title: 'مراجعة عملية تخطيط السبرينت', why: 'ثلاثة سبرينتات بأداء ضعيف متتالية', who: 'الهندسة', urgent: false },
+  ] : [
+    { num: '1', title: 'Address refund rate spike immediately', why: 'Impacting revenue and customer trust', who: 'Product + Ops', urgent: true },
+    { num: '2', title: 'Launch at-risk customer recovery programme', why: 'NPS decline is compounding weekly', who: 'Customer Success', urgent: false },
+    { num: '3', title: 'Fix sprint planning process this week', why: 'Third consecutive underperforming sprint', who: 'Engineering', urgent: false },
+  ]
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>
+          {isAr ? '📄 ملخص الإجراءات — 90 يوماً' : '📄 Action Digest — 90-day plan'}
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {items.map((item, i) => (
+          <div key={i} style={{ background: item.urgent ? '#FEF2F2' : '#F5F3FF', border: `1px solid ${item.urgent ? '#FECACA' : '#DDD6FE'}`, borderRadius: 10, padding: '12px 14px', display: 'flex', gap: 10 }}>
+            <span style={{ width: 22, height: 22, borderRadius: '50%', background: item.urgent ? '#DC2626' : '#7C3AED', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{item.num}</span>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, color: item.urgent ? '#991B1B' : '#4C1D95', margin: '0 0 3px', textAlign: isAr ? 'right' : 'left' }}>{item.title}</p>
+              <p style={{ fontSize: 11, color: item.urgent ? '#DC2626' : '#7C3AED', margin: '0 0 2px', textAlign: isAr ? 'right' : 'left' }}>{isAr ? 'لماذا:' : 'Why:'} {item.why}</p>
+              <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0, textAlign: isAr ? 'right' : 'left' }}>{isAr ? 'المسؤول:' : 'Owner:'} {item.who}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CanvasStep6({ isAr }: { isAr: boolean }) {
+  const [score, setScore] = useState(0)
+  useEffect(() => {
+    const start = Date.now()
+    const target = 64
+    const duration = 1500
+    const tick = () => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setScore(Math.round(eased * target))
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [])
+  const dims = isAr ? [
+    { name: 'الإيرادات', score: 62, color: '#D97706' },
+    { name: 'العملاء',   score: 74, color: '#059669' },
+    { name: 'التسويق',   score: 48, color: '#DC2626' },
+    { name: 'المنتج',    score: 55, color: '#D97706' },
+    { name: 'الفريق',    score: 81, color: '#059669' },
+    { name: 'الاستراتيجية', score: 67, color: '#059669' },
+  ] : [
+    { name: 'Revenue',  score: 62, color: '#D97706' },
+    { name: 'Customer', score: 74, color: '#059669' },
+    { name: 'Marketing',score: 48, color: '#DC2626' },
+    { name: 'Product',  score: 55, color: '#D97706' },
+    { name: 'Team',     score: 81, color: '#059669' },
+    { name: 'Strategy', score: 67, color: '#059669' },
+  ]
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14, padding: '14px 16px', background: '#FFF7ED', border: '1px solid #FDE68A', borderRadius: 12 }}>
+        <div style={{ textAlign: 'center', flexShrink: 0 }}>
+          <p style={{ fontSize: 40, fontWeight: 900, color: '#D97706', margin: 0, lineHeight: 1 }}>{score}</p>
+          <p style={{ fontSize: 11, color: '#92400E', margin: 0 }}>/100</p>
+        </div>
+        <div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#92400E', margin: '0 0 3px' }}>{isAr ? 'يحتاج اهتماماً' : 'Needs Attention'}</p>
+          <p style={{ fontSize: 12, color: '#B45309', margin: '0 0 8px' }}>{isAr ? '3 مشاكل حرجة تحتاج إجراءً فورياً' : '3 critical issues need immediate action'}</p>
+          <Link href="/signup" style={{ fontSize: 12, fontWeight: 700, color: '#D97706', textDecoration: 'none' }}>
+            {isAr ? 'أجرِ تقييمك الخاص ←' : 'Run your own diagnostic →'}
+          </Link>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        {dims.map(dim => (
+          <div key={dim.name} style={{ padding: '8px 10px', background: '#F9FAFB', borderRadius: 8, border: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#374151' }}>{dim.name}</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: dim.color }}>{dim.score}</span>
+            </div>
+            <div style={{ height: 3, background: '#E5E7EB', borderRadius: 99 }}>
+              <div style={{ height: 3, background: dim.color, borderRadius: 99, width: `${dim.score}%`, transition: 'width 1.5s ease' }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Scroll story section ──────────────────────────────────────
+function ScrollStory({ isAr }: { isAr: boolean }) {
+  const [activeStep, setActiveStep] = useState(0)
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([])
+  const steps = isAr ? STEPS_AR : STEPS_EN
+
+  useEffect(() => {
+    const observers = stepRefs.current.map((ref, i) => {
+      if (!ref) return null
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveStep(i) },
+        { threshold: 0.5, rootMargin: '-20% 0px -20% 0px' }
+      )
+      obs.observe(ref)
+      return obs
+    })
+    return () => observers.forEach(obs => obs?.disconnect())
+  }, [])
+
+  const canvases = [
+    <CanvasStep1 isAr={isAr} />,
+    <CanvasStep2 isAr={isAr} />,
+    <CanvasStep3 isAr={isAr} />,
+    <CanvasStep4 isAr={isAr} />,
+    <CanvasStep5 isAr={isAr} />,
+    <CanvasStep6 isAr={isAr} />,
+  ]
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'flex-start', maxWidth: 1080, margin: '0 auto' }}>
+      {/* Left — scroll steps */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {steps.map((step, i) => (
+          <div
+            key={i}
+            ref={el => { stepRefs.current[i] = el }}
+            style={{ padding: '64px 0', borderBottom: i < steps.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', opacity: activeStep === i ? 1 : 0.35, transition: 'opacity 0.4s ease' }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#C9A84C', letterSpacing: '0.12em', display: 'block', marginBottom: 12 }}>{step.num}</span>
+            <h3 style={{ fontSize: 24, fontWeight: 800, color: '#F8F4EE', margin: '0 0 14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>{step.title}</h3>
+            <p style={{ fontSize: 16, color: '#94A3B8', lineHeight: 1.75, margin: 0 }}>{step.body}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Right — sticky canvas */}
+      <div style={{ position: 'sticky', top: 100, height: 'fit-content' }}>
+        {/* Browser chrome */}
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
+          <div style={{ background: '#F3F4F6', padding: '10px 14px', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F59E0B' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }} />
+            <span style={{ fontSize: 11, color: '#9CA3AF', marginInlineStart: 8 }}>app.elvanis.com</span>
+            <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 4 }}>
+              {[0,1,2,3,4,5].map(i => (
+                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: activeStep === i ? '#4B35CC' : '#E5E7EB', transition: 'background 0.3s' }} />
+              ))}
+            </div>
+          </div>
+          <div style={{ padding: 20, minHeight: 320 }}>
+            {canvases[activeStep]}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── FAQ ───────────────────────────────────────────────────────
+function FAQItem({ q, a, isAr }: { q: string; a: string; isAr: boolean }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ borderBottom: '1px solid #E5E7EB' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', padding: '18px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+        <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', flex: 1, textAlign: isAr ? 'right' : 'left' }}>{q}</span>
+        <span style={{ fontSize: 20, color: '#4B35CC', flexShrink: 0, transform: open ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', lineHeight: 1 }}>+</span>
+      </button>
+      {open && <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.75, margin: '0 0 18px', textAlign: isAr ? 'right' : 'left' }}>{a}</p>}
+    </div>
+  )
+}
+
+// ── Content ───────────────────────────────────────────────────
 const CONTENT = {
   en: {
-    nav: {
-      login: 'Go to my account',
-      cta: 'Start free',
-    },
+    nav: { login: 'Go to my account', cta: 'Start free' },
     hero: {
       eyebrow: 'AI-powered business diagnostics',
-      headline_before: 'See ',
-      headline_highlight: 'exactly',
-      headline_after: " what's breaking your business.",
+      headline_before: 'See ', headline_highlight: 'exactly', headline_after: " what's breaking your business.",
       sub: 'Elvanis connects to your tools, reads your real data, and tells you what to fix first — ranked by impact.',
       cta_primary: 'Start the diagnostic →',
-      cta_secondary: 'See how it works',
+      cta_secondary: 'Book a demo',
       stats: [
         { value: '6', label: 'Business dimensions' },
         { value: '10 min', label: 'To your first signal' },
         { value: '£0', label: 'To get started' },
       ],
     },
-    logos: {
-      eyebrow: 'Connects to your stack',
-      items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'],
-    },
+    logos: { eyebrow: 'Connects to your stack', items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'] },
     problem: {
       eyebrow: "The founder's dilemma",
       headline: 'Data is everywhere. Clarity is rare.',
@@ -52,14 +452,14 @@ const CONTENT = {
     focus: {
       eyebrow: 'The focus metric',
       headline: 'Most platforms show you everything. Elvanis shows you what matters to your business right now.',
-      body: 'During onboarding, you choose one strategic priority: Revenue Growth, Customer Retention, Operations Cost, or Product Delivery. Every signal, digest, and AI recommendation is filtered through that lens — so you never wade through noise.',
+      body: 'During onboarding, you choose one strategic priority: Revenue Growth, Customer Retention, Operations Cost, or Product Delivery. Every signal, digest, and AI recommendation is filtered through that lens.',
       options: [
-        { icon: '💰', label: 'Revenue Growth', desc: 'Focus on acquisition, conversion, and MRR' },
-        { icon: '👥', label: 'Customer Retention', desc: 'Focus on churn, NPS, and satisfaction' },
-        { icon: '⚙️', label: 'Operations Cost', desc: 'Focus on efficiency, support, and overhead' },
-        { icon: '🎯', label: 'Product Delivery', desc: 'Focus on velocity, quality, and PMF' },
+        { icon: '💰', label: 'Revenue Growth', desc: 'Acquisition, conversion, and MRR' },
+        { icon: '👥', label: 'Customer Retention', desc: 'Churn, NPS, and satisfaction' },
+        { icon: '⚙️', label: 'Operations Cost', desc: 'Efficiency, support, and overhead' },
+        { icon: '🎯', label: 'Product Delivery', desc: 'Velocity, quality, and PMF' },
       ],
-      note: 'You can change your focus metric anytime from your Profile as your business evolves.',
+      note: 'You can change your focus metric anytime from your Profile.',
     },
     dimensions: {
       eyebrow: 'What we diagnose',
@@ -78,29 +478,24 @@ const CONTENT = {
       headline: 'Everything you need to run your business on intelligence',
       items: [
         { icon: '⚡', title: 'Ranked signals', desc: 'Every issue detected and ranked by business impact. Critical first, always.' },
-        { icon: '⚖️', title: 'Conflict resolution', desc: 'When two tools disagree — GA4 says traffic is up, Shopify says revenue is down — Elvanis flags the conflict and asks you which source to trust.' },
-        { icon: '📈', title: 'Goals & tracker', desc: 'Set measurable targets on any signal. Track progress scan by scan. Get alerted the moment a goal goes at risk.' },
-        { icon: '📄', title: 'Action Digest', desc: 'A monthly AI-generated 90-day action plan built from every signal across all your tools. Navigator plan only.' },
-        { icon: '✨', title: 'AI Readiness Score', desc: 'See exactly where AI automation could save your business time or revenue right now — with specific opportunities ranked by impact.' },
-        { icon: '🎯', title: 'Business assessment', desc: 'A 26-question diagnostic across 6 dimensions. Takes 10 minutes. Gives you a scored baseline with priority actions.' },
+        { icon: '⚖️', title: 'Conflict resolution', desc: 'When two tools disagree, Elvanis flags the conflict and asks you which source to trust.' },
+        { icon: '📈', title: 'Goals & tracker', desc: 'Set measurable targets on any signal. Get alerted the moment a goal goes at risk.' },
+        { icon: '📄', title: 'Action Digest', desc: 'A monthly AI-generated 90-day action plan. Navigator plan only.' },
+        { icon: '✨', title: 'AI Readiness Score', desc: 'Specific automation opportunities ranked by impact, with estimated savings.' },
+        { icon: '🎯', title: 'Business assessment', desc: 'A 26-question diagnostic across 6 dimensions. 10 minutes. Immediate results.' },
       ],
     },
     demo: {
-      eyebrow: 'Platform preview',
-      headline: 'See the full OS in action',
-      tabs: [
-        { id: 'connect',    icon: '🔌', label: 'Connect' },
-        { id: 'signals',    icon: '⚡', label: 'Signals' },
-        { id: 'conflicts',  icon: '⚖️', label: 'Conflicts' },
-        { id: 'digest',     icon: '📄', label: 'Digest' },
-        { id: 'assessment', icon: '🎯', label: 'Assessment' },
-      ],
-      cycling: 'Auto-cycling · Click any tab to explore',
+      eyebrow: 'Here\'s what founders see on day one',
+      headline: 'Watch Elvanis work.',
+      sub: 'Scroll to see how raw data becomes a ranked action plan — in real time.',
+      cta_primary: 'Start the diagnostic →',
+      cta_secondary: 'See it with your own data →',
     },
     ai: {
       eyebrow: 'AI Readiness',
       headline: 'Know where AI can save your business time or revenue — right now.',
-      body: 'Your AI Readiness Score is calculated from your active signals and business profile. It tells you which specific automation opportunities are available to you today — with estimated time or revenue savings.',
+      body: 'Your AI Readiness Score is calculated from your active signals and business profile. It surfaces specific automation opportunities available today.',
       opportunities: [
         { icon: '🤖', title: 'AI Support Agent', saving: 'Save ~12 hrs/week', complexity: 'Low', desc: 'Automate tier-1 support tickets based on your repeat complaint patterns.' },
         { icon: '📊', title: 'Revenue Anomaly Detection', saving: 'Catch issues early', complexity: 'Medium', desc: 'Flag refund spikes and AOV drops before they become critical.' },
@@ -112,13 +507,20 @@ const CONTENT = {
       headline: 'When you need more than a diagnosis.',
       body: 'AI can detect the signal. It takes a senior consultant to resolve the root cause. Every Elvanis advisory service is delivered by experienced operators who understand founder-led businesses.',
       services: [
-        { icon: '🗺️', title: 'Strategic AI Roadmap', desc: 'A custom plan for implementing AI in your business — prioritised by ROI and complexity.' },
-        { icon: '👤', title: 'CPO Advisory Session', desc: 'A focused strategy session with a senior product consultant on your most critical product signals.' },
-        { icon: '⚖️', title: 'Conflict Resolution', desc: 'Expert help interpreting conflicting signals and deciding which data source to trust.' },
+        { icon: '🗺️', title: 'Strategic AI Roadmap', desc: 'A custom plan for implementing AI — prioritised by ROI and complexity.' },
+        { icon: '👤', title: 'CPO Advisory Session', desc: 'A focused strategy session with a senior product consultant.' },
+        { icon: '⚖️', title: 'Conflict Resolution', desc: 'Expert help interpreting conflicting signals and deciding which source to trust.' },
         { icon: '🤖', title: 'Custom AI Implementation', desc: 'Hands-on delivery of a specific AI solution — from scoping to deployment.' },
       ],
       cta: 'Book a session →',
       note: 'Navigator users get priority access to all advisory services.',
+    },
+    demo_cta: {
+      eyebrow: 'See it live',
+      headline: 'Watch Elvanis diagnose a real business.',
+      body: 'Book a free 30-minute live walkthrough. We connect to a real tool, run a scan, and show you exactly what your business would see on day one.',
+      button: 'Book a live demo →',
+      note: 'Free. No commitment. 30 minutes.',
     },
     pricing: {
       eyebrow: 'Pricing',
@@ -126,18 +528,14 @@ const CONTENT = {
       popular: 'Most popular',
       plans: [
         {
-          name: 'Free',
-          price: '£0',
-          period: 'forever',
+          name: 'Free', price: '£0', period: 'forever',
           desc: 'For founders getting started with diagnostics',
           cta: 'Start free',
           features: ['Business health score', 'Up to 3 tool connections', 'Unlimited signals', 'Monthly scan cycle', 'Business assessment', 'Goal tracking'],
           highlighted: false,
         },
         {
-          name: 'Navigator',
-          price: '£49',
-          period: 'per month',
+          name: 'Navigator', price: '£49', period: 'per month',
           desc: 'For founders who need weekly intelligence',
           cta: 'Start Navigator',
           features: ['Everything in Free', 'Weekly scans', 'Unlimited tool connections', 'Monthly AI Action Digest', 'On-demand manual scans', 'Conflict resolution', 'Impact tracking', 'Priority advisory access'],
@@ -158,67 +556,31 @@ const CONTENT = {
       ],
     },
     cta: { headline: 'Your business is sending signals.', sub: 'Start reading them.', button: 'Diagnose my business →' },
-    demo_cta: {
-      eyebrow: 'See it live',
-      headline: 'Watch Elvanis diagnose a real business.',
-      body: 'Book a free 30-minute live walkthrough. We connect to a real tool, run a scan, and show you exactly what your business would see on day one.',
-      button: 'Book a live demo →',
-      note: 'Free. No commitment. 30 minutes.',
-    },
     footer: {
       tagline: 'AI-powered business diagnostics for founder-led companies.',
       groups: [
-        {
-          title: 'Product',
-          links: [
-            { label: 'Start free', href: '/signup' },
-            { label: 'Pricing', href: '/landing#pricing' },
-            { label: 'Book a demo', href: 'https://calendly.com/elvanis/book-demo-session' },
-          ],
-        },
-        {
-          title: 'Services',
-          links: [
-            { label: 'Strategic Roadmap', href: '/signup' },
-            { label: 'CPO Advisory', href: '/signup' },
-            { label: 'Contact us', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' },
-          ],
-        },
-        {
-          title: 'Legal',
-          links: [
-            { label: 'Terms of Service', href: '/terms' },
-            { label: 'Privacy Policy', href: '/privacy' },
-            { label: 'Sign in', href: '/login' },
-          ],
-        },
+        { title: 'Product', links: [{ label: 'Start free', href: '/signup' }, { label: 'Pricing', href: '#pricing' }, { label: 'Book a demo', href: 'https://calendly.com/elvanis/book-demo-session' }] },
+        { title: 'Services', links: [{ label: 'Strategic Roadmap', href: '/signup' }, { label: 'CPO Advisory', href: '/signup' }, { label: 'Contact us', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
+        { title: 'Legal', links: [{ label: 'Terms of Service', href: '/terms' }, { label: 'Privacy Policy', href: '/privacy' }, { label: 'Sign in', href: '/login' }] },
       ],
       copy: '© 2026 Elvanis. All rights reserved.',
     },
   },
   ar: {
-    nav: {
-      login: 'الذهاب إلى حسابي',
-      cta: 'ابدأ مجاناً',
-    },
+    nav: { login: 'الذهاب إلى حسابي', cta: 'ابدأ مجاناً' },
     hero: {
       eyebrow: 'تشخيص الأعمال بالذكاء الاصطناعي',
-      headline_before: 'اعرف ',
-      headline_highlight: 'بالضبط',
-      headline_after: ' ما الذي يعيق نمو أعمالك.',
+      headline_before: 'اعرف ', headline_highlight: 'بالضبط', headline_after: ' ما الذي يعيق نمو أعمالك.',
       sub: 'يتصل إلفانيس بأدواتك، يقرأ بياناتك الحقيقية، ويخبرك بما يجب إصلاحه أولاً — مرتباً حسب الأثر.',
       cta_primary: 'ابدأ التشخيص ←',
-      cta_secondary: 'كيف يعمل',
+      cta_secondary: 'احجز عرضاً',
       stats: [
         { value: '٦', label: 'أبعاد تجارية' },
         { value: '١٠ د', label: 'حتى أول إشارة' },
         { value: '£0', label: 'للبدء' },
       ],
     },
-    logos: {
-      eyebrow: 'يتصل بأدواتك',
-      items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'],
-    },
+    logos: { eyebrow: 'يتصل بأدواتك', items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'] },
     problem: {
       eyebrow: 'معضلة المؤسس',
       headline: 'البيانات في كل مكان. الوضوح نادر.',
@@ -236,31 +598,31 @@ const CONTENT = {
       steps: [
         { num: '٠١', icon: '🔌', title: 'اربط أدواتك', desc: 'اربط Shopify وJira وGA4 وIntercom وTrustpilot — أو ارفع ملف CSV. يستغرق أقل من 3 دقائق.' },
         { num: '٠٢', icon: '⚡', title: 'احصل على تشخيصك', desc: 'يقرأ إلفانيس بياناتك الحية، يكتشف الأنماط، ويرصد الإشارات مرتبةً حسب الأثر التجاري.' },
-        { num: '٠٣', icon: '🎯', title: 'تصرّف بناءً على ما يهم', desc: 'كل إشارة لها إجراء موصى به محدد. تابع ما إذا كانت إصلاحاتك نجحت. اعرف فور حدوث أي خلل جديد.' },
+        { num: '٠٣', icon: '🎯', title: 'تصرّف بناءً على ما يهم', desc: 'كل إشارة لها إجراء موصى به محدد. تابع ما إذا كانت إصلاحاتك نجحت.' },
       ],
     },
     focus: {
       eyebrow: 'مقياس التركيز',
       headline: 'معظم المنصات تعرض كل شيء. إلفانيس يعرض ما يهم أعمالك الآن.',
-      body: 'أثناء الإعداد الأولي، تختار أولويتك الاستراتيجية: نمو الإيرادات، الاحتفاظ بالعملاء، تكاليف العمليات، أو تسليم المنتج. كل إشارة وملخص وتوصية ذكاء اصطناعي تُصفَّى عبر هذه العدسة — حتى لا تغرق في الضوضاء أبداً.',
+      body: 'أثناء الإعداد الأولي، تختار أولويتك الاستراتيجية. كل إشارة وملخص وتوصية ذكاء اصطناعي تُصفَّى عبر هذه العدسة.',
       options: [
-        { icon: '💰', label: 'نمو الإيرادات', desc: 'التركيز على الاكتساب والتحويل والـ MRR' },
-        { icon: '👥', label: 'الاحتفاظ بالعملاء', desc: 'التركيز على التسرب وNPS والرضا' },
-        { icon: '⚙️', label: 'تكاليف العمليات', desc: 'التركيز على الكفاءة والدعم والتكاليف العامة' },
-        { icon: '🎯', label: 'تسليم المنتج', desc: 'التركيز على السرعة والجودة وملاءمة السوق' },
+        { icon: '💰', label: 'نمو الإيرادات', desc: 'الاكتساب والتحويل والـ MRR' },
+        { icon: '👥', label: 'الاحتفاظ بالعملاء', desc: 'التسرب وNPS والرضا' },
+        { icon: '⚙️', label: 'تكاليف العمليات', desc: 'الكفاءة والدعم والتكاليف العامة' },
+        { icon: '🎯', label: 'تسليم المنتج', desc: 'السرعة والجودة وملاءمة السوق' },
       ],
-      note: 'يمكنك تغيير مقياس التركيز في أي وقت من ملفك الشخصي مع تطور أعمالك.',
+      note: 'يمكنك تغيير مقياس التركيز في أي وقت من ملفك الشخصي.',
     },
     dimensions: {
       eyebrow: 'ما نشخّصه',
       headline: 'كل بُعد من أبعاد أعمالك في نظام واحد',
       items: [
-        { icon: '💰', name: 'الإيرادات', desc: 'اتجاهات MRR، محركات التسرب، ارتفاعات الاسترداد، إشارات التسعير' },
-        { icon: '👥', name: 'العملاء', desc: 'أنماط NPS، مجموعات الشكاوى، صحة الإحالة، سلوك التكرار' },
-        { icon: '📣', name: 'التسويق', desc: 'اتجاهات CAC، كفاءة القناة، انخفاض التحويل، تحولات الزيارات' },
-        { icon: '🎯', name: 'المنتج', desc: 'إشارات PMF، اعتماد الميزات، تأثير الأخطاء، سرعة التسليم' },
-        { icon: '⚙️', name: 'الفريق', desc: 'سرعة السبرينت، فجوات التوافق، عوائق التنفيذ، إشارات الطاقة' },
-        { icon: '🧭', name: 'الاستراتيجية', desc: 'انجراف ICP، تجنب القرارات، نضج العمليات، توافق 90 يوماً' },
+        { icon: '💰', name: 'الإيرادات', desc: 'اتجاهات MRR، محركات التسرب، ارتفاعات الاسترداد' },
+        { icon: '👥', name: 'العملاء', desc: 'أنماط NPS، مجموعات الشكاوى، صحة الإحالة' },
+        { icon: '📣', name: 'التسويق', desc: 'اتجاهات CAC، كفاءة القناة، انخفاض التحويل' },
+        { icon: '🎯', name: 'المنتج', desc: 'إشارات PMF، اعتماد الميزات، تأثير الأخطاء' },
+        { icon: '⚙️', name: 'الفريق', desc: 'سرعة السبرينت، فجوات التوافق، عوائق التنفيذ' },
+        { icon: '🧭', name: 'الاستراتيجية', desc: 'انجراف ICP، تجنب القرارات، نضج العمليات' },
       ],
     },
     features: {
@@ -268,29 +630,24 @@ const CONTENT = {
       headline: 'كل ما تحتاجه لإدارة أعمالك بالذكاء',
       items: [
         { icon: '⚡', title: 'إشارات مرتّبة', desc: 'كل مشكلة مكتشفة ومرتّبة حسب الأثر التجاري. الحرجة أولاً دائماً.' },
-        { icon: '⚖️', title: 'حل التعارضات', desc: 'عندما تختلف أداتان — GA4 يقول الزيارات ترتفع، Shopify يقول الإيرادات تنخفض — يرصد إلفانيس التعارض ويسألك أي مصدر تثق به.' },
-        { icon: '📈', title: 'الأهداف والمتابعة', desc: 'ضع أهدافاً قابلة للقياس على أي إشارة. تابع التقدم فحصاً تلو الآخر. احصل على تنبيه فور تعرّض هدف للخطر.' },
-        { icon: '📄', title: 'ملخص الإجراءات', desc: 'خطة عمل شهرية مولّدة بالذكاء الاصطناعي لمدة 90 يوماً، مبنية من كل إشارة عبر أدواتك. خطة Navigator فقط.' },
-        { icon: '✨', title: 'درجة الاستعداد للذكاء الاصطناعي', desc: 'اعرف بالضبط أين يمكن للذكاء الاصطناعي توفير الوقت أو الإيرادات لأعمالك الآن — مع فرص محددة مرتّبة حسب الأثر.' },
-        { icon: '🎯', title: 'تقييم الأعمال', desc: 'تشخيص من 26 سؤالاً عبر 6 أبعاد. يستغرق 10 دقائق. يعطيك خطاً أساسياً مُعَيَّناً مع إجراءات ذات أولوية.' },
+        { icon: '⚖️', title: 'حل التعارضات', desc: 'عندما تختلف أداتان، يرصد إلفانيس التعارض ويسألك أي مصدر تثق به.' },
+        { icon: '📈', title: 'الأهداف والمتابعة', desc: 'ضع أهدافاً قابلة للقياس على أي إشارة. احصل على تنبيه فور تعرّض هدف للخطر.' },
+        { icon: '📄', title: 'ملخص الإجراءات', desc: 'خطة عمل شهرية مولّدة بالذكاء الاصطناعي لمدة 90 يوماً. خطة Navigator فقط.' },
+        { icon: '✨', title: 'درجة الاستعداد للذكاء الاصطناعي', desc: 'فرص أتمتة محددة مرتّبة حسب الأثر، مع تقديرات للتوفير.' },
+        { icon: '🎯', title: 'تقييم الأعمال', desc: 'تشخيص من 26 سؤالاً عبر 6 أبعاد. 10 دقائق. نتائج فورية.' },
       ],
     },
     demo: {
-      eyebrow: 'معاينة المنصة',
-      headline: 'شاهد النظام الكامل في العمل',
-      tabs: [
-        { id: 'connect',    icon: '🔌', label: 'الربط' },
-        { id: 'signals',    icon: '⚡', label: 'الإشارات' },
-        { id: 'conflicts',  icon: '⚖️', label: 'التعارضات' },
-        { id: 'digest',     icon: '📄', label: 'الملخص' },
-        { id: 'assessment', icon: '🎯', label: 'التقييم' },
-      ],
-      cycling: 'يتبدّل تلقائياً · انقر على أي تبويب للاستكشاف',
+      eyebrow: 'هذا ما يراه المؤسسون في اليوم الأول',
+      headline: 'شاهد إلفانيس يعمل.',
+      sub: 'مرّر للأسفل لترى كيف تتحول البيانات الخام إلى خطة عمل مرتّبة — في الوقت الفعلي.',
+      cta_primary: 'ابدأ التشخيص ←',
+      cta_secondary: 'شاهده ببياناتك الخاصة ←',
     },
     ai: {
       eyebrow: 'الاستعداد للذكاء الاصطناعي',
       headline: 'اعرف أين يمكن للذكاء الاصطناعي توفير الوقت أو الإيرادات — الآن.',
-      body: 'تُحسب درجة استعدادك للذكاء الاصطناعي من إشاراتك النشطة وملفك التجاري. تخبرك بفرص الأتمتة المحددة المتاحة لك اليوم — مع تقديرات لتوفير الوقت أو الإيرادات.',
+      body: 'تُحسب درجة استعدادك للذكاء الاصطناعي من إشاراتك النشطة وملفك التجاري. تُظهر فرص الأتمتة المحددة المتاحة اليوم.',
       opportunities: [
         { icon: '🤖', title: 'وكيل دعم بالذكاء الاصطناعي', saving: 'وفّر ~12 ساعة/أسبوع', complexity: 'منخفض', desc: 'أتمتة تذاكر الدعم من المستوى الأول بناءً على أنماط الشكاوى المتكررة.' },
         { icon: '📊', title: 'كشف شذوذات الإيرادات', saving: 'اكتشف المشاكل مبكراً', complexity: 'متوسط', desc: 'رصد ارتفاعات الاسترداد وانخفاضات AOV قبل أن تصبح حرجة.' },
@@ -300,15 +657,22 @@ const CONTENT = {
     advisory: {
       eyebrow: 'الخبرة البشرية',
       headline: 'عندما تحتاج أكثر من تشخيص.',
-      body: 'الذكاء الاصطناعي يكتشف الإشارة. يحتاج حل السبب الجذري إلى مستشار متمرس. كل خدمة استشارية في إلفانيس يقدمها مشغّلون ذوو خبرة يفهمون الشركات التي يقودها المؤسسون.',
+      body: 'الذكاء الاصطناعي يكتشف الإشارة. يحتاج حل السبب الجذري إلى مستشار متمرس.',
       services: [
-        { icon: '🗺️', title: 'خارطة طريق استراتيجية للذكاء الاصطناعي', desc: 'خطة مخصصة لتطبيق الذكاء الاصطناعي في أعمالك — مرتّبة حسب العائد على الاستثمار والتعقيد.' },
-        { icon: '👤', title: 'جلسة استشارية CPO', desc: 'جلسة استراتيجية مركزة مع مستشار منتج كبير حول إشاراتك الأكثر إلحاحاً.' },
-        { icon: '⚖️', title: 'حل التعارضات', desc: 'مساعدة خبير في تفسير الإشارات المتعارضة وتحديد مصدر البيانات الأجدر بالثقة.' },
-        { icon: '🤖', title: 'تنفيذ ذكاء اصطناعي مخصص', desc: 'تسليم عملي لحل ذكاء اصطناعي محدد — من التحديد النطاق حتى النشر.' },
+        { icon: '🗺️', title: 'خارطة طريق استراتيجية للذكاء الاصطناعي', desc: 'خطة مخصصة مرتّبة حسب العائد على الاستثمار والتعقيد.' },
+        { icon: '👤', title: 'جلسة استشارية CPO', desc: 'جلسة استراتيجية مركزة مع مستشار منتج كبير.' },
+        { icon: '⚖️', title: 'حل التعارضات', desc: 'مساعدة خبير في تفسير الإشارات المتعارضة.' },
+        { icon: '🤖', title: 'تنفيذ ذكاء اصطناعي مخصص', desc: 'تسليم عملي من التحديد النطاق حتى النشر.' },
       ],
       cta: 'احجز جلسة ←',
       note: 'يحصل مستخدمو Navigator على أولوية الوصول لجميع الخدمات الاستشارية.',
+    },
+    demo_cta: {
+      eyebrow: 'شاهده مباشرة',
+      headline: 'شاهد إلفانيس يشخّص أعمالاً حقيقية.',
+      body: 'احجز جلسة مباشرة مجانية لمدة 30 دقيقة. نربط أداة حقيقية، نجري فحصاً، ونريك بالضبط ما ستراه أعمالك في اليوم الأول.',
+      button: 'احجز عرضاً مباشراً ←',
+      note: 'مجاني. بدون التزام. 30 دقيقة.',
     },
     pricing: {
       eyebrow: 'الأسعار',
@@ -316,18 +680,14 @@ const CONTENT = {
       popular: 'الأكثر شيوعاً',
       plans: [
         {
-          name: 'مجاني',
-          price: '£0',
-          period: 'للأبد',
+          name: 'مجاني', price: '£0', period: 'للأبد',
           desc: 'للمؤسسين الذين يبدأون مع التشخيص',
           cta: 'ابدأ مجاناً',
           features: ['درجة صحة الأعمال', 'حتى 3 اتصالات أدوات', 'إشارات غير محدودة', 'دورة فحص شهرية', 'تقييم الأعمال', 'تتبع الأهداف'],
           highlighted: false,
         },
         {
-          name: 'Navigator',
-          price: '£49',
-          period: 'شهرياً',
+          name: 'Navigator', price: '£49', period: 'شهرياً',
           desc: 'للمؤسسين الذين يحتاجون ذكاءً أسبوعياً',
           cta: 'ابدأ Navigator',
           features: ['كل ما في المجاني', 'فحوصات أسبوعية', 'اتصالات أدوات غير محدودة', 'ملخص إجراءات شهري بالذكاء الاصطناعي', 'فحوصات يدوية عند الطلب', 'حل التعارضات', 'تتبع الأثر', 'وصول أولوي للاستشارة'],
@@ -339,285 +699,30 @@ const CONTENT = {
       eyebrow: 'أسئلة شائعة',
       headline: 'كل ما تحتاج معرفته',
       items: [
-        { q: 'هل بياناتي آمنة؟', a: 'نعم. يطلب إلفانيس صلاحية القراءة فقط من أدواتك المتصلة. لا نكتب بياناتك أو نعدّلها أبداً. جميع البيانات مشفّرة أثناء النقل وعند التخزين، على بنية تحتية مستضافة في الاتحاد الأوروبي.' },
-        { q: 'كم يستغرق رؤية النتائج؟', a: 'يرى معظم المؤسسين أول إشاراتهم التشخيصية في غضون 10 دقائق من ربط أداة. يستغرق تقييم الأعمال نحو 10 دقائق ويعطيك تحليلاً مُعَيَّناً فورياً عبر 6 أبعاد.' },
-        { q: 'هل يناسب المؤسسين غير التقنيين؟', a: 'بالتأكيد. بُني إلفانيس للمشغّلين، لا للمهندسين. لا كود، لا إعداد، لا لوحات تحكم للتهيئة. اربط أدواتك، أجرِ التقييم، وتشخيصك جاهز.' },
-        { q: 'هل يمكنني الإلغاء في أي وقت؟', a: 'نعم. لا توجد عقود طويلة الأمد. يمكنك إلغاء Navigator في أي وقت من ملفك الشخصي. تُحتفظ ببياناتك لمدة 30 يوماً بعد الإلغاء.' },
-        { q: 'ما الأدوات التي يتصل بها إلفانيس؟', a: 'Shopify وJira وGoogle Analytics 4 وIntercom وTrustpilot. يمكنك أيضاً رفع ملفات CSV من أي أداة. تُضاف تكاملات جديدة باستمرار.' },
-        { q: 'كيف يختلف إلفانيس عن لوحة التحكم؟', a: 'لوحة التحكم تعرض البيانات. إلفانيس يشخّصها. نقرأ مقاييسك، نكتشف الأنماط عبر أدوات متعددة، نرتّب المشكلات حسب الأثر التجاري، ونخبرك بالضبط بما يجب إصلاحه أولاً — مع إجراء موصى به.' },
+        { q: 'هل بياناتي آمنة؟', a: 'نعم. يطلب إلفانيس صلاحية القراءة فقط. لا نكتب بياناتك أو نعدّلها. جميع البيانات مشفّرة على بنية تحتية مستضافة في الاتحاد الأوروبي.' },
+        { q: 'كم يستغرق رؤية النتائج؟', a: 'يرى معظم المؤسسين أول إشاراتهم في غضون 10 دقائق. يستغرق التقييم نحو 10 دقائق ويعطيك تحليلاً فورياً عبر 6 أبعاد.' },
+        { q: 'هل يناسب المؤسسين غير التقنيين؟', a: 'بالتأكيد. لا كود، لا إعداد. اربط أدواتك، أجرِ التقييم، وتشخيصك جاهز.' },
+        { q: 'هل يمكنني الإلغاء في أي وقت؟', a: 'نعم. لا توجد عقود طويلة الأمد. يمكنك الإلغاء في أي وقت من ملفك الشخصي.' },
+        { q: 'ما الأدوات التي يتصل بها إلفانيس؟', a: 'Shopify وJira وGoogle Analytics 4 وIntercom وTrustpilot. يمكنك أيضاً رفع ملفات CSV.' },
+        { q: 'كيف يختلف إلفانيس عن لوحة التحكم؟', a: 'لوحة التحكم تعرض البيانات. إلفانيس يشخّصها ويخبرك بالضبط بما يجب إصلاحه أولاً.' },
       ],
     },
     cta: { headline: 'أعمالك ترسل إشارات.', sub: 'ابدأ قراءتها.', button: 'شخّص أعمالي ←' },
-    demo_cta: {
-      eyebrow: 'شاهده مباشرة',
-      headline: 'شاهد إلفانيس يشخّص أعمالاً حقيقية.',
-      body: 'احجز جلسة مباشرة مجانية لمدة 30 دقيقة. نربط أداة حقيقية، نجري فحصاً، ونريك بالضبط ما ستراه أعمالك في اليوم الأول.',
-      button: 'احجز عرضاً مباشراً ←',
-      note: 'مجاني. بدون التزام. 30 دقيقة.',
-    },
     footer: {
       tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للشركات التي يقودها المؤسسون.',
       groups: [
-        {
-          title: 'المنتج',
-          links: [
-            { label: 'ابدأ مجاناً', href: '/signup' },
-            { label: 'الأسعار', href: '/landing#pricing' },
-            { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis/book-demo-session' },
-          ],
-        },
-        {
-          title: 'الخدمات',
-          links: [
-            { label: 'خارطة طريق استراتيجية', href: '/signup' },
-            { label: 'استشارة CPO', href: '/signup' },
-            { label: 'تواصل معنا', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' },
-          ],
-        },
-        {
-          title: 'قانوني',
-          links: [
-            { label: 'شروط الخدمة', href: '/terms' },
-            { label: 'سياسة الخصوصية', href: '/privacy' },
-            { label: 'تسجيل الدخول', href: '/login' },
-          ],
-        },
+        { title: 'المنتج', links: [{ label: 'ابدأ مجاناً', href: '/signup' }, { label: 'الأسعار', href: '#pricing' }, { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis/book-demo-session' }] },
+        { title: 'الخدمات', links: [{ label: 'خارطة طريق استراتيجية', href: '/signup' }, { label: 'استشارة CPO', href: '/signup' }, { label: 'تواصل معنا', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
+        { title: 'قانوني', links: [{ label: 'شروط الخدمة', href: '/terms' }, { label: 'سياسة الخصوصية', href: '/privacy' }, { label: 'تسجيل الدخول', href: '/login' }] },
       ],
       copy: '© 2026 إلفانيس. جميع الحقوق محفوظة.',
     },
   },
 }
 
-// ── Demo tab panels ───────────────────────────────────────────
-function DemoConnect({ isAr }: { isAr: boolean }) {
-  const tools = [
-    { name: 'Shopify',          icon: '🛍️', href: '/connect/shopify',     connected: true,  scanning: false },
-    { name: 'Jira',             icon: '🔧', href: '/connect/jira',        connected: true,  scanning: false },
-    { name: 'Google Analytics', icon: '📊', href: '/connect/ga4',         connected: true,  scanning: false },
-    { name: 'Intercom',         icon: '💬', href: '/connect/intercom',    connected: false, scanning: true  },
-    { name: 'Trustpilot',       icon: '⭐', href: '/connect/trustpilot',  connected: false, scanning: false },
-  ]
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', textAlign: isAr ? 'right' : 'left' }}>
-        {isAr ? 'اربط أدواتك — انقر لربط أي أداة' : 'Connect your tools — click any to connect'}
-      </p>
-      {tools.map(tool => (
-        <div key={tool.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 18 }}>{tool.icon}</span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{tool.name}</span>
-          </div>
-          {tool.connected ? (
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#059669' }}>{isAr ? 'متصل ✓' : 'Connected ✓'}</span>
-          ) : tool.scanning ? (
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#D97706' }}>{isAr ? 'جارٍ الفحص...' : 'Scanning...'}</span>
-          ) : (
-            <Link href={tool.href} style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#4B35CC', padding: '5px 12px', borderRadius: 7, textDecoration: 'none' }}>
-              {isAr ? 'ربط ←' : 'Connect →'}
-            </Link>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function DemoSignals({ isAr }: { isAr: boolean }) {
-  const [expanded, setExpanded] = useState<number | null>(null)
-  const sev: Record<string, { bg: string; border: string; color: string }> = {
-    critical: { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626' },
-    warning:  { bg: '#FFFBEB', border: '#FDE68A', color: '#D97706' },
-    watch:    { bg: '#F9FAFB', border: '#E5E7EB', color: '#6B7280' },
-  }
-  const signals = isAr ? [
-    { s: 'critical', dim: 'الإيرادات',  title: 'معدل الاسترداد يتجاوز 8%',             src: 'Shopify',  val: '8.3%', label: 'حرجة',   action: 'افحص عملية التوصيل وحدّد أبرز فئات الاسترداد خلال 48 ساعة.' },
-    { s: 'warning',  dim: 'العملاء',   title: 'انخفض NPS 18 نقطة في 30 يوماً',        src: 'Intercom', val: '-18',  label: 'تحذير',  action: 'صنّف المعترضين وجدوِل مكالمات متابعة خلال 48 ساعة.' },
-    { s: 'watch',    dim: 'المنتج',    title: 'سرعة السبرينت تتراجع للمرة الثالثة',    src: 'Jira',     val: '↓22%', label: 'مراقبة', action: 'راجع عملية تخطيط السبرينت وأزل العوائق الأسبوع القادم.' },
-  ] : [
-    { s: 'critical', dim: 'Revenue',  title: 'Refund rate exceeding 8%',              src: 'Shopify',  val: '8.3%', label: 'Critical', action: 'Audit fulfilment process and identify top refund categories within 48 hours.' },
-    { s: 'warning',  dim: 'Customer', title: 'NPS dropped 18 points in 30 days',      src: 'Intercom', val: '-18',  label: 'Warning',  action: 'Segment detractors and schedule follow-up calls within 48 hours.' },
-    { s: 'watch',    dim: 'Product',  title: 'Sprint velocity declining — 3rd sprint', src: 'Jira',     val: '↓22%', label: 'Watch',    action: 'Review sprint planning process and remove blockers next week.' },
-  ]
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 8px', textAlign: isAr ? 'right' : 'left' }}>
-        {isAr ? 'انقر على أي إشارة لرؤية الإجراء الموصى به' : 'Click any signal to see the recommended action'}
-      </p>
-      {signals.map((sig, i) => {
-        const st = sev[sig.s]
-        const isOpen = expanded === i
-        return (
-          <div key={i} style={{ background: st.bg, border: `1px solid ${isOpen ? st.color : st.border}`, borderRadius: 10, overflow: 'hidden', transition: 'border-color 0.2s', cursor: 'pointer' }} onClick={() => setExpanded(isOpen ? null : i)}>
-            <div style={{ padding: '12px 14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: st.color, display: 'inline-block' }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: st.color, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{sig.label}</span>
-                  <span style={{ fontSize: 11, color: '#9CA3AF' }}>· {sig.dim}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: '#9CA3AF' }}>{sig.src}</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: st.color }}>{sig.val}</span>
-                  <span style={{ fontSize: 11, color: st.color, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'inline-block' }}>▾</span>
-                </div>
-              </div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0, textAlign: isAr ? 'right' : 'left' }}>{sig.title}</p>
-            </div>
-            {isOpen && (
-              <div style={{ padding: '0 14px 14px', borderTop: `1px solid ${st.border}` }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: st.color, margin: '10px 0 4px', textAlign: isAr ? 'right' : 'left' }}>
-                  {isAr ? '→ الإجراء الموصى به:' : '→ Recommended action:'}
-                </p>
-                <p style={{ fontSize: 13, color: '#374151', margin: '0 0 10px', lineHeight: 1.5, textAlign: isAr ? 'right' : 'left' }}>{sig.action}</p>
-                <Link href="/signup" style={{ fontSize: 12, fontWeight: 700, color: st.color, textDecoration: 'none' }}>
-                  {isAr ? 'ابدأ التشخيص لرؤية جميع إشاراتك ←' : 'Start your diagnostic to see all your signals →'}
-                </Link>
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function DemoConflict({ isAr }: { isAr: boolean }) {
-  const [trusted, setTrusted] = useState<string | null>(null)
-  return (
-    <div>
-      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#92400E', margin: '0 0 6px' }}>
-          {isAr ? '⚠ تعارض بين المصادر' : '⚠ Conflict between sources'}
-        </p>
-        <p style={{ fontSize: 13, color: '#92400E', margin: 0, lineHeight: 1.5 }}>
-          {isAr ? 'GA4 يُظهر ارتفاع الزيارات 12%. Shopify يُظهر انخفاض الإيرادات 8%.' : 'GA4 shows traffic up 12%. Shopify shows revenue down 8%.'}
-        </p>
-      </div>
-      {trusted ? (
-        <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span>✅</span>
-          <p style={{ fontSize: 13, color: '#059669', fontWeight: 600, margin: 0 }}>
-            {isAr ? `تم الاختيار: ${trusted} كمصدر موثوق` : `Trusted: ${trusted} as primary source`}
-          </p>
-        </div>
-      ) : (
-        <div>
-          <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 10, textAlign: isAr ? 'right' : 'left' }}>
-            {isAr ? 'أي مصدر تثق به؟' : 'Which source do you trust?'}
-          </p>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {['GA4', 'Shopify'].map(src => (
-              <button key={src} onClick={() => setTrusted(src)} style={{ flex: 1, padding: '10px', background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                {isAr ? `ثق بـ ${src}` : `Trust ${src}`}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function DemoDigest({ isAr }: { isAr: boolean }) {
-  const items = isAr ? [
-    { num: '١', title: 'معالجة ارتفاع معدل الاسترداد', why: 'يؤثر على الإيرادات ورضا العملاء', who: 'المنتج + العمليات' },
-    { num: '٢', title: 'إطلاق برنامج استرداد العملاء المعرّضين للتسرب', why: 'خطر انخفاض NPS مستمر', who: 'نجاح العملاء' },
-    { num: '٣', title: 'مراجعة عملية تخطيط السبرينت', why: 'ثلاثة سبرينتات بأداء ضعيف متتالية', who: 'الهندسة' },
-  ] : [
-    { num: '1', title: 'Address refund rate spike', why: 'Impacting revenue and customer trust', who: 'Product + Ops' },
-    { num: '2', title: 'Launch at-risk customer recovery programme', why: 'NPS decline risk is compounding', who: 'Customer Success' },
-    { num: '3', title: 'Review sprint planning process', why: 'Three consecutive underperforming sprints', who: 'Engineering' },
-  ]
-  return (
-    <div>
-      <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 12 }}>
-        {isAr ? 'ملخص الإجراءات — 90 يوماً' : 'Action Digest — 90-day plan'}
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {items.map((item, i) => (
-          <div key={i} style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 10, padding: '12px 14px', display: 'flex', gap: 10 }}>
-            <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#7C3AED', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{item.num}</span>
-            <div>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#4C1D95', margin: '0 0 3px', textAlign: isAr ? 'right' : 'left' }}>{item.title}</p>
-              <p style={{ fontSize: 11, color: '#7C3AED', margin: '0 0 2px', textAlign: isAr ? 'right' : 'left' }}>{isAr ? 'لماذا:' : 'Why:'} {item.why}</p>
-              <p style={{ fontSize: 11, color: '#A78BFA', margin: 0, textAlign: isAr ? 'right' : 'left' }}>{isAr ? 'المسؤول:' : 'Owner:'} {item.who}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <Link href="/signup" style={{ display: 'block', marginTop: 14, padding: '10px', background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', textAlign: 'center' }}>
-        {isAr ? 'احصل على ملخص الإجراءات الكامل ←' : 'Get your full Action Digest →'}
-      </Link>
-    </div>
-  )
-}
-
-function DemoAssessment({ isAr }: { isAr: boolean }) {
-  const dims = isAr ? [
-    { name: 'الإيرادات', score: 62, color: '#D97706' },
-    { name: 'العملاء',   score: 74, color: '#059669' },
-    { name: 'التسويق',   score: 48, color: '#D97706' },
-    { name: 'المنتج',    score: 55, color: '#D97706' },
-    { name: 'الفريق',    score: 81, color: '#059669' },
-    { name: 'الاستراتيجية', score: 67, color: '#059669' },
-  ] : [
-    { name: 'Revenue',  score: 62, color: '#D97706' },
-    { name: 'Customer', score: 74, color: '#059669' },
-    { name: 'Marketing',score: 48, color: '#D97706' },
-    { name: 'Product',  score: 55, color: '#D97706' },
-    { name: 'Team',     score: 81, color: '#059669' },
-    { name: 'Strategy', score: 67, color: '#059669' },
-  ]
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14, padding: '12px 14px', background: '#FFF7ED', border: '1px solid #FDE68A', borderRadius: 10 }}>
-        <div style={{ textAlign: 'center', flexShrink: 0 }}>
-          <p style={{ fontSize: 34, fontWeight: 900, color: '#D97706', margin: 0, lineHeight: 1 }}>64</p>
-          <p style={{ fontSize: 10, color: '#92400E', margin: 0 }}>/100</p>
-        </div>
-        <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 3px' }}>{isAr ? 'يحتاج اهتماماً' : 'Needs Attention'}</p>
-          <p style={{ fontSize: 12, color: '#B45309', margin: 0 }}>{isAr ? 'التسويق والمنتج يحتاجان تدخلاً فورياً' : 'Marketing and Product need immediate focus'}</p>
-        </div>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        {dims.map(dim => (
-          <div key={dim.name} style={{ padding: '8px 10px', background: '#F9FAFB', borderRadius: 8, border: '1px solid #E5E7EB' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>{dim.name}</span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: dim.color }}>{dim.score}</span>
-            </div>
-            <div style={{ height: 4, background: '#E5E7EB', borderRadius: 99 }}>
-              <div style={{ height: 4, background: dim.color, borderRadius: 99, width: `${dim.score}%` }} />
-            </div>
-          </div>
-        ))}
-      </div>
-      <Link href="/signup" style={{ display: 'block', marginTop: 14, padding: '10px', background: '#FFF7ED', border: '1px solid #FDE68A', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#D97706', textDecoration: 'none', textAlign: 'center' }}>
-        {isAr ? 'أجرِ تقييمك الخاص ←' : 'Take your own assessment →'}
-      </Link>
-    </div>
-  )
-}
-
-function FAQItem({ q, a, isAr }: { q: string; a: string; isAr: boolean }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div style={{ borderBottom: '1px solid #E5E7EB' }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', padding: '18px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', flex: 1, textAlign: isAr ? 'right' : 'left' }}>{q}</span>
-        <span style={{ fontSize: 20, color: '#4B35CC', flexShrink: 0, transform: open ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', lineHeight: 1 }}>+</span>
-      </button>
-      {open && <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.75, margin: '0 0 18px', textAlign: isAr ? 'right' : 'left' }}>{a}</p>}
-    </div>
-  )
-}
-
-// ── Main ──────────────────────────────────────────────────────
+// ── Main page ─────────────────────────────────────────────────
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>('en')
-  const [activeTab, setActiveTab] = useState(0)
   const isAr = lang === 'ar'
   const c = CONTENT[lang]
 
@@ -626,20 +731,14 @@ export default function LandingPage() {
     if (saved === 'ar' || saved === 'en') setLang(saved as Lang)
   }, [])
 
-  useEffect(() => {
-    const iv = setInterval(() => setActiveTab(t => (t + 1) % 5), 3200)
-    return () => clearInterval(iv)
-  }, [])
-
   function toggleLang() {
     const next: Lang = lang === 'en' ? 'ar' : 'en'
     setLang(next)
     localStorage.setItem('preferred_lang', next)
   }
 
-  const NAV: React.CSSProperties = { position: 'sticky', top: 0, zIndex: 100, background: 'rgba(9,7,26,0.96)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 24px' }
-  const WRAP: React.CSSProperties = { maxWidth: 1080, margin: '0 auto' }
-  const SEC = (bg: string): React.CSSProperties => ({ padding: '96px 24px', background: bg })
+  const W: React.CSSProperties = { maxWidth: 1080, margin: '0 auto' }
+  const S = (bg: string): React.CSSProperties => ({ padding: '96px 24px', background: bg })
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} style={{ fontFamily: "'Inter',-apple-system,sans-serif", color: '#111827', overflowX: 'hidden' }}>
@@ -651,23 +750,28 @@ export default function LandingPage() {
         .btn{display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#4B35CC,#7C3AED);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;font-family:inherit;box-shadow:0 4px 20px rgba(75,53,204,0.3);}
         .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(75,53,204,0.4);}
         .btn-o{display:inline-block;padding:14px 28px;background:transparent;color:#E2E8F0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:inherit;}
-        .btn-o:hover{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05);}
+        .btn-o:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.07);}
         .ey{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#4B35CC;margin-bottom:12px;display:block;}
         .sh{font-size:clamp(26px,4vw,40px);font-weight:800;color:#09071A;line-height:1.2;letter-spacing:-0.02em;}
+        @media(max-width:900px){.scroll-grid{grid-template-columns:1fr!important;}.sticky-canvas{position:relative!important;top:0!important;}}
         @media(max-width:768px){.g2{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr 1fr!important;}.g4{grid-template-columns:1fr 1fr!important;}.hm{display:none!important;}}
       `}</style>
 
       {/* Nav */}
-      <nav style={NAV}>
-        <div style={{ ...WRAP, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(9,7,26,0.96)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 24px' }}>
+        <div style={{ ...W, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <span style={{ fontSize: 20, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', lineHeight: 1.15 }}>Elvanis</span>
             <span style={{ fontSize: 9, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>AI Business OS</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={toggleLang} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{lang === 'en' ? 'عربي' : 'English'}</button>
+            <button onClick={toggleLang} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+              {lang === 'en' ? 'عربي' : 'English'}
+            </button>
             <Link href="/login" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
-            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }} className="hm">{isAr ? 'احجز عرضاً' : 'Book a demo'}</a>
+            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="hm" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }}>
+              {isAr ? 'احجز عرضاً' : 'Book a demo'}
+            </a>
             <Link href="/signup" style={{ display: 'inline-block', padding: '8px 18px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
           </div>
         </div>
@@ -676,7 +780,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section style={{ background: 'linear-gradient(180deg,#09071A 0%,#0F0A2E 60%,#09071A 100%)', padding: '120px 24px 96px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(circle,rgba(75,53,204,0.12) 0%,transparent 70%)', pointerEvents: 'none' as const }} />
-        <div style={{ ...WRAP, textAlign: 'center', position: 'relative' }}>
+        <div style={{ ...W, textAlign: 'center', position: 'relative' }}>
           <span className="ey" style={{ color: '#C9A84C' }}>{c.hero.eyebrow}</span>
           <h1 style={{ fontSize: 'clamp(36px,6vw,68px)', fontWeight: 900, color: '#F8F4EE', lineHeight: 1.08, letterSpacing: '-0.03em', maxWidth: 820, margin: '0 auto 24px' }}>
             {c.hero.headline_before}<span className="hl">{c.hero.headline_highlight}</span>{c.hero.headline_after}
@@ -684,7 +788,7 @@ export default function LandingPage() {
           <p style={{ fontSize: 'clamp(16px,2vw,20px)', color: '#CBD5E1', lineHeight: 1.7, maxWidth: 540, margin: '0 auto 40px' }}>{c.hero.sub}</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' as const, marginBottom: 72 }}>
             <Link href="/signup" className="btn">{c.hero.cta_primary}</Link>
-            <a href="#how" className="btn-o">{c.hero.cta_secondary}</a>
+            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="btn-o">{c.hero.cta_secondary}</a>
           </div>
           <div style={{ display: 'flex', gap: 56, justifyContent: 'center', flexWrap: 'wrap' as const }}>
             {c.hero.stats.map(s => (
@@ -699,7 +803,7 @@ export default function LandingPage() {
 
       {/* Logos */}
       <section style={{ background: '#F8F4EE', padding: '32px 24px', borderBottom: '1px solid #E5E7EB' }}>
-        <div style={{ ...WRAP, textAlign: 'center' }}>
+        <div style={{ ...W, textAlign: 'center' }}>
           <span style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.1em', textTransform: 'uppercase' as const, display: 'block', marginBottom: 16 }}>{c.logos.eyebrow}</span>
           <div style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap' as const }}>
             {c.logos.items.map(logo => <span key={logo} style={{ fontSize: 14, fontWeight: 700, color: '#9CA3AF' }}>{logo}</span>)}
@@ -708,8 +812,8 @@ export default function LandingPage() {
       </section>
 
       {/* Problem */}
-      <section style={SEC('#fff')}>
-        <div style={{ ...WRAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }} className="g2">
+      <section style={S('#fff')}>
+        <div style={{ ...W, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }} className="g2">
           <div>
             <span className="ey">{c.problem.eyebrow}</span>
             <h2 className="sh" style={{ marginBottom: 20 }}>{c.problem.headline}</h2>
@@ -720,7 +824,7 @@ export default function LandingPage() {
             {c.problem.pains.map((p, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: '#F8F4EE', borderRadius: 12, border: '1px solid #E5E7EB' }}>
                 <span style={{ fontSize: 22, flexShrink: 0 }}>{p.icon}</span>
-                <p style={{ fontSize: 14, color: '#374151', margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{p.text}</p>
+                <p style={{ fontSize: 14, color: '#374151', margin: 0, fontWeight: 500 }}>{p.text}</p>
               </div>
             ))}
           </div>
@@ -728,8 +832,8 @@ export default function LandingPage() {
       </section>
 
       {/* How */}
-      <section id="how" style={SEC('#09071A')}>
-        <div style={WRAP}>
+      <section id="how" style={S('#09071A')}>
+        <div style={W}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <span className="ey" style={{ color: '#C9A84C' }}>{c.how.eyebrow}</span>
             <h2 className="sh" style={{ color: '#F8F4EE' }}>{c.how.headline}</h2>
@@ -748,9 +852,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Focus metric */}
-      <section style={SEC('#F8F4EE')}>
-        <div style={WRAP}>
+      {/* Focus */}
+      <section style={S('#F8F4EE')}>
+        <div style={W}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <span className="ey">{c.focus.eyebrow}</span>
             <h2 className="sh" style={{ maxWidth: 680, margin: '0 auto 16px' }}>{c.focus.headline}</h2>
@@ -770,8 +874,8 @@ export default function LandingPage() {
       </section>
 
       {/* Dimensions */}
-      <section style={SEC('#fff')}>
-        <div style={WRAP}>
+      <section style={S('#fff')}>
+        <div style={W}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <span className="ey">{c.dimensions.eyebrow}</span>
             <h2 className="sh">{c.dimensions.headline}</h2>
@@ -789,8 +893,8 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section style={SEC('#09071A')}>
-        <div style={WRAP}>
+      <section style={S('#09071A')}>
+        <div style={W}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <span className="ey" style={{ color: '#C9A84C' }}>{c.features.eyebrow}</span>
             <h2 className="sh" style={{ color: '#F8F4EE' }}>{c.features.headline}</h2>
@@ -807,42 +911,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo */}
-      <section style={SEC('#F8F4EE')}>
-        <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <span className="ey">{c.demo.eyebrow}</span>
-            <h2 className="sh">{c.demo.headline}</h2>
+      {/* Scroll Story Demo */}
+      <section style={{ background: '#09071A', padding: '96px 24px' }}>
+        <div style={W}>
+          <div style={{ textAlign: 'center', marginBottom: 72 }}>
+            <span className="ey" style={{ color: '#C9A84C' }}>{c.demo.eyebrow}</span>
+            <h2 className="sh" style={{ color: '#F8F4EE', marginBottom: 16 }}>{c.demo.headline}</h2>
+            <p style={{ fontSize: 16, color: '#64748B', maxWidth: 480, margin: '0 auto' }}>{c.demo.sub}</p>
           </div>
-          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E5E7EB', boxShadow: '0 20px 60px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-            <div style={{ background: '#F3F4F6', padding: '10px 16px', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444' }} />
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F59E0B' }} />
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }} />
-              <span style={{ fontSize: 11, color: '#9CA3AF', marginInlineStart: 8 }}>app.elvanis.com</span>
-            </div>
-            <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', overflowX: 'auto' as const }}>
-              {c.demo.tabs.map((tab, i) => (
-                <button key={tab.id} onClick={() => setActiveTab(i)} style={{ flex: 1, padding: '11px 6px', background: activeTab === i ? '#fff' : '#F9FAFB', border: 'none', borderBottom: `2px solid ${activeTab === i ? '#4B35CC' : 'transparent'}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: activeTab === i ? 700 : 500, color: activeTab === i ? '#4B35CC' : '#6B7280', transition: 'all 0.2s', whiteSpace: 'nowrap' as const }}>
-                  {tab.icon} {tab.label}
-                </button>
-              ))}
-            </div>
-            <div style={{ padding: 20, minHeight: 280 }}>
-              {activeTab === 0 && <DemoConnect isAr={isAr} />}
-              {activeTab === 1 && <DemoSignals isAr={isAr} />}
-              {activeTab === 2 && <DemoConflict isAr={isAr} />}
-              {activeTab === 3 && <DemoDigest isAr={isAr} />}
-              {activeTab === 4 && <DemoAssessment isAr={isAr} />}
-            </div>
+          <ScrollStory isAr={isAr} />
+          {/* Demo CTAs */}
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const, marginTop: 80 }}>
+            <Link href="/signup" className="btn">{c.demo.cta_primary}</Link>
+            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="btn-o">{c.demo.cta_secondary}</a>
           </div>
-          <p style={{ textAlign: 'center', fontSize: 12, color: '#9CA3AF', marginTop: 14 }}>{c.demo.cycling}</p>
         </div>
       </section>
 
       {/* AI Readiness */}
-      <section style={SEC('#fff')}>
-        <div style={{ ...WRAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }} className="g2">
+      <section style={S('#fff')}>
+        <div style={{ ...W, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }} className="g2">
           <div>
             <span className="ey">{c.ai.eyebrow}</span>
             <h2 className="sh" style={{ marginBottom: 16 }}>{c.ai.headline}</h2>
@@ -868,8 +956,8 @@ export default function LandingPage() {
       </section>
 
       {/* Advisory */}
-      <section style={SEC('#09071A')}>
-        <div style={WRAP}>
+      <section style={S('#09071A')}>
+        <div style={W}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <span className="ey" style={{ color: '#C9A84C' }}>{c.advisory.eyebrow}</span>
             <h2 className="sh" style={{ color: '#F8F4EE', marginBottom: 16 }}>{c.advisory.headline}</h2>
@@ -893,10 +981,10 @@ export default function LandingPage() {
 
       {/* Book a Demo */}
       <section style={{ padding: '80px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
           <span className="ey">{c.demo_cta.eyebrow}</span>
           <h2 className="sh" style={{ marginBottom: 16 }}>{c.demo_cta.headline}</h2>
-          <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.75, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px' }}>{c.demo_cta.body}</p>
+          <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.75, maxWidth: 500, margin: '0 auto 36px' }}>{c.demo_cta.body}</p>
           <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '15px 32px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(75,53,204,0.3)', marginBottom: 12 }}>
             {c.demo_cta.button}
           </a>
@@ -905,7 +993,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section style={SEC('#F8F4EE')}>
+      <section id="pricing" style={S('#F8F4EE')}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <span className="ey">{c.pricing.eyebrow}</span>
@@ -942,7 +1030,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section style={SEC('#fff')}>
+      <section style={S('#fff')}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <span className="ey">{c.faq.eyebrow}</span>
@@ -952,20 +1040,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Final CTA */}
       <section style={{ padding: '96px 24px', background: 'linear-gradient(135deg,#09071A 0%,#1E1B4B 100%)' }}>
-        <div style={{ ...WRAP, textAlign: 'center' }}>
+        <div style={{ ...W, textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(32px,5vw,54px)', fontWeight: 900, color: '#F8F4EE', margin: '0 0 12px', letterSpacing: '-0.02em' }}>{c.cta.headline}</h2>
           <p style={{ fontSize: 22, color: '#C9A84C', fontWeight: 700, margin: '0 0 40px' }}>{c.cta.sub}</p>
-          <Link href="/signup" style={{ display: 'inline-block', padding: '16px 40px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 30px rgba(75,53,204,0.4)' }}>{c.cta.button}</Link>
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const }}>
+            <Link href="/signup" style={{ display: 'inline-block', padding: '16px 40px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 30px rgba(75,53,204,0.4)' }}>{c.cta.button}</Link>
+            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '16px 40px', background: 'transparent', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none' }}>
+              {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
+            </a>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer style={{ background: '#09071A', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '56px 24px 40px' }}>
-        <div style={WRAP}>
+        <div style={W}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, marginBottom: 48 }} className="g2">
-            {/* Brand */}
             <div>
               <span style={{ fontSize: 18, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', marginBottom: 8 }}>Elvanis</span>
               <p style={{ fontSize: 13, color: '#6B7280', maxWidth: 240, lineHeight: 1.7, margin: '0 0 20px' }}>{c.footer.tagline}</p>
@@ -973,7 +1065,6 @@ export default function LandingPage() {
                 {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
               </a>
             </div>
-            {/* Link groups */}
             {c.footer.groups.map(group => (
               <div key={group.title}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase' as const, letterSpacing: '0.1em', margin: '0 0 14px' }}>{group.title}</p>
