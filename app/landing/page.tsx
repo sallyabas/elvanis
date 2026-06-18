@@ -445,7 +445,7 @@ const CONTENT = {
     hero: {
       eyebrow: '✦ AI-POWERED STRATEGIC DIAGNOSTICS',
       headline_before: 'See ', headline_highlight: 'exactly', headline_after: " what's breaking your business.",
-      sub: 'Elvanis connects to your existing tools, analyses your real operational data, and hands you an immediate roadmap of structural issues to fix first — ranked by business impact.',
+      sub: 'Elvanis connects to your existing tools, analyses your real operational data, and hands you an immediate roadmap of exactly what to fix first — ranked by business impact. Built for founders and owner-operators who run their business themselves.',
       cta_primary: 'Start the diagnostic →',
       cta_secondary: 'See how it works',
       stats: [
@@ -456,7 +456,7 @@ const CONTENT = {
     },
     logos: { eyebrow: 'Connects to your stack', items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'] },
     problem: {
-      eyebrow: "The founder's dilemma",
+      eyebrow: "The operator's dilemma",
       headline: 'Data is everywhere. Clarity is rare.',
       body: 'You have dashboards, reports, and alerts — but still can\'t answer: "What is the single most important thing to fix right now?" Elvanis was built to answer that question, every time you log in.',
       pains: [
@@ -512,7 +512,7 @@ const CONTENT = {
       ],
     },
     demo: {
-      eyebrow: "Here's what founders see on day one",
+      eyebrow: "Here's what operators see on day one",
       headline: 'Watch Elvanis work.',
       sub: 'Auto-plays through the full story. Click any step or use the arrows to explore.',
     },
@@ -551,8 +551,8 @@ const CONTENT = {
       headline: "Start free. Scale when you're ready.",
       popular: 'Most popular',
       plans: [
-        { name: 'Free', price: '£0', period: 'forever', desc: 'For founders getting started with diagnostics', cta: 'Start free', features: ['Business health score', 'Up to 3 tool connections', 'Unlimited signals', 'Monthly scan cycle', 'Business assessment', 'Goal tracking'], highlighted: false },
-        { name: 'Navigator', price: '£49', period: 'per month', desc: 'For founders who need weekly intelligence', cta: 'Start Navigator', features: ['Everything in Free', 'Weekly scans', 'Unlimited tool connections', 'Monthly AI Action Digest', 'On-demand manual scans', 'Conflict resolution', 'Impact tracking', 'Priority advisory access'], highlighted: true },
+        { name: 'Free', price: '£0', period: 'forever', desc: 'For founders and owner-operators getting started', cta: 'Start free', features: ['Business health score', 'Up to 3 tool connections', 'Unlimited signals', 'Monthly scan cycle', 'Business assessment', 'Goal tracking'], highlighted: false },
+        { name: 'Navigator', price: '£49', period: 'per month', desc: 'For founders and owner-operators who need weekly intelligence', cta: 'Start Navigator', features: ['Everything in Free', 'Weekly scans', 'Unlimited tool connections', 'Monthly AI Action Digest', 'On-demand manual scans', 'Conflict resolution', 'Impact tracking', 'Priority advisory access'], highlighted: true },
       ],
     },
     faq: {
@@ -561,7 +561,7 @@ const CONTENT = {
       items: [
         { q: 'Is my data safe?', a: 'Yes. Elvanis only requests read-only access to your connected tools. We never write or modify your data. All data is encrypted in transit and at rest, stored on EU-hosted infrastructure.' },
         { q: 'How long does it take to see results?', a: 'Most founders see their first diagnostic signals within 10 minutes of connecting a tool. The business assessment takes around 10 minutes and gives you an immediate scored breakdown across 6 dimensions.' },
-        { q: 'Does it work for non-technical founders?', a: 'Absolutely. Elvanis is built for operators, not engineers. No code, no setup, no dashboards to configure. Connect your tools, take the assessment, and your diagnosis is ready.' },
+        { q: 'Does it work for non-technical founders and owner-operators?', a: 'Absolutely. Elvanis is built for operators, not engineers. No code, no setup, no dashboards to configure. Connect your tools, take the assessment, and your diagnosis is ready.' },
         { q: 'Can I cancel at any time?', a: 'Yes. There are no long-term contracts. You can cancel Navigator at any time from your profile. Your data is retained for 30 days after cancellation.' },
         { q: 'What tools does Elvanis connect to?', a: 'Shopify, Jira, Google Analytics 4, Intercom, and Trustpilot. You can also upload CSV exports from any tool. More integrations are being added regularly.' },
         { q: 'How is Elvanis different from a dashboard?', a: 'A dashboard shows you data. Elvanis diagnoses it. We read your metrics, detect patterns across multiple tools, rank issues by business impact, and tell you exactly what to fix first — with a recommended action.' },
@@ -569,7 +569,7 @@ const CONTENT = {
     },
     cta: { headline: 'Your business is sending signals.', sub: 'Start reading them.', button: 'Diagnose my business →' },
     footer: {
-      tagline: 'AI-powered business diagnostics for founder-led companies.',
+      tagline: 'AI-powered business diagnostics for founders and owner-operators who run their business themselves.',
       groups: [
         { title: 'Product', links: [{ label: 'Start free', href: '/signup' }, { label: 'Pricing', href: '#pricing' }, { label: 'Book a demo', href: 'https://calendly.com/elvanis/book-demo-session' }] },
         { title: 'Services', links: [{ label: 'Strategic Roadmap', href: '/signup' }, { label: 'CPO Advisory', href: '/signup' }, { label: 'Contact us', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
@@ -583,7 +583,7 @@ const CONTENT = {
     hero: {
       eyebrow: '✦ التشخيص الاستراتيجي المدعوم بالذكاء الاصطناعي',
       headline_before: 'اكتشف ', headline_highlight: 'فوراً', headline_after: ' الاختناقات الهيكلية التي تعطّل نمو أعمالك.',
-      sub: 'يتصل إلفانيس بأدواتك الحالية، يحلّل بياناتك التشغيلية الحقيقية، ويمنحك خارطة طريق فورية بالمشاكل الهيكلية التي يجب إصلاحها أولاً — مرتّبةً تلقائياً حسب الأثر التجاري.',
+      sub: 'يتصل إلفانيس بأدواتك الحالية، يحلّل بياناتك التشغيلية الحقيقية، ويمنحك خارطة طريق فورية بما يجب إصلاحه أولاً — مرتّبةً حسب الأثر التجاري. مبني للمؤسسين وأصحاب الأعمال الذين يديرون أعمالهم بأنفسهم.',
       cta_primary: 'ابدأ التشخيص ←',
       cta_secondary: 'شاهد كيف يعمل',
       stats: [
@@ -594,7 +594,7 @@ const CONTENT = {
     },
     logos: { eyebrow: 'يتصل بأدواتك', items: ['Shopify', 'Jira', 'Google Analytics', 'Intercom', 'Trustpilot'] },
     problem: {
-      eyebrow: 'معضلة المؤسس',
+      eyebrow: 'معضلة المؤسس وصاحب العمل',
       headline: 'البيانات في كل مكان. الوضوح نادر.',
       body: 'لديك لوحات تحكم وتقارير وتنبيهات — لكنك لا تزال غير قادر على الإجابة: "ما هو الشيء الأهم الذي يجب إصلاحه الآن؟" بُني إلفانيس للإجابة على هذا السؤال في كل مرة تسجّل الدخول.',
       pains: [
@@ -689,8 +689,8 @@ const CONTENT = {
       headline: 'ابدأ مجاناً. طوّر عندما تكون مستعداً.',
       popular: 'الأكثر شيوعاً',
       plans: [
-        { name: 'مجاني', price: '£0', period: 'للأبد', desc: 'للمؤسسين الذين يبدأون مع التشخيص', cta: 'ابدأ مجاناً', features: ['درجة صحة الأعمال', 'حتى 3 اتصالات أدوات', 'إشارات غير محدودة', 'دورة فحص شهرية', 'تقييم الأعمال', 'تتبع الأهداف'], highlighted: false },
-        { name: 'Navigator', price: '£49', period: 'شهرياً', desc: 'للمؤسسين الذين يحتاجون ذكاءً أسبوعياً', cta: 'ابدأ Navigator', features: ['كل ما في المجاني', 'فحوصات أسبوعية', 'اتصالات أدوات غير محدودة', 'ملخص إجراءات شهري بالذكاء الاصطناعي', 'فحوصات يدوية عند الطلب', 'حل التعارضات', 'تتبع الأثر', 'وصول أولوي للاستشارة'], highlighted: true },
+        { name: 'مجاني', price: '£0', period: 'للأبد', desc: 'للمؤسسين وأصحاب الأعمال الذين يبدأون مع التشخيص', cta: 'ابدأ مجاناً', features: ['درجة صحة الأعمال', 'حتى 3 اتصالات أدوات', 'إشارات غير محدودة', 'دورة فحص شهرية', 'تقييم الأعمال', 'تتبع الأهداف'], highlighted: false },
+        { name: 'Navigator', price: '£49', period: 'شهرياً', desc: 'للمؤسسين وأصحاب الأعمال الذين يحتاجون ذكاءً أسبوعياً', cta: 'ابدأ Navigator', features: ['كل ما في المجاني', 'فحوصات أسبوعية', 'اتصالات أدوات غير محدودة', 'ملخص إجراءات شهري بالذكاء الاصطناعي', 'فحوصات يدوية عند الطلب', 'حل التعارضات', 'تتبع الأثر', 'وصول أولوي للاستشارة'], highlighted: true },
       ],
     },
     faq: {
@@ -707,7 +707,7 @@ const CONTENT = {
     },
     cta: { headline: 'أعمالك ترسل إشارات.', sub: 'ابدأ قراءتها.', button: 'شخّص أعمالي ←' },
     footer: {
-      tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للشركات التي يقودها المؤسسون.',
+      tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للمؤسسين وأصحاب الأعمال الذين يديرون أعمالهم بأنفسهم.',
       groups: [
         { title: 'المنتج', links: [{ label: 'ابدأ مجاناً', href: '/signup' }, { label: 'الأسعار', href: '#pricing' }, { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis/book-demo-session' }] },
         { title: 'الخدمات', links: [{ label: 'خارطة طريق استراتيجية', href: '/signup' }, { label: 'استشارة CPO', href: '/signup' }, { label: 'تواصل معنا', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
