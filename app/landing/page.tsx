@@ -780,7 +780,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section style={{ background: 'linear-gradient(180deg,#09071A 0%,#0F0A2E 60%,#09071A 100%)', padding: '120px 24px 96px', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'linear-gradient(180deg,#09071A 0%,#0F0A2E 60%,#09071A 100%)', padding: '160px 24px 112px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(circle,rgba(75,53,204,0.12) 0%,transparent 70%)', pointerEvents: 'none' as const }} />
         <div style={{ ...W, textAlign: 'center', position: 'relative' }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#C9A84C', letterSpacing: '0.15em', display: 'block', marginBottom: 16 }}>{c.hero.eyebrow}</span>
