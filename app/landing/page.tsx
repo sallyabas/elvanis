@@ -767,14 +767,14 @@ export default function LandingPage() {
             <span style={{ fontSize: 9, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>AI Business OS</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <Link href="/login" style={{ fontSize: 13, color: '#64748B', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
+            <Link href="https://app.elvanis.com/login" style={{ fontSize: 13, color: '#64748B', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
             <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="hm" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }}>
               {isAr ? 'احجز عرضاً' : 'Book a demo'}
             </a>
             <button onClick={toggleLang} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#64748B', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
               {lang === 'en' ? 'عربي' : 'EN'}
             </button>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '9px 20px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
+            <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '9px 20px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const }}>{c.nav.cta}</Link>
           </div>
         </div>
       </nav>
@@ -789,7 +789,7 @@ export default function LandingPage() {
           </h1>
           <p style={{ fontSize: 'clamp(16px,2vw,19px)', color: '#CBD5E1', lineHeight: 1.75, maxWidth: 580, margin: '0 auto 40px' }}>{c.hero.sub}</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' as const, marginBottom: 72 }}>
-            <Link href="/signup" className="btn">{c.hero.cta_primary}</Link>
+            <Link href="https://app.elvanis.com/signup" className="btn">{c.hero.cta_primary}</Link>
             <button onClick={scrollToDemo} className="btn-o" style={{ cursor: 'pointer' }}>{c.hero.cta_secondary}</button>
           </div>
         </div>
@@ -812,7 +812,7 @@ export default function LandingPage() {
             <span className="ey">{c.problem.eyebrow}</span>
             <h2 className="sh" style={{ marginBottom: 20 }}>{c.problem.headline}</h2>
             <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.75, marginBottom: 32 }}>{c.problem.body}</p>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '13px 26px', background: '#09071A', color: '#F8F4EE', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{c.hero.cta_primary}</Link>
+            <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '13px 26px', background: '#09071A', color: '#F8F4EE', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{c.hero.cta_primary}</Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {c.problem.pains.map((p, i) => (
@@ -914,7 +914,7 @@ export default function LandingPage() {
           </div>
           <DemoPanel isAr={isAr} />
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const, marginTop: 48 }}>
-            <Link href="/signup" className="btn">{c.hero.cta_primary}</Link>
+            <Link href="https://app.elvanis.com/signup" className="btn">{c.hero.cta_primary}</Link>
             <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="btn-o">
               {isAr ? 'احجز عرضاً مباشراً ←' : 'Book a live demo →'}
             </a>
@@ -929,7 +929,7 @@ export default function LandingPage() {
             <span className="ey">{c.ai.eyebrow}</span>
             <h2 className="sh" style={{ marginBottom: 16 }}>{c.ai.headline}</h2>
             <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.75, marginBottom: 32 }}>{c.ai.body}</p>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '13px 26px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{c.hero.cta_primary}</Link>
+            <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '13px 26px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{c.hero.cta_primary}</Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {c.ai.opportunities.map((opp, i) => (
@@ -967,7 +967,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{ textAlign: 'center' }}>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '13px 28px', background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', marginBottom: 12 }}>{c.advisory.cta}</Link>
+            <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '13px 28px', background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', marginBottom: 12 }}>{c.advisory.cta}</Link>
             <p style={{ fontSize: 12, color: '#4B5563', marginTop: 8 }}>{c.advisory.note}</p>
           </div>
         </div>
@@ -1014,7 +1014,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/signup" style={{ display: 'block', padding: 13, textAlign: 'center', background: plan.highlighted ? '#F8F4EE' : '#09071A', color: plan.highlighted ? '#4B35CC' : '#F8F4EE', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+                <Link href="https://app.elvanis.com/signup" style={{ display: 'block', padding: 13, textAlign: 'center', background: plan.highlighted ? '#F8F4EE' : '#09071A', color: plan.highlighted ? '#4B35CC' : '#F8F4EE', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
                   {plan.cta}
                 </Link>
               </div>
@@ -1040,7 +1040,7 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 'clamp(32px,5vw,54px)', fontWeight: 900, color: '#F8F4EE', margin: '0 0 12px', letterSpacing: '-0.02em' }}>{c.cta.headline}</h2>
           <p style={{ fontSize: 22, color: '#C9A84C', fontWeight: 700, margin: '0 0 40px' }}>{c.cta.sub}</p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const }}>
-            <Link href="/signup" style={{ display: 'inline-block', padding: '16px 40px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 30px rgba(75,53,204,0.4)' }}>{c.cta.button}</Link>
+            <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '16px 40px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 30px rgba(75,53,204,0.4)' }}>{c.cta.button}</Link>
             <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '16px 40px', background: 'transparent', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none' }}>
               {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
             </a>
