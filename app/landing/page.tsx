@@ -931,7 +931,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const, marginTop: 48 }}>
             <Link href="/signup" className="btn">{c.hero.cta_primary}</Link>
             <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="btn-o">
-              {isAr ? 'شاهده ببياناتك الخاصة ←' : 'See it with your own data →'}
+              {isAr ? 'احجز عرضاً مباشراً ←' : 'Book a live demo →'}
             </a>
           </div>
         </div>
