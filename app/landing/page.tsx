@@ -588,7 +588,7 @@ const CONTENT = {
     nav: { login: 'الذهاب إلى حسابي', cta: 'ابدأ مجاناً' },
     hero: {
       eyebrow: '✦ التشخيص الاستراتيجي المدعوم بالذكاء الاصطناعي',
-      headline_before: 'اعرف ', headline_highlight: 'بالضبط', headline_after: ' ما الذي يعيق نمو أعمالك.',
+      headline_before: 'اكتشف ', headline_highlight: 'فوراً', headline_after: ' الاختناقات الهيكلية التي تعطّل نمو أعمالك.',
       sub: 'يتصل إلفانيس بأدواتك الحالية، يحلّل بياناتك التشغيلية الحقيقية، ويمنحك خارطة طريق فورية بالمشاكل الهيكلية التي يجب إصلاحها أولاً — مرتّبةً تلقائياً حسب الأثر التجاري.',
       cta_primary: 'ابدأ التشخيص ←',
       cta_secondary: '👁️ شاهد كيف يعمل',
@@ -846,14 +846,14 @@ export default function LandingPage() {
             <span className="ey" style={{ color: '#C9A84C' }}>{c.how.eyebrow}</span>
             <h2 className="sh" style={{ color: '#F8F4EE' }}>{c.how.headline}</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }} className="g3">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 40 }} className="g3">
             {c.how.steps.map((step, i) => (
               <div key={i} style={{ padding: 28, background: 'rgba(255,255,255,0.04)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: '#4B35CC', letterSpacing: '0.1em', display: 'block', marginBottom: 16 }}>{step.num}</span>
                 <span style={{ fontSize: 28, display: 'block', marginBottom: 12 }}>{step.icon}</span>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: '#F8F4EE', margin: '0 0 10px' }}>{step.title}</h3>
                 <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.65, margin: 0 }}>{step.desc}</p>
-                {i < 2 && <div className="hm" style={{ position: 'absolute', top: '50%', [isAr ? 'left' : 'right']: -13, transform: 'translateY(-50%)', fontSize: 20, color: '#4B35CC' }}>{isAr ? '←' : '→'}</div>}
+                {i < 2 && <div className="hm" style={{ position: 'absolute', top: '50%', [isAr ? 'left' : 'right']: -20, transform: 'translateY(-50%)', fontSize: 16, color: '#4B35CC', zIndex: 1, background: '#09071A', padding: '0 4px' }}>{isAr ? '←' : '→'}</div>}
               </div>
             ))}
           </div>
