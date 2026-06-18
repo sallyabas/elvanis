@@ -31,6 +31,7 @@ const PUBLIC_ROUTES = [
   '/suspended',
   '/terms',
   '/privacy',
+  '/landing',
 ]
 
 export async function middleware(request: NextRequest) {
