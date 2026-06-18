@@ -67,49 +67,43 @@ function C1Connect({ isAr, active }: { isAr: boolean; active: boolean }) {
 }
 
 function C2Scan({ isAr, active }: { isAr: boolean; active: boolean }) {
-  const [counts, setCounts] = useState([0, 0, 0, 0])
-  const targets = [8432, 1204, 3, 847]
-  const labels = isAr
-    ? ['طلب معالج', 'تذكرة دعم', 'سبرينتات تتبّعت', 'تقييم Trustpilot']
-    : ['orders processed', 'support tickets', 'sprints tracked', 'Trustpilot reviews']
-  useEffect(() => {
-    if (!active) return
-    setCounts([0, 0, 0, 0])
-    targets.forEach((target, idx) => {
-      const dur = 2000
-      const start = Date.now()
-      const tick = () => {
-        const p = Math.min((Date.now() - start) / dur, 1)
-        const eased = 1 - Math.pow(1 - p, 2)
-        setCounts(prev => { const next = [...prev]; next[idx] = Math.round(eased * target); return next })
-        if (p < 1) requestAnimationFrame(tick)
-      }
-      setTimeout(() => requestAnimationFrame(tick), idx * 300)
-    })
-  }, [active])
   const [pulse, setPulse] = useState(0)
+  const [lit, setLit] = useState<number[]>([])
+  const sources = [
+    { name: 'Shopify', icon: '🛍️', label: isAr ? 'الطلبات والإيرادات' : 'Orders & revenue' },
+    { name: 'Intercom', icon: '💬', label: isAr ? 'تذاكر الدعم' : 'Support tickets' },
+    { name: 'Jira', icon: '🔧', label: isAr ? 'السبرينتات والأخطاء' : 'Sprints & bugs' },
+    { name: 'GA4', icon: '📊', label: isAr ? 'الزيارات والتحويل' : 'Traffic & conversion' },
+  ]
   useEffect(() => {
     if (!active) return
-    const iv = setInterval(() => setPulse(p => (p + 1) % 3), 600)
+    setLit([])
+    setPulse(0)
+    const iv = setInterval(() => setPulse(p => (p + 1) % 3), 500)
+    sources.forEach((_, i) => setTimeout(() => setLit(p => [...p, i]), i * 400 + 200))
     return () => clearInterval(iv)
   }, [active])
   return (
     <div>
       <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 12, padding: '14px 16px', marginBottom: 14, textAlign: 'center' }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#0284C7', margin: '0 0 6px', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
-          ⚡ {isAr ? 'جارٍ الفحص' : 'Scanning'}
+        <p style={{ fontSize: 12, fontWeight: 700, color: '#0284C7', margin: 0, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
+          ⚡ {isAr ? 'جارٍ قراءة البيانات الحية' : 'Reading live data'}
           <span style={{ opacity: pulse === 0 ? 1 : 0.2, transition: 'opacity 0.2s' }}>.</span>
           <span style={{ opacity: pulse === 1 ? 1 : 0.2, transition: 'opacity 0.2s' }}>.</span>
           <span style={{ opacity: pulse === 2 ? 1 : 0.2, transition: 'opacity 0.2s' }}>.</span>
         </p>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {counts.map((count, i) => (
-          <div key={i} style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-            <p style={{ fontSize: 22, fontWeight: 900, color: '#4B35CC', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
-              {count.toLocaleString()}
-            </p>
-            <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>{labels[i]}</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {sources.map((src, i) => (
+          <div key={src.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lit.includes(i) ? '#F0F9FF' : '#F9FAFB', border: `1px solid ${lit.includes(i) ? '#BAE6FD' : '#E5E7EB'}`, borderRadius: 10, transition: 'all 0.4s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 16 }}>{src.icon}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{src.name}</span>
+              <span style={{ fontSize: 11, color: '#9CA3AF' }}>· {src.label}</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 600, color: lit.includes(i) ? '#0284C7' : '#D1D5DB' }}>
+              {lit.includes(i) ? (isAr ? 'جارٍ ✓' : 'Reading ✓') : '...'}
+            </span>
           </div>
         ))}
       </div>
@@ -797,14 +791,6 @@ export default function LandingPage() {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' as const, marginBottom: 72 }}>
             <Link href="/signup" className="btn">{c.hero.cta_primary}</Link>
             <button onClick={scrollToDemo} className="btn-o" style={{ cursor: 'pointer' }}>{c.hero.cta_secondary}</button>
-          </div>
-          <div style={{ display: 'flex', gap: 56, justifyContent: 'center', flexWrap: 'wrap' as const }}>
-            {c.hero.stats.map(s => (
-              <div key={s.label} style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: 34, fontWeight: 900, color: '#F8F4EE', margin: '0 0 4px', letterSpacing: '-0.02em' }}>{s.value}</p>
-                <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{s.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
