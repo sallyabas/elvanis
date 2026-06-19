@@ -8,6 +8,8 @@ import {
   ICP_TARGETING, REFERRAL_FREQUENCY, PROCESS_MATURITY,
   TEAM_SIZE, TECHNICAL_CAPACITY,
 } from '@/lib/assessment-ids'
+import { DIMENSIONS } from '@/lib/gravity-engine'
+
 
 const groq   = new Groq({ apiKey: process.env.GROQ_API_KEY })
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -42,15 +44,19 @@ function getOverallStatus(score: number): string {
   return 'assessment.status_critical'
 }
 
+const VALID_DIMENSION_KEYS = Object.keys(DIMENSIONS) // ['revenue', 'customer', 'marketing', 'team', 'product', 'strategy']
+
+
 const SYSTEM_PROMPT = `You are Elvanis, an expert AI business health advisor for founder-led startups and SMEs in the UK and Gulf. Diagnose why the business is not growing and identify root causes not just symptoms.
 
 RULES:
 - Every insight must reference the founder specific answers directly
 - Never give generic advice — be specific to their situation
 - When data clearly points to one conclusion state it directly
-- If language is ar respond entirely in Arabic Gulf dialect. Do NOT mix in English words, acronyms, or Latin letters anywhere — including for technical/business terms (e.g. write "العائد على الاستثمار" not "ROI", "نموذج العمل" not "business model"). Every word must be Arabic script. If en respond in English
+- If language is ar respond entirely in Arabic Gulf dialect. Do NOT mix in English words, acronyms, or Latin letters anywhere — including for technical/business terms. If en respond in English
 - You must respond with valid JSON only. No preamble. No explanation. No markdown fences. Pure JSON starting with { and ending with }
 - Do NOT include overall_score in your response — it is calculated server-side from your dimension scores
+- The "dimensions" object keys MUST be exactly these strings, nothing else: ${VALID_DIMENSION_KEYS.map(k => `"${k}"`).join(', ')}. Any other key name will be silently ignored by the application and will break score calculation.
 - Use these score-band definitions consistently across all 6 dimensions:
   0-40 (Critical): fundamental gaps requiring immediate intervention — e.g. no PMF validation, runway under 3 months, solo founder with no delegation capacity, no retention signal.
   41-65 (Needs Attention): foundational elements exist but execution gaps limit growth — e.g. some traction but inconsistent, processes exist but not followed, team aligned on some but not all priorities.
@@ -626,7 +632,13 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
     const stageKey = stageFromRequest === 'product_customers' ? 'product_customers' : 'early_stage'
     const weights  = WEIGHT_MATRICES[stageKey]
 
-    const aiDims = diagnosis.dimensions as Record<string, { score: number }> ?? {}
+        // Defensive: only accept dimension keys that exist in gravity-engine.ts.
+    // Protects against Groq drifting back to legacy long-form key names.
+    const aiDimsRaw = diagnosis.dimensions as Record<string, { score: number }> ?? {}
+    const aiDims: Record<string, { score: number }> = {}
+    for (const key of VALID_DIMENSION_KEYS) {
+      if (aiDimsRaw[key]) aiDims[key] = aiDimsRaw[key]
+    }
     const scoreRevenue   = aiDims?.revenue?.score   ?? 0
     const scorePmf       = aiDims?.product?.score   ?? 0
     const scoreTeam      = aiDims?.team?.score      ?? 0
