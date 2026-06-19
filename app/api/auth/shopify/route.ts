@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     try {
       const clientId = process.env.SHOPIFY_CLIENT_ID!
       const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`
-      const scopes = 'read_orders,read_customers,read_products,read_inventory'
+      const scopes = 'read_orders,read_customers,read_products,read_inventory,read_analytics'
     
       const authUrl = `https://${shopDomain}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`
     
