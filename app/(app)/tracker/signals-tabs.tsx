@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useT, useLang } from '@/app/context/LanguageContext'
+import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 type Signal = Record<string, unknown>
 
@@ -159,7 +160,9 @@ export default function SignalsTabs({ withComparison, newSignals, allSignals, la
                     <span style={{ fontSize: 15 }}>{dimensionIcon(signal.dimension as string)}</span>
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: '0 0 2px', lineHeight: 1.3 }}>
-                        {String(signal.signal_type).replace(/_/g, ' ')}
+                        {SIGNAL_GOAL_MAP[signal.signal_type as string]
+                          ? (lang === 'ar' ? SIGNAL_GOAL_MAP[signal.signal_type as string].label_ar : SIGNAL_GOAL_MAP[signal.signal_type as string].label)
+                          : String(signal.signal_type).replace(/_/g, ' ')}
                       </p>
                       <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0, lineHeight: 1.3 }}>
                         {String(signal[insightKey] ?? '').substring(0, 55)}{String(signal[insightKey] ?? '').length > 55 ? '…' : ''}

@@ -3,6 +3,7 @@ import { createServerComponentClient } from '@/lib/supabase-server'
 import GoalsSection from './goals-section'
 import SignalsTabs from './signals-tabs'
 import { getT } from '@/lib/translations'
+import { SIGNAL_GOAL_MAP } from '@/lib/signal-goal-map'
 
 const SIGNAL_LOWER_BETTER = new Set([
   'churn_spike', 'ticket_volume_increase', 'refund_spike',
@@ -390,10 +391,12 @@ export default async function BusinessHealthTrackerPage() {
                         background: '#FAFFFE',
                         minWidth: '750px',
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 14 }}>{dimensionIcon(signal.dimension)}</span>
                           <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>
-                            {String(signal.signal_type).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            {SIGNAL_GOAL_MAP[signal.signal_type as string]
+                              ? (lang === 'ar' ? SIGNAL_GOAL_MAP[signal.signal_type as string].label_ar : SIGNAL_GOAL_MAP[signal.signal_type as string].label)
+                              : String(signal.signal_type).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                           </span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
