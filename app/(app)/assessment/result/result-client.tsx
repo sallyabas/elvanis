@@ -190,9 +190,12 @@ export function CausalChainCard({ chain, lang, labels }: CausalChainCardProps) {
           <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
             ⚡ {chain.chain_name}
           </p>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
-            {chain.causeLabel} → {chain.symptomLabels.join(', ')}
-          </p>
+
+          <p style={{ fontSize: 12, color: '#6B7280', margin: 0, textAlign: isAr ? 'right' : 'left' }}>
+           {isAr
+           ? `${chain.symptomLabels.join('، ')} ← ${chain.causeLabel}`
+           : `${chain.causeLabel} → ${chain.symptomLabels.join(', ')}`}
+       </p>
         </div>
         <span style={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
           {expanded ? '▲' : '▼'}
