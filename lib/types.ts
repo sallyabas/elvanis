@@ -1,3 +1,6 @@
+import { DIMENSIONS, type DimensionId } from './gravity-engine'
+
+
 // ── Founder ────────────────────────────────────────────────────────────────
 export type Founder = {
     id: string
@@ -188,19 +191,18 @@ export type Founder = {
   }
   
   // ── Dimension keys ─────────────────────────────────────────────────────────
-  export type DimensionKey =
-    | 'revenue_financial'
-    | 'product_market_fit'
-    | 'team_operations'
-    | 'customer_retention'
-    | 'marketing_growth'
-    | 'strategy_goals'
+
+
+  // DimensionKey is re-exported from gravity-engine — single source of truth for dimension IDs.
+  // Never redefine dimension keys here. Add/remove dimensions in gravity-engine.ts only.
+  export type DimensionKey = DimensionId
   
-  export const DIMENSION_LABELS: Record<DimensionKey, { en: string; ar: string; color: string }> = {
-    revenue_financial:  { en: 'Revenue & Financial',    ar: 'الإيرادات والصحة المالية', color: '#2563EB' },
-    product_market_fit: { en: 'Product & Market Fit',   ar: 'الملاءمة مع السوق',        color: '#059669' },
-    team_operations:    { en: 'Team & Operations',       ar: 'الفريق والعمليات',          color: '#7C3AED' },
-    customer_retention: { en: 'Customer & Retention',    ar: 'العملاء والاحتفاظ',         color: '#D97706' },
-    marketing_growth:   { en: 'Marketing & Growth',      ar: 'التسويق والنمو',            color: '#DC2626' },
-    strategy_goals:     { en: 'Strategy & Goals',        ar: 'الاستراتيجية والأهداف',    color: '#1D4ED8' },
-  }
+  // Derived from gravity-engine.ts DIMENSIONS — not duplicated.
+  // Adding or removing a dimension in gravity-engine.ts automatically updates this.
+  export const DIMENSION_LABELS: Record<DimensionKey, { en: string; ar: string; color: string }> =
+    Object.fromEntries(
+      Object.entries(DIMENSIONS).map(([id, d]) => [
+        id,
+        { en: d.label, ar: d.label_ar, color: d.color },
+      ])
+    ) as Record<DimensionKey, { en: string; ar: string; color: string }>

@@ -17,20 +17,20 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 // Each matrix validated to sum exactly 1.00
 const WEIGHT_MATRICES: Record<string, Record<string, number>> = {
   early_stage: {
-    revenue_financial:  0.15,
-    product_market_fit: 0.30, // PMF is the core question for pre-product founders
-    team_operations:    0.20,
-    customer_retention: 0.10,
-    marketing_growth:   0.10, // Find PMF before scaling marketing
-    strategy_goals:     0.15, // Strategy clarity matters more than marketing early
+    revenue:   0.15,
+    product:   0.30, // PMF is the core question for pre-product founders
+    team:      0.20,
+    customer:  0.10,
+    marketing: 0.10, // Find PMF before scaling marketing
+    strategy:  0.15, // Strategy clarity matters more than marketing early
   },
   product_customers: {
-    revenue_financial:  0.25,
-    product_market_fit: 0.20,
-    team_operations:    0.20, // Ops pressure grows with customer load
-    customer_retention: 0.20,
-    marketing_growth:   0.07,
-    strategy_goals:     0.08,
+    revenue:   0.25,
+    product:   0.20,
+    team:      0.20, // Ops pressure grows with customer load
+    customer:  0.20,
+    marketing: 0.07,
+    strategy:  0.08,
   },
 }
 
@@ -64,39 +64,39 @@ RULES:
   "urgency_level": "normal",
   "overall_summary": "3-4 sentences specific to this founder referencing their actual answers",
   "primary_constraint": {
-    "dimension": "team_operations",
+    "dimension": "team",
     "summary": "specific explanation referencing their answers",
     "urgency": "high"
   },
   "causal_chains": [
     {
       "chain_name": "Velocity Chain",
-      "cause_dimension": "team_operations",
+      "cause_dimension": "team",
       "cause_signal": "specific signal from their answers",
-      "symptom_dimensions": ["customer_retention"],
+      "symptom_dimensions": ["customer"],
       "fix_order": "Fix team velocity first because..."
     }
   ],
   "dimensions": {
-    "revenue_financial":  { "score": 58, "status": "needs_attention", "headline": "specific headline", "diagnosis": "specific diagnosis referencing their answers", "top_actions": ["specific action 1", "specific action 2", "specific action 3"] },
-    "product_market_fit": { "score": 72, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
-    "team_operations":    { "score": 44, "status": "needs_attention", "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
-    "customer_retention": { "score": 38, "status": "critical",        "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
-    "marketing_growth":   { "score": 65, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
-    "strategy_goals":     { "score": 70, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] }
+    "revenue":   { "score": 58, "status": "needs_attention", "headline": "specific headline", "diagnosis": "specific diagnosis referencing their answers", "top_actions": ["specific action 1", "specific action 2", "specific action 3"] },
+    "product":   { "score": 72, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
+    "team":      { "score": 44, "status": "needs_attention", "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
+    "customer":  { "score": 38, "status": "critical",        "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
+    "marketing": { "score": 65, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] },
+    "strategy":  { "score": 70, "status": "healthy",         "headline": "specific headline", "diagnosis": "specific diagnosis", "top_actions": ["action 1", "action 2", "action 3"] }
   },
   "top_3_findings": [
-    { "rank": 1, "dimension": "customer_retention", "finding": "specific finding from their answers", "impact": "specific impact" },
-    { "rank": 2, "dimension": "team_operations",    "finding": "specific finding", "impact": "specific impact" },
-    { "rank": 3, "dimension": "revenue_financial",  "finding": "specific finding", "impact": "specific impact" }
+    { "rank": 1, "dimension": "customer", "finding": "specific finding from their answers", "impact": "specific impact" },
+    { "rank": 2, "dimension": "team",     "finding": "specific finding", "impact": "specific impact" },
+    { "rank": 3, "dimension": "revenue",  "finding": "specific finding", "impact": "specific impact" }
   ],
   "priority_order": [
-    { "priority": 1, "action": "specific action", "dimension": "team_operations",    "reason": "why this first", "timeframe": "This week",    "effort": "low",    "impact": "high" },
-    { "priority": 2, "action": "specific action", "dimension": "customer_retention", "reason": "why second",    "timeframe": "Next 2 weeks", "effort": "medium", "impact": "high" }
+    { "priority": 1, "action": "specific action", "dimension": "team",     "reason": "why this first", "timeframe": "This week",    "effort": "low",    "impact": "high" },
+    { "priority": 2, "action": "specific action", "dimension": "customer", "reason": "why second",    "timeframe": "Next 2 weeks", "effort": "medium", "impact": "high" }
   ],
   "implementation_roadmap": [
-    { "priority": 1, "timeframe": "This week",    "action": "specific action", "dimension": "team_operations",    "effort": "low",    "impact": "high" },
-    { "priority": 2, "timeframe": "Next 2 weeks", "action": "specific action", "dimension": "customer_retention", "effort": "medium", "impact": "high" }
+    { "priority": 1, "timeframe": "This week",    "action": "specific action", "dimension": "team",     "effort": "low",    "impact": "high" },
+    { "priority": 2, "timeframe": "Next 2 weeks", "action": "specific action", "dimension": "customer", "effort": "medium", "impact": "high" }
   ],
   "closing_message": "2-3 sentences personal and directional to this specific founder"
 }`
@@ -303,7 +303,7 @@ function generateAssessmentSignals(
   }
 
   // ── NEW SIGNAL 1: Solo founder — operational bottleneck + key-person risk ──
-  // Solo founders are almost always execution bottlenecks. High team_operations friction,
+  // Solo founders are almost always execution bottlenecks. High  friction,
   // slow velocity, severe key-person risk. Correlates with delivery delays and burnout.
   if (answers.team_size === TEAM_SIZE.SOLO) {
     signals.push({ ...base, signal_type: 'velocity_drop', dimension: 'team', severity: 'warning', confidence_score: 0.80, value: null,
@@ -376,12 +376,12 @@ function buildEmailHtml(diagnosis: Record<string, unknown>, founderEmail: string
 
   const scoreColor = (s: number) => s >= 66 ? '#059669' : s >= 41 ? '#D97706' : '#DC2626'
   const dimLabel: Record<string, string> = {
-    revenue_financial:  'Revenue & Financial',
-    product_market_fit: 'Product-Market Fit',
-    team_operations:    'Team & Operations',
-    customer_retention: 'Customer & Retention',
-    marketing_growth:   'Marketing & Growth',
-    strategy_goals:     'Strategy & Goals',
+    revenue:   'Revenue Engine',
+    product:   'Product-Market Fit',
+    team:      'Execution Capacity',
+    customer:  'Customer Health',
+    marketing: 'Growth & Acquisition',
+    strategy:  'Strategic Clarity',
   }
 
   return `<!DOCTYPE html>
@@ -627,20 +627,20 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
     const weights  = WEIGHT_MATRICES[stageKey]
 
     const aiDims = diagnosis.dimensions as Record<string, { score: number }> ?? {}
-    const scoreRevenue  = aiDims?.revenue_financial?.score  ?? 0
-    const scorePmf      = aiDims?.product_market_fit?.score ?? 0
-    const scoreTeam     = aiDims?.team_operations?.score    ?? 0
-    const scoreCustomer = aiDims?.customer_retention?.score ?? 0
-    const scoreMarketing= aiDims?.marketing_growth?.score   ?? 0
-    const scoreStrategy = aiDims?.strategy_goals?.score     ?? 0
+    const scoreRevenue   = aiDims?.revenue?.score   ?? 0
+    const scorePmf       = aiDims?.product?.score   ?? 0
+    const scoreTeam      = aiDims?.team?.score      ?? 0
+    const scoreCustomer  = aiDims?.customer?.score  ?? 0
+    const scoreMarketing = aiDims?.marketing?.score ?? 0
+    const scoreStrategy  = aiDims?.strategy?.score  ?? 0
 
     const trueOverallScore = Math.round(
-      (scoreRevenue   * weights.revenue_financial)  +
-      (scorePmf       * weights.product_market_fit) +
-      (scoreTeam      * weights.team_operations)    +
-      (scoreCustomer  * weights.customer_retention) +
-      (scoreMarketing * weights.marketing_growth)   +
-      (scoreStrategy  * weights.strategy_goals)
+      (scoreRevenue   * weights.revenue)   +
+      (scorePmf       * weights.product)   +
+      (scoreTeam      * weights.team)      +
+      (scoreCustomer  * weights.customer)  +
+      (scoreMarketing * weights.marketing) +
+      (scoreStrategy  * weights.strategy)
     )
 
     // Inject calculated score — overrides any AI-generated score
@@ -694,12 +694,12 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       score_customer:               scoreCustomer,
       score_marketing:              scoreMarketing,
       score_strategy:               scoreStrategy,
-      label_revenue:   (diagnosis.dimensions as Record<string, Record<string, string>>)?.revenue_financial?.status,
-      label_pmf:       (diagnosis.dimensions as Record<string, Record<string, string>>)?.product_market_fit?.status,
-      label_team:      (diagnosis.dimensions as Record<string, Record<string, string>>)?.team_operations?.status,
-      label_customer:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.customer_retention?.status,
-      label_marketing: (diagnosis.dimensions as Record<string, Record<string, string>>)?.marketing_growth?.status,
-      label_strategy:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.strategy_goals?.status,
+      label_revenue:   (diagnosis.dimensions as Record<string, Record<string, string>>)?.revenue?.status,
+      label_pmf:       (diagnosis.dimensions as Record<string, Record<string, string>>)?.product?.status,
+      label_team:      (diagnosis.dimensions as Record<string, Record<string, string>>)?.team?.status,
+      label_customer:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.customer?.status,
+      label_marketing: (diagnosis.dimensions as Record<string, Record<string, string>>)?.marketing?.status,
+      label_strategy:  (diagnosis.dimensions as Record<string, Record<string, string>>)?.strategy?.status,
       implementation_roadmap:   diagnosis.implementation_roadmap,
       raw_ai_response:          diagnosis,
     })
