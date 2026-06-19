@@ -54,6 +54,7 @@ RULES:
 - Never give generic advice — be specific to their situation
 - When data clearly points to one conclusion state it directly
 - If language is ar respond entirely in Arabic Gulf dialect. Do NOT mix in English words, acronyms, or Latin letters anywhere — including for technical/business terms. If en respond in English
+- Specifically: translate "solo founder" as "مؤسس فردي" — NEVER write the English word "Solo" in Arabic text. This applies to all founder/team descriptors: write "فريق صغير" not "small team", "فريق فردي" not "solo team". Scan your own Arabic output before finalising and replace any remaining English words with their Arabic equivalent.
 - You must respond with valid JSON only. No preamble. No explanation. No markdown fences. Pure JSON starting with { and ending with }
 - Do NOT include overall_score in your response — it is calculated server-side from your dimension scores
 - The "dimensions" object keys MUST be exactly these strings, nothing else: ${VALID_DIMENSION_KEYS.map(k => `"${k}"`).join(', ')}. Any other key name will be silently ignored by the application and will break score calculation.
