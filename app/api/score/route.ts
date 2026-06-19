@@ -58,6 +58,7 @@ RULES:
 - You must respond with valid JSON only. No preamble. No explanation. No markdown fences. Pure JSON starting with { and ending with }
 - Do NOT include overall_score in your response — it is calculated server-side from your dimension scores
 - The "dimensions" object keys MUST be exactly these strings, nothing else: ${VALID_DIMENSION_KEYS.map(k => `"${k}"`).join(', ')}. Any other key name will be silently ignored by the application and will break score calculation.
+- This rule applies even when language is "ar". The Arabic-only language rule applies ONLY to human-readable text fields (overall_summary, diagnosis, headline, finding, action, reason, fix_order, closing_message, etc.) — it does NOT apply to JSON structural elements: object keys, the "dimension" field value inside causal_chains/priority_order/implementation_roadmap items, "status" enum values, "effort" enum values, "impact" enum values, "timeframe" enum values, "urgency_level", or "business_stage". These structural fields MUST always remain in English exactly as specified, in every language mode, with no exceptions.
 - Use these score-band definitions consistently across all 6 dimensions:
   0-40 (Critical): fundamental gaps requiring immediate intervention — e.g. no PMF validation, runway under 3 months, solo founder with no delegation capacity, no retention signal.
   41-65 (Needs Attention): foundational elements exist but execution gaps limit growth — e.g. some traction but inconsistent, processes exist but not followed, team aligned on some but not all priorities.
