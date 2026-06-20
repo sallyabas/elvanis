@@ -193,20 +193,6 @@ export default async function PlanPage() {
             </div>
           )}
 
-                    {/* Arabic translation still pending */}
-                    {!isFreeTier && digest && arabicTranslationPending && (
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '48px', textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>🌐</div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '0 0 10px' }}>
-                {t('plan.preparing_ar_title')}
-              </h2>
-              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
-                {t('plan.preparing_ar_sub')}
-              </p>
-            </div>
-          )}
-
-
           {/* Digest content */}
           {!isFreeTier && digest && (
             <>

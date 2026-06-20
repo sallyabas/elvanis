@@ -509,13 +509,9 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       return NextResponse.json({ error: 'Digest generated no actions — try again' }, { status: 500 })
     }
 
-    // ── Store in action_digests — mark existing active as stale ──
-    await admin
-      .from('action_digests')
-      .update({ status: 'stale' })
-      .eq('founder_id', founderId)
-      .eq('status', 'active')
-
+    // ── Store in action_digests as 'processing' — the OLD digest stays 'active'
+    // until this new one is fully ready (English + Arabic), so founders never
+    // see a half-finished or English-only version of the new plan. ──
     const { data: digestRow, error: digestErr } = await admin
       .from('action_digests')
       .insert({
@@ -530,7 +526,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
           sources:        connectedSources,
         },
         digest,
-        status:       'active',
+        status:       'processing',
         generated_at: new Date().toISOString(),
       })
       .select('id')
@@ -764,21 +760,40 @@ try {
   console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
 }
 
-          try {
-            await admin.from('action_digests')
-              .update({ digest_ar: arDigest })
-              .eq('id', digestRow.id)
-            console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
-          } catch (saveErr) {
-            console.error('[digest] Arabic translation save failed:', saveErr)
-          }
-        }
-      }
-    } catch (err) {
-      console.error('[digest] Arabic translation call failed:', err)
-    }
+try {
+  await admin.from('action_digests')
+    .update({ digest_ar: arDigest })
+    .eq('id', digestRow.id)
+  console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
+} catch (saveErr) {
+  console.error('[digest] Arabic translation save failed:', saveErr)
+}
+}
+}
+} catch (err) {
+console.error('[digest] Arabic translation call failed:', err)
+}
 
-    return NextResponse.json({ success: true, digestId: digestRow.id })
+// ── Now fully ready (English + Arabic) — flip statuses.
+// Old digest goes stale, new digest goes active, in one final step. ──
+try {
+await admin
+.from('action_digests')
+.update({ status: 'stale' })
+.eq('founder_id', founderId)
+.eq('status', 'active')
+
+await admin
+.from('action_digests')
+.update({ status: 'active' })
+.eq('id', digestRow.id)
+
+console.log(`[digest] ${digestRow.id} is now active — old digest marked stale`)
+} catch (statusErr) {
+console.error('[digest] status flip failed:', statusErr)
+}
+
+return NextResponse.json({ success: true, digestId: digestRow.id })
 
   } catch (err) {
     console.error('[digest] Error:', err)
