@@ -665,9 +665,18 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
         console.error('[digest] Arabic translation — no JSON found')
         return
       }
-      try {
-        const arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
 
+      let arDigest: Record<string, unknown>
+      try {
+        arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
+      } catch (parseErr) {
+        console.error('[digest] Arabic translation parse failed:', parseErr)
+        return
+      }
+
+      // Validation is isolated — if it fails for ANY reason, save the
+      // unvalidated Arabic rather than losing the translation entirely.
+      try {
         const { validateArabicField } = await import('@/lib/content-validator')
         if (arDigest.summary_ar) {
           arDigest.summary_ar = await validateArabicField({
@@ -679,7 +688,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
         }
         if (Array.isArray(arDigest.actions_ar)) {
           arDigest.actions_ar = await Promise.all(
-            arDigest.actions_ar.map(async (actionAr: Record<string, unknown>, i: number) => ({
+            (arDigest.actions_ar as Array<Record<string, unknown>>).map(async (actionAr, i: number) => ({
               ...actionAr,
               how_ar: await validateArabicField({
                 admin, founderId,
@@ -690,12 +699,17 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
             }))
           )
         }
+      } catch (validationErr) {
+        console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
+      }
+
+      try {
         await admin.from('action_digests')
           .update({ digest_ar: arDigest })
           .eq('id', digestRow.id)
         console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
-      } catch (parseErr) {
-        console.error('[digest] Arabic translation parse failed:', parseErr)
+      } catch (saveErr) {
+        console.error('[digest] Arabic translation save failed:', saveErr)
       }
     }).catch(err => {
       console.error('[digest] Arabic translation call failed:', err)
