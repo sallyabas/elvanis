@@ -529,9 +529,11 @@ export async function POST(request: NextRequest) {
 
     // ── Build signals with trend tracking ──
     // Issue 9 + Hybrid approach: carry previous_value from existingMap before delete
-    const signalsToInsert = (analysis.signals ?? [])
+    const { validateArabicField } = await import('@/lib/content-validator')
+
+    const signalsToInsert = await Promise.all((analysis.signals ?? [])
       .filter((s: Record<string, unknown>) => (s.confidence_score as number) >= 0.5)
-      .map((s: Record<string, unknown>) => {
+      .map(async (s: Record<string, unknown>) => {
         const n = normalise(s)
         const prev = existingMap.get(n.signal_type)
 
@@ -545,15 +547,31 @@ export async function POST(request: NextRequest) {
           const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
             ? n.evidence as Record<string, string>
             : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
+
+          const insightEn = (n.insight_summary as unknown as Record<string,string>).en
+          const insightAr = await validateArabicField({
+            admin, founderId: founder.id,
+            fieldLabel: `csv.insight_summary[${n.signal_type}]`,
+            englishText: insightEn,
+            arabicText: (n.insight_summary as unknown as Record<string,string>).ar,
+          })
+          const actionEn = (n.recommended_action as unknown as Record<string,string>).en
+          const actionAr = await validateArabicField({
+            admin, founderId: founder.id,
+            fieldLabel: `csv.recommended_action[${n.signal_type}]`,
+            englishText: actionEn,
+            arabicText: (n.recommended_action as unknown as Record<string,string>).ar,
+          })
+
           return {
           founder_id:         founder.id,
           source_id:          savedSource.id,
           signal_type:        n.signal_type,
           dimension:          n.dimension,
-          insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
-          insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
-          recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
-          recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
+          insight_summary:       insightEn,
+          insight_summary_ar:    insightAr,
+          recommended_action:    actionEn,
+          recommended_action_ar: actionAr,
           severity:           n.severity,
           confidence_score:   (n.confidence_score as number) ?? 0.85,
           value:              n.value ?? null,
@@ -566,8 +584,9 @@ export async function POST(request: NextRequest) {
           scan_count:         scanCount,
           period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           period_end:   new Date().toISOString().split('T')[0],
-          raw_data: { template_type: templateType, row_count: rows.length, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },        }
-      })
+          raw_data: { template_type: templateType, row_count: rows.length, evidence: evidenceObj.en, evidence_ar: evidenceObj.ar },        
+        }
+      }))
 
     // ── Delete old signals for this source only ──
     // source_id guard already verified above — safe to delete

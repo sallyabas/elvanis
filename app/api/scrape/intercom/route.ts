@@ -416,15 +416,32 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
       const evidenceObj = typeof n.evidence === 'object' && n.evidence !== null
         ? n.evidence as Record<string, string>
         : { en: String(n.evidence ?? ''), ar: String(n.evidence ?? '') }
+
+      const { validateArabicField } = await import('@/lib/content-validator')
+      const insightEn = (n.insight_summary as unknown as Record<string,string>).en
+      const insightAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `intercom.insight_summary[${n.signal_type}]`,
+        englishText: insightEn,
+        arabicText: (n.insight_summary as unknown as Record<string,string>).ar,
+      })
+      const actionEn = (n.recommended_action as unknown as Record<string,string>).en
+      const actionAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `intercom.recommended_action[${n.signal_type}]`,
+        englishText: actionEn,
+        arabicText: (n.recommended_action as unknown as Record<string,string>).ar,
+      })
+
       const signalRow = {
         founder_id: founderId,
         source_id: source.id as string,
         signal_type: n.signal_type,
         dimension: n.dimension,
-        insight_summary:       (n.insight_summary as unknown as Record<string,string>).en,
-        insight_summary_ar:    (n.insight_summary as unknown as Record<string,string>).ar,
-        recommended_action:    (n.recommended_action as unknown as Record<string,string>).en,
-        recommended_action_ar: (n.recommended_action as unknown as Record<string,string>).ar,
+        insight_summary:       insightEn,
+        insight_summary_ar:    insightAr,
+        recommended_action:    actionEn,
+        recommended_action_ar: actionAr,
         severity: n.severity,
         confidence_score: (n.confidence_score as number) ?? 0.85,
         value: n.value ?? null,

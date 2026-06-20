@@ -193,3 +193,43 @@ async function logAlert(
     console.error('[content-validator] failed to log alert (non-fatal):', err)
   }
 }
+
+/**
+ * Validates an array of objects has the expected length and that each
+ * item's required fields are non-empty. Does NOT retry/regenerate —
+ * arrays like top_3_findings are harder to safely regenerate in isolation
+ * (would need full re-prompting context). Instead: logs the issue and
+ * returns the array filtered to only complete, valid items, so the founder
+ * never sees a blank or broken entry — just possibly fewer items than expected.
+ */
+export async function validateArrayCompleteness(params: {
+  admin: ReturnType<typeof import('@/lib/supabase-server').createAdminClient>
+  founderId: string | null
+  fieldLabel: string
+  items: Array<Record<string, unknown>>
+  expectedLength: number
+  requiredFields: string[]
+}): Promise<Array<Record<string, unknown>>> {
+  const { admin, founderId, fieldLabel, items, expectedLength, requiredFields } = params
+
+  if (!Array.isArray(items)) {
+    await logAlert(admin, founderId, 'data_error', `${fieldLabel}: expected an array, got ${typeof items}.`)
+    return []
+  }
+
+  const validItems = items.filter(item =>
+    requiredFields.every(field => {
+      const val = item[field]
+      return val !== null && val !== undefined && String(val).trim().length >= 3
+    })
+  )
+
+  if (validItems.length < expectedLength) {
+    await logAlert(admin, founderId, 'data_error',
+      `${fieldLabel}: expected ${expectedLength} complete item(s), found ${validItems.length} valid out of ${items.length} total. ` +
+      `Dropped ${items.length - validItems.length} incomplete item(s).`
+    )
+  }
+
+  return validItems
+}
