@@ -194,6 +194,50 @@ async function logAlert(
   }
 }
 
+export async function validateTranslationCompleteness(params: {
+  admin: ReturnType<typeof import('@/lib/supabase-server').createAdminClient>
+  founderId: string | null
+  arDigest: Record<string, unknown>
+  englishDigest: Record<string, unknown>
+}): Promise<Record<string, unknown>> {
+  const { admin, founderId, arDigest, englishDigest } = params
+
+  const englishActions = Array.isArray(englishDigest.actions) ? englishDigest.actions as Array<Record<string, unknown>> : []
+  const arActions = Array.isArray(arDigest.actions_ar) ? arDigest.actions_ar as Array<Record<string, unknown>> : []
+
+  const missing: string[] = []
+  if (!arDigest.summary_ar) missing.push('summary_ar')
+  if (!arDigest.consultant_hook_ar) missing.push('consultant_hook_ar')
+  if (englishDigest.data_quality_note && !arDigest.data_quality_note_ar) missing.push('data_quality_note_ar')
+  englishActions.forEach((_, i) => {
+    if (!arActions[i]?.title_ar) missing.push(`actions_ar[${i}].title_ar`)
+    if (!arActions[i]?.why_ar) missing.push(`actions_ar[${i}].why_ar`)
+    if (!arActions[i]?.how_ar) missing.push(`actions_ar[${i}].how_ar`)
+  })
+
+  if (missing.length === 0) return arDigest
+
+  await logAlert(admin, founderId, 'data_error',
+    `Translation incomplete — missing fields: ${missing.join(', ')}. Filling gaps with English source.`
+  )
+
+  if (!arDigest.summary_ar) arDigest.summary_ar = englishDigest.summary ?? ''
+  if (!arDigest.consultant_hook_ar) arDigest.consultant_hook_ar = englishDigest.consultant_hook ?? ''
+  if (englishDigest.data_quality_note && !arDigest.data_quality_note_ar) {
+    arDigest.data_quality_note_ar = englishDigest.data_quality_note
+  }
+
+  const filledActions = englishActions.map((enAction, i) => ({
+    title_ar: arActions[i]?.title_ar ?? enAction.title ?? '',
+    why_ar:   arActions[i]?.why_ar   ?? enAction.why   ?? '',
+    how_ar:   arActions[i]?.how_ar   ?? enAction.how   ?? '',
+  }))
+  arDigest.actions_ar = filledActions
+
+  return arDigest
+}
+
+
 /**
  * Validates an array of objects has the expected length and that each
  * item's required fields are non-empty. Does NOT retry/regenerate —
@@ -233,3 +277,4 @@ export async function validateArrayCompleteness(params: {
 
   return validItems
 }
+

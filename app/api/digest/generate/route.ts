@@ -674,33 +674,95 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
         }
 
         if (arDigest) {
-          try {
-            const { validateArabicField } = await import('@/lib/content-validator')
-            if (arDigest.summary_ar) {
-              arDigest.summary_ar = await validateArabicField({
-                admin, founderId,
-                fieldLabel: 'digest.summary_ar',
-                englishText: String(digest.summary ?? ''),
-                arabicText: String(arDigest.summary_ar),
-              })
-            }
-            if (Array.isArray(arDigest.actions_ar)) {
-              const validatedActionsAr: Array<Record<string, unknown>> = []
-              for (let i = 0; i < (arDigest.actions_ar as Array<Record<string, unknown>>).length; i++) {
-                const actionAr = (arDigest.actions_ar as Array<Record<string, unknown>>)[i]
-                const howAr = await validateArabicField({
-                  admin, founderId,
-                  fieldLabel: `digest.actions_ar[${i}].how_ar`,
-                  englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
-                  arabicText: String(actionAr.how_ar ?? ''),
-                })
-                validatedActionsAr.push({ ...actionAr, how_ar: howAr })
-              }
-              arDigest.actions_ar = validatedActionsAr
-            }
-          } catch (validationErr) {
-            console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
-          }
+// Step 1 — completeness: fill any entirely-missing field with English source
+try {
+  const { validateTranslationCompleteness } = await import('@/lib/content-validator')
+  arDigest = await validateTranslationCompleteness({
+    admin, founderId,
+    arDigest,
+    englishDigest: digest,
+  })
+} catch (completenessErr) {
+  console.error('[digest] completeness check failed (non-fatal):', completenessErr)
+}
+
+// Step 2 — leak check on every field the TRANSLATION_PROMPT produces.
+// Isolated — if it fails for ANY reason, save what we have rather than losing the translation.
+try {
+  const { validateArabicField } = await import('@/lib/content-validator')
+
+  if (arDigest.summary_ar) {
+    arDigest.summary_ar = await validateArabicField({
+      admin, founderId,
+      fieldLabel: 'digest.summary_ar',
+      englishText: String(digest.summary ?? ''),
+      arabicText: String(arDigest.summary_ar),
+    })
+  }
+  if (arDigest.data_quality_note_ar) {
+    arDigest.data_quality_note_ar = await validateArabicField({
+      admin, founderId,
+      fieldLabel: 'digest.data_quality_note_ar',
+      englishText: String(digest.data_quality_note ?? ''),
+      arabicText: String(arDigest.data_quality_note_ar),
+    })
+  }
+  if (arDigest.consultant_hook_ar) {
+    arDigest.consultant_hook_ar = await validateArabicField({
+      admin, founderId,
+      fieldLabel: 'digest.consultant_hook_ar',
+      englishText: String(digest.consultant_hook ?? ''),
+      arabicText: String(arDigest.consultant_hook_ar),
+    })
+  }
+
+  if (Array.isArray(arDigest.conflicts_ar)) {
+    const englishConflicts = Array.isArray(digest.conflicts_to_resolve)
+      ? digest.conflicts_to_resolve as Array<Record<string, unknown>>
+      : []
+    const validatedConflictsAr: Array<Record<string, unknown>> = []
+    for (let i = 0; i < (arDigest.conflicts_ar as Array<Record<string, unknown>>).length; i++) {
+      const conflictAr = (arDigest.conflicts_ar as Array<Record<string, unknown>>)[i]
+      const noteAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `digest.conflicts_ar[${i}].note_ar`,
+        englishText: String(englishConflicts[i]?.note ?? ''),
+        arabicText: String(conflictAr.note_ar ?? ''),
+      })
+      validatedConflictsAr.push({ ...conflictAr, note_ar: noteAr })
+    }
+    arDigest.conflicts_ar = validatedConflictsAr
+  }
+
+  if (Array.isArray(arDigest.actions_ar)) {
+    const validatedActionsAr: Array<Record<string, unknown>> = []
+    for (let i = 0; i < (arDigest.actions_ar as Array<Record<string, unknown>>).length; i++) {
+      const actionAr = (arDigest.actions_ar as Array<Record<string, unknown>>)[i]
+      const titleAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `digest.actions_ar[${i}].title_ar`,
+        englishText: String((validatedActions[i] as Record<string, unknown>)?.title ?? ''),
+        arabicText: String(actionAr.title_ar ?? ''),
+      })
+      const whyAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `digest.actions_ar[${i}].why_ar`,
+        englishText: String((validatedActions[i] as Record<string, unknown>)?.why ?? ''),
+        arabicText: String(actionAr.why_ar ?? ''),
+      })
+      const howAr = await validateArabicField({
+        admin, founderId,
+        fieldLabel: `digest.actions_ar[${i}].how_ar`,
+        englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
+        arabicText: String(actionAr.how_ar ?? ''),
+      })
+      validatedActionsAr.push({ ...actionAr, title_ar: titleAr, why_ar: whyAr, how_ar: howAr })
+    }
+    arDigest.actions_ar = validatedActionsAr
+  }
+} catch (validationErr) {
+  console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
+}
 
           try {
             await admin.from('action_digests')
