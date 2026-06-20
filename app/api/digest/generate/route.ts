@@ -148,7 +148,6 @@ OUTPUT: Return ONLY a JSON object with this exact structure — no preamble, no 
   "conflicts_ar": [
     { "note_ar": "..." }
   ]
-}
 }`
 
 export async function POST(request: NextRequest) {  try {
