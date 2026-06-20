@@ -282,13 +282,18 @@ export default async function HomePage() {
           <div id="tour-digest-card" style={{ background: latestDigest ? '#F5F3FF' : '#F9FAFB', borderRadius: 16, border: latestDigest ? '1px solid #DDD6FE' : '1px solid #E5E7EB', padding: '24px 28px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: latestDigest ? 14 : 0 }}>
               <div>
-              <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
               {latestDigest ? (
+                  <>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>{t('home.action_digest')}</p>
                   <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
                    {t('plan.generated')} {new Date((latestDigest as Record<string, unknown>).generated_at as string).toLocaleDateString(founder.language === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
+                  </>
                 ) : (
-                  <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>{t('home.digest_anniversary')}</p>
+                  <>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#374151', margin: '0 0 4px' }}>{t('home.digest_empty_title')}</p>
+                  <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{t('home.digest_empty_sub')}</p>
+                  </>
                 )}
               </div>
               <a href="/plan" style={{ padding: '8px 18px', background: latestDigest ? '#7C3AED' : '#E5E7EB', color: latestDigest ? '#fff' : '#9CA3AF', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
