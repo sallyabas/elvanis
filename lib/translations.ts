@@ -604,6 +604,8 @@ const TRANSLATIONS = {
     'plan.hook_title':          'Want a human strategist to review this with you?',
     'plan.book_cpo':            'Book a CPO session →',
     'plan.footer_note':         'Action Digest refreshes automatically as new signals are detected.',
+    'plan.preparing_ar_title':  'Preparing your plan in Arabic',
+    'plan.preparing_ar_sub':    'This usually takes a few minutes. Refresh shortly.',
     // ── Tracker page (page-specific only) ──
     'tracker.title':             'Business Health Tracker',
     'tracker.subtitle':          'Track signal trends, measure impact, and record your wins.',
@@ -1857,6 +1859,8 @@ const TRANSLATIONS = {
     'plan.hook_title':          'هل تريد مراجعة هذا مع استراتيجي بشري؟',
     'plan.book_cpo':            'احجز جلسة CPO ←',
     'plan.footer_note':         'يتجدد ملخص الإجراءات تلقائياً مع اكتشاف إشارات جديدة.',
+    'plan.preparing_ar_title':  'جارٍ تجهيز خطتك بالعربية',
+    'plan.preparing_ar_sub':    'يستغرق هذا بضع دقائق عادةً. حدّث الصفحة بعد قليل.',
     // ── Tracker page (page-specific only) ──
     'tracker.title':             'متابعة صحة الأعمال',
     'tracker.subtitle':          'تتبع اتجاهات الإشارات وقس الأثر وسجِّل إنجازاتك.',

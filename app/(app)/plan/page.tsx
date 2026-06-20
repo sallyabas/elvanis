@@ -34,6 +34,10 @@ export default async function PlanPage() {
   const isAr             = lang === 'ar'
   const conflictsAr      = (digestAr?.conflicts_ar as Array<Record<string, unknown>>) ?? []
 
+  // If founder's language is Arabic but the digest's Arabic translation hasn't
+  // been saved yet, show a "preparing" state instead of falling through to English.
+  const arabicTranslationPending = isAr && !!digest && !digest.digest_ar
+
   const actions         = digestEn?.actions as Array<Record<string, unknown>> ?? []
   const actionsAr       = (digestAr?.actions_ar as Array<Record<string, unknown>>) ?? []
   const conflicts       = digestEn?.conflicts_to_resolve as Array<Record<string, unknown>> ?? []
@@ -188,6 +192,20 @@ export default async function PlanPage() {
               </a>
             </div>
           )}
+
+                    {/* Arabic translation still pending */}
+                    {!isFreeTier && digest && arabicTranslationPending && (
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '48px', textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>🌐</div>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '0 0 10px' }}>
+                {t('plan.preparing_ar_title')}
+              </h2>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
+                {t('plan.preparing_ar_sub')}
+              </p>
+            </div>
+          )}
+
 
           {/* Digest content */}
           {!isFreeTier && digest && (

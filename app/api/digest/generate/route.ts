@@ -685,17 +685,18 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
               })
             }
             if (Array.isArray(arDigest.actions_ar)) {
-              arDigest.actions_ar = await Promise.all(
-                (arDigest.actions_ar as Array<Record<string, unknown>>).map(async (actionAr, i: number) => ({
-                  ...actionAr,
-                  how_ar: await validateArabicField({
-                    admin, founderId,
-                    fieldLabel: `digest.actions_ar[${i}].how_ar`,
-                    englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
-                    arabicText: String(actionAr.how_ar ?? ''),
-                  }),
-                }))
-              )
+              const validatedActionsAr: Array<Record<string, unknown>> = []
+              for (let i = 0; i < (arDigest.actions_ar as Array<Record<string, unknown>>).length; i++) {
+                const actionAr = (arDigest.actions_ar as Array<Record<string, unknown>>)[i]
+                const howAr = await validateArabicField({
+                  admin, founderId,
+                  fieldLabel: `digest.actions_ar[${i}].how_ar`,
+                  englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
+                  arabicText: String(actionAr.how_ar ?? ''),
+                })
+                validatedActionsAr.push({ ...actionAr, how_ar: howAr })
+              }
+              arDigest.actions_ar = validatedActionsAr
             }
           } catch (validationErr) {
             console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
@@ -716,7 +717,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
     }
 
     return NextResponse.json({ success: true, digestId: digestRow.id })
-    
+
   } catch (err) {
     console.error('[digest] Error:', err)
     return NextResponse.json({ error: String(err) }, { status: 500 })
