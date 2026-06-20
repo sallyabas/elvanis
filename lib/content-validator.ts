@@ -93,7 +93,7 @@ export async function validateArabicField(params: {
 
   try {
     const retryResponse = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       max_tokens: 1000,
       temperature: 0.1,
       messages: [
@@ -150,7 +150,7 @@ export async function validateSteppedField(params: {
 
   try {
     const retryResponse = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       max_tokens: 500,
       temperature: 0.2,
       messages: [

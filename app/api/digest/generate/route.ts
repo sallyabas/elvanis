@@ -472,7 +472,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
     // Requires system prompt to instruct JSON — ours already does ✓
     console.log(`[digest] Generating for founder ${founderId} (${founder.business_name ?? 'unknown'})...`)
     const response = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       max_tokens: 4000,
       temperature: 0.3,
       response_format: { type: 'json_object' },
