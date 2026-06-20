@@ -617,6 +617,22 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
 
     console.log(`[digest] Generated: ${digestRow.id} — ${connectedSources.join(', ')} — ${signals.length} signals`)
 
+        // ── Validate English "how" fields for complete numbered steps — before Arabic translation ──
+        const { validateSteppedField } = await import('@/lib/content-validator')
+        const validatedActions = await Promise.all(
+          digestActions.map(async (action: Record<string, unknown>) => {
+            const validatedHow = await validateSteppedField({
+              admin,
+              founderId,
+              fieldLabel: `digest.actions[${action.title ?? '?'}].how`,
+              howText: String(action.how ?? ''),
+              context: String(action.title ?? ''),
+            })
+            return { ...action, how: validatedHow }
+          })
+        )
+        digest.actions = validatedActions
+
     // ── Arabic translation call (fire-and-forget, non-blocking) ──
     // Uses llama-3.1-8b-instant — translation only, no strategic reasoning needed
     const translationInput = {
@@ -651,6 +667,29 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       }
       try {
         const arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
+
+        const { validateArabicField } = await import('@/lib/content-validator')
+        if (arDigest.summary_ar) {
+          arDigest.summary_ar = await validateArabicField({
+            admin, founderId,
+            fieldLabel: 'digest.summary_ar',
+            englishText: String(digest.summary ?? ''),
+            arabicText: String(arDigest.summary_ar),
+          })
+        }
+        if (Array.isArray(arDigest.actions_ar)) {
+          arDigest.actions_ar = await Promise.all(
+            arDigest.actions_ar.map(async (actionAr: Record<string, unknown>, i: number) => ({
+              ...actionAr,
+              how_ar: await validateArabicField({
+                admin, founderId,
+                fieldLabel: `digest.actions_ar[${i}].how_ar`,
+                englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
+                arabicText: String(actionAr.how_ar ?? ''),
+              }),
+            }))
+          )
+        }
         await admin.from('action_digests')
           .update({ digest_ar: arDigest })
           .eq('id', digestRow.id)
