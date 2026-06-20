@@ -536,9 +536,44 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       .select('id')
       .single()
 
-    if (digestErr) {
-      console.error('[digest] Insert failed:', digestErr.message)
-      return NextResponse.json({ error: 'Failed to save digest' }, { status: 500 })
+      if (digestErr) {
+        console.error('[digest] Insert failed:', digestErr.message)
+        return NextResponse.json({ error: 'Failed to save digest' }, { status: 500 })
+      }
+
+          // ── Send plan-ready email immediately — does not wait for Arabic translation ──
+    try {
+      let founderEmailForPlan: string | null = null
+      const { data: founderRow } = await admin
+        .from('founders')
+        .select('email, user_id')
+        .eq('id', founderId)
+        .maybeSingle()
+      founderEmailForPlan = founderRow?.email ?? null
+      if (!founderEmailForPlan && founderRow?.user_id) {
+        const { data: { user } } = await admin.auth.admin.getUserById(founderRow.user_id)
+        founderEmailForPlan = user?.email ?? null
+      }
+
+      if (founderEmailForPlan) {
+        const { Resend } = await import('resend')
+        const resendClient = new Resend(process.env.RESEND_API_KEY)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+        const month = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+        const planSummary = (digest.summary as string) ?? 'Your prioritised 90-day action plan has been generated based on your latest signals.'
+
+        const { error: planEmailErr } = await resendClient.emails.send({
+          from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+          to: founderEmailForPlan,
+          subject: `${founder.full_name?.split(' ')[0] ?? 'Founder'} — your 90-Day Action Plan is ready`,
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F9FAFB;font-family:Inter,Arial,sans-serif"><div style="max-width:600px;margin:0 auto;padding:32px 16px"><div style="text-align:center;margin-bottom:32px"><h1 style="font-size:28px;font-weight:800;color:#2563EB;margin:0">Elvanis</h1><p style="color:#6B7280;font-size:14px;margin:4px 0 0">Your 90-Day Action Plan — ${month}</p></div><div style="background:#F5F3FF;border-radius:16px;border:1px solid #DDD6FE;padding:32px;margin-bottom:20px;text-align:center"><div style="font-size:48px;margin-bottom:12px">✨</div><h2 style="font-size:20px;font-weight:800;color:#4C1D95;margin:0 0 12px">Your Action Digest is ready</h2><p style="font-size:14px;color:#6D28D9;line-height:1.65;margin:0 0 24px">${planSummary}</p><a href="${appUrl}/plan" style="display:inline-block;padding:14px 36px;background:#7C3AED;color:#fff;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none">View your Plan →</a></div><div style="text-align:center;border-top:1px solid #E5E7EB;padding-top:20px"><p style="color:#9CA3AF;font-size:12px;margin:0">Elvanis · Know what to fix before you scale</p><p style="color:#9CA3AF;font-size:12px;margin:4px 0 0">${founderEmailForPlan}</p></div></div></body></html>`,
+        })
+
+        if (planEmailErr) console.error('[digest] plan-ready email failed:', planEmailErr)
+        else console.log(`[digest] plan-ready email sent to ${founderEmailForPlan}`)
+      }
+    } catch (emailErr) {
+      console.error('[digest] plan-ready email block failed (non-fatal):', emailErr)
     }
 
     // ── Save default conflict preferences for unresolved conflicts ──
