@@ -89,50 +89,45 @@ export async function validateArabicField(params: {
   let leaked = findLeakedWords(currentText)
   if (leaked.length === 0) return currentText
 
-  const MAX_ATTEMPTS = 2
+  console.warn(`[content-validator] leaked words in ${fieldLabel}: ${leaked.join(', ')} — retrying with 70B (single attempt)`)
 
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    console.warn(`[content-validator] leaked words in ${fieldLabel} (attempt ${attempt}): ${leaked.join(', ')} — retrying translation`)
+  try {
+    const retryResponse = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1000,
+      temperature: 0.1,
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert Arabic copyeditor for premium enterprise SaaS platforms. Your sole task is to rewrite the provided Arabic text to remove specific leaked English words while maintaining a flawless, premium business tone.
 
-    try {
-      const retryResponse = await groq.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
-        max_tokens: 1000,
-        temperature: 0.1,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a professional Arabic business translator. Translate the given English text into professional Gulf/MSA Arabic. Do NOT leave any English words untranslated except these exact terms which must stay in English: CSV, SKU, API, CRM, NPS, CSAT, AOV, MRR, KPI, CAC, LTV, ROAS, CPL, GA4, Shopify, Jira, Intercom, Trustpilot, Google Analytics, Elvanis. A previous translation attempt of this exact text left these specific word(s) untranslated or in the wrong script: ${leaked.join(', ')}. Pay special attention to translating these words correctly into proper Arabic script this time — every word must be Arabic except the exact terms listed above. Respond with ONLY the translated text, no preamble, no quotes, no explanation.`,
-          },
-          { role: 'user', content: englishText },
-        ],
-      })
+CRITICAL RULES:
+1. Output ONLY the corrected Arabic text. Do not include notes, preambles, or markdown formatting.
+2. Absolutely FORBIDDEN to introduce any foreign scripts, languages, or characters outside of standard Arabic text (no Thai, no Cyrillic, no Spanish phonetics, no other languages of any kind).
+3. Do not invent new details. Keep the exact meaning of the original sentence intact, changing only the leaked terminology into standard, professional Arabic.
+4. These exact terms must stay in English, untranslated: CSV, SKU, API, CRM, NPS, CSAT, AOV, MRR, KPI, CAC, LTV, ROAS, CPL, GA4, Shopify, Jira, Intercom, Trustpilot, Google Analytics, Elvanis.
+5. The previous attempt left these specific word(s) untranslated: ${leaked.join(', ')}. Fix exactly these words — do not alter any other part of the sentence beyond what's needed.`,
+        },
+        { role: 'user', content: englishText },
+      ],
+    })
 
-      const retryText = retryResponse.choices[0]?.message?.content?.trim() ?? ''
-      const retryLeaked = findLeakedWords(retryText)
+    const retryText = retryResponse.choices[0]?.message?.content?.trim() ?? ''
+    const retryLeaked = findLeakedWords(retryText)
 
-      await logAlert(admin, founderId, 'data_error',
-        `Translation retry attempt ${attempt} for "${fieldLabel}". Leaked words: ${leaked.join(', ')}. ` +
-        `Result: ${retryLeaked.length === 0 ? 'SUCCEEDED' : `still has leaks: ${retryLeaked.join(', ')}`}.`
-      )
+    await logAlert(admin, founderId, 'data_error',
+      `Translation retry (70B) for "${fieldLabel}". Leaked words: ${leaked.join(', ')}. ` +
+      `Result: ${retryLeaked.length === 0 ? 'SUCCEEDED' : `still has leaks: ${retryLeaked.join(', ')} — falling back to English`}.`
+    )
 
-      if (retryText && retryLeaked.length === 0) return retryText
+    if (retryText && retryLeaked.length === 0) return retryText
+    return englishText || currentText
 
-      currentText = retryText || currentText
-      leaked = retryLeaked
-
-      if (leaked.length === 0) return currentText
-
-    } catch (err) {
-      console.error(`[content-validator] retry attempt ${attempt} call failed:`, err)
-      await logAlert(admin, founderId, 'data_error', `Translation retry attempt ${attempt} call failed for "${fieldLabel}": ${String(err)}.`)
-    }
+  } catch (err) {
+    console.error('[content-validator] retry call failed:', err)
+    await logAlert(admin, founderId, 'data_error', `Translation retry call failed for "${fieldLabel}": ${String(err)}. Falling back to English.`)
+    return englishText || currentText
   }
-
-  await logAlert(admin, founderId, 'data_error',
-    `Translation for "${fieldLabel}" still has leaks after ${MAX_ATTEMPTS} attempts: ${leaked.join(', ')}. Falling back to English.`
-  )
-  return englishText || currentText // fallback — English if available, else the best Arabic attempt we have
 }
 
 /**
