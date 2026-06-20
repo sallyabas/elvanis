@@ -647,10 +647,50 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
 
     try {
       const arResponse = await groq.chat.completions.create({
-        model:           'llama-3.1-8b-instant',
+        model:           'openai/gpt-oss-120b',
         max_tokens:      4000,
         temperature:     0.1,
-        response_format: { type: 'json_object' },
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'digest_translation',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                summary_ar: { type: 'string' },
+                data_quality_note_ar: { type: ['string', 'null'] },
+                consultant_hook_ar: { type: ['string', 'null'] },
+                actions_ar: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      title_ar: { type: 'string' },
+                      why_ar: { type: 'string' },
+                      how_ar: { type: 'string' },
+                    },
+                    required: ['title_ar', 'why_ar', 'how_ar'],
+                    additionalProperties: false,
+                  },
+                },
+                conflicts_ar: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      note_ar: { type: 'string' },
+                    },
+                    required: ['note_ar'],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ['summary_ar', 'data_quality_note_ar', 'consultant_hook_ar', 'actions_ar', 'conflicts_ar'],
+              additionalProperties: false,
+            },
+          },
+        },
         messages: [
           { role: 'system', content: TRANSLATION_PROMPT },
           { role: 'user',   content: JSON.stringify(translationInput) },
