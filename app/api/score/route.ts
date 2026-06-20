@@ -805,6 +805,7 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
       const { error: emailError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
         to:      founder.email as string,
+        replyTo: 'info@elvanis.com',
         subject: `${founderFirstName} — your Elvanis diagnosis is ready (Score: ${trueOverallScore}/100)`,
         html:    buildEmailHtml(diagnosis, founder.email as string, founderFirstName),
       })
