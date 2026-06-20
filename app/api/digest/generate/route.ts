@@ -649,74 +649,74 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       })),
     }
 
-    groq.chat.completions.create({
-      model:           'llama-3.1-8b-instant',
-      max_tokens:      4000,
-      temperature:     0.1,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: TRANSLATION_PROMPT },
-        { role: 'user',   content: JSON.stringify(translationInput) },
-      ],
-    }).then(async (arResponse) => {
+    try {
+      const arResponse = await groq.chat.completions.create({
+        model:           'llama-3.1-8b-instant',
+        max_tokens:      4000,
+        temperature:     0.1,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: TRANSLATION_PROMPT },
+          { role: 'user',   content: JSON.stringify(translationInput) },
+        ],
+      })
+
       const arText = arResponse.choices[0]?.message?.content ?? ''
       const arFirstBrace = arText.indexOf('{')
       if (arFirstBrace === -1) {
         console.error('[digest] Arabic translation — no JSON found')
-        return
-      }
-
-      let arDigest: Record<string, unknown>
-      try {
-        arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
-      } catch (parseErr) {
-        console.error('[digest] Arabic translation parse failed:', parseErr)
-        return
-      }
-
-      // Validation is isolated — if it fails for ANY reason, save the
-      // unvalidated Arabic rather than losing the translation entirely.
-      try {
-        const { validateArabicField } = await import('@/lib/content-validator')
-        if (arDigest.summary_ar) {
-          arDigest.summary_ar = await validateArabicField({
-            admin, founderId,
-            fieldLabel: 'digest.summary_ar',
-            englishText: String(digest.summary ?? ''),
-            arabicText: String(arDigest.summary_ar),
-          })
+      } else {
+        let arDigest: Record<string, unknown> | null = null
+        try {
+          arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
+        } catch (parseErr) {
+          console.error('[digest] Arabic translation parse failed:', parseErr)
         }
-        if (Array.isArray(arDigest.actions_ar)) {
-          arDigest.actions_ar = await Promise.all(
-            (arDigest.actions_ar as Array<Record<string, unknown>>).map(async (actionAr, i: number) => ({
-              ...actionAr,
-              how_ar: await validateArabicField({
+
+        if (arDigest) {
+          try {
+            const { validateArabicField } = await import('@/lib/content-validator')
+            if (arDigest.summary_ar) {
+              arDigest.summary_ar = await validateArabicField({
                 admin, founderId,
-                fieldLabel: `digest.actions_ar[${i}].how_ar`,
-                englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
-                arabicText: String(actionAr.how_ar ?? ''),
-              }),
-            }))
-          )
-        }
-      } catch (validationErr) {
-        console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
-      }
+                fieldLabel: 'digest.summary_ar',
+                englishText: String(digest.summary ?? ''),
+                arabicText: String(arDigest.summary_ar),
+              })
+            }
+            if (Array.isArray(arDigest.actions_ar)) {
+              arDigest.actions_ar = await Promise.all(
+                (arDigest.actions_ar as Array<Record<string, unknown>>).map(async (actionAr, i: number) => ({
+                  ...actionAr,
+                  how_ar: await validateArabicField({
+                    admin, founderId,
+                    fieldLabel: `digest.actions_ar[${i}].how_ar`,
+                    englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
+                    arabicText: String(actionAr.how_ar ?? ''),
+                  }),
+                }))
+              )
+            }
+          } catch (validationErr) {
+            console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
+          }
 
-      try {
-        await admin.from('action_digests')
-          .update({ digest_ar: arDigest })
-          .eq('id', digestRow.id)
-        console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
-      } catch (saveErr) {
-        console.error('[digest] Arabic translation save failed:', saveErr)
+          try {
+            await admin.from('action_digests')
+              .update({ digest_ar: arDigest })
+              .eq('id', digestRow.id)
+            console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
+          } catch (saveErr) {
+            console.error('[digest] Arabic translation save failed:', saveErr)
+          }
+        }
       }
-    }).catch(err => {
+    } catch (err) {
       console.error('[digest] Arabic translation call failed:', err)
-    })
+    }
 
     return NextResponse.json({ success: true, digestId: digestRow.id })
-
+    
   } catch (err) {
     console.error('[digest] Error:', err)
     return NextResponse.json({ error: String(err) }, { status: 500 })
