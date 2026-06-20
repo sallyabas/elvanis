@@ -301,15 +301,22 @@ export default async function HomePage() {
               </a>
             </div>
             {latestDigest && (
-              <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, margin: 0, paddingTop: 14, borderTop: '1px solid #EDE9FE' }}>
-                {(() => {
-                  const d = (latestDigest as Record<string, unknown>).digest as Record<string, unknown>
-                  const dAr = (latestDigest as Record<string, unknown>).digest_ar as Record<string, unknown> | undefined
-                  const summary = (founder.language === 'ar' && dAr?.summary_ar) ? String(dAr.summary_ar) : String(d?.summary ?? '')
-                  return summary.substring(0, 200) + (summary.length > 200 ? '...' : '')
-                })()}
-              </p>
-            )}
+            <div style={{ position: 'relative', paddingTop: 14, borderTop: '1px solid #EDE9FE' }}>
+             <p style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
+              {t('home.digest_preview')}
+            </p>
+           <div style={{ position: 'relative', maxHeight: 72, overflow: 'hidden' }}>
+            <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, margin: 0 }}>
+              {(() => {
+               const d = (latestDigest as Record<string, unknown>).digest as Record<string, unknown>
+               const dAr = (latestDigest as Record<string, unknown>).digest_ar as Record<string, unknown> | undefined
+               return (founder.language === 'ar' && dAr?.summary_ar) ? String(dAr.summary_ar) : String(d?.summary ?? '')
+             })()}
+          </p>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(to bottom, transparent, #F5F3FF)' }} />
+        </div>
+       </div>
+          )}
           </div>
         ) : (
           <div id="tour-digest-card" style={{ background: '#F5F3FF', borderRadius: 16, border: '1px solid #DDD6FE', padding: '24px 28px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' as const }}>
