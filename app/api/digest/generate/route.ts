@@ -813,23 +813,88 @@ try {
 console.error('[digest] Arabic translation call failed:', err)
 }
 
-// ── Now fully ready (English + Arabic) — flip statuses.
+// ── Quality gate: count any field that STILL contains non-Arabic content
+// after all validation/retries. If anything failed, do NOT activate this
+// digest — keep the old one live, alert admin, leave this one as 'processing'
+// for manual review via the admin tool. ──
+let stillBrokenFields: string[] = []
+try {
+  const { data: finalRow } = await admin
+    .from('action_digests')
+    .select('digest, digest_ar')
+    .eq('id', digestRow.id)
+    .maybeSingle()
+
+  const finalArDigest = (finalRow?.digest_ar ?? {}) as Record<string, unknown>
+  const finalEnDigest = (finalRow?.digest ?? {}) as Record<string, unknown>
+
+  const { judgeArabicQuality } = await import('@/lib/content-validator')
+  const arabicCharPattern = /[\u0600-\u06FF\u0750-\u077F]/
+
+  async function failsQualityCheck(text: unknown): Promise<boolean> {
+    const str = String(text ?? '').trim()
+    if (str.length === 0) return false // empty is a different problem, not this gate's concern
+    if (!arabicCharPattern.test(str)) return true // no Arabic script at all — immediate fail, skip judge call
+    const leaked = findLeakedWordsForGate(str)
+    if (leaked.length > 0) return true // leaked English words — immediate fail, skip judge call
+    const isQuality = await judgeArabicQuality({ text: str })
+    return !isQuality
+  }
+
+  function findLeakedWordsForGate(text: string): string[] {
+    const allowed = new Set(['csv', 'sku', 'api', 'crm', 'nps', 'csat', 'aov', 'mrr', 'kpi', 'cac', 'ltv', 'roas', 'cpl', 'ga4', 'shopify', 'jira', 'intercom', 'trustpilot', 'google analytics', 'elvanis'])
+    const latinRuns = text.match(/[A-Za-z]{3,}/g) ?? []
+    return latinRuns.filter(w => !allowed.has(w.toLowerCase()))
+  }
+
+  if (await failsQualityCheck(finalArDigest.summary_ar)) stillBrokenFields.push('summary_ar')
+  if (await failsQualityCheck(finalArDigest.consultant_hook_ar)) stillBrokenFields.push('consultant_hook_ar')
+  if (finalEnDigest.data_quality_note && await failsQualityCheck(finalArDigest.data_quality_note_ar)) stillBrokenFields.push('data_quality_note_ar')
+
+  const arActions = Array.isArray(finalArDigest.actions_ar) ? finalArDigest.actions_ar as Array<Record<string, unknown>> : []
+  for (let i = 0; i < arActions.length; i++) {
+    const a = arActions[i]
+    if (await failsQualityCheck(a.title_ar)) stillBrokenFields.push(`actions_ar[${i}].title_ar`)
+    if (await failsQualityCheck(a.why_ar)) stillBrokenFields.push(`actions_ar[${i}].why_ar`)
+    if (await failsQualityCheck(a.how_ar)) stillBrokenFields.push(`actions_ar[${i}].how_ar`)
+  }
+} catch (gateErr) {
+  console.error('[digest] quality gate check failed (non-fatal — will publish anyway):', gateErr)
+  stillBrokenFields = [] // if the gate itself breaks, don't block publishing — fail open, not closed
+}
+
+if (stillBrokenFields.length > 0) {
+  console.error(`[digest] ${digestRow.id} FAILED quality gate — fields still non-Arabic: ${stillBrokenFields.join(', ')}. NOT activating — keeping previous digest live.`)
+  await admin.from('system_alerts').insert({
+    founder_id: founderId,
+    alert_type: 'data_error',
+    message: `Digest ${digestRow.id} failed quality gate — these fields are still not in Arabic after all retries: ${stillBrokenFields.join(', ')}. Digest left as 'processing', NOT shown to founder. Previous digest remains active. Manually review and regenerate via admin.`,
+  })
+  return NextResponse.json({
+    success: false,
+    error: `Digest generated but ${stillBrokenFields.length} field(s) failed Arabic translation. Previous digest remains live. Check system_alerts for details.`,
+    digestId: digestRow.id,
+    failedFields: stillBrokenFields,
+  }, { status: 207 }) // 207 = partial success, not a clean failure
+}
+
+// ── Quality gate passed — fully ready (English + Arabic) — flip statuses.
 // Old digest goes stale, new digest goes active, in one final step. ──
 try {
-await admin
-.from('action_digests')
-.update({ status: 'stale' })
-.eq('founder_id', founderId)
-.eq('status', 'active')
+  await admin
+    .from('action_digests')
+    .update({ status: 'stale' })
+    .eq('founder_id', founderId)
+    .eq('status', 'active')
 
-await admin
-.from('action_digests')
-.update({ status: 'active' })
-.eq('id', digestRow.id)
+  await admin
+    .from('action_digests')
+    .update({ status: 'active' })
+    .eq('id', digestRow.id)
 
-console.log(`[digest] ${digestRow.id} is now active — old digest marked stale`)
+  console.log(`[digest] ${digestRow.id} is now active — old digest marked stale`)
 } catch (statusErr) {
-console.error('[digest] status flip failed:', statusErr)
+  console.error('[digest] status flip failed:', statusErr)
 }
 
 return NextResponse.json({ success: true, digestId: digestRow.id })

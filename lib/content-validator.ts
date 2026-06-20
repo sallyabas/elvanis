@@ -291,3 +291,53 @@ export async function validateArrayCompleteness(params: {
   return validItems
 }
 
+/**
+ * Asks the LLM to judge whether Arabic text is fluent, professional,
+ * grammatically correct, and contains no English words. Returns true
+ * only if the model explicitly confirms quality — used as the final
+ * gate before publishing, not as a translator/fixer.
+ */
+export async function judgeArabicQuality(params: {
+  text: string
+}): Promise<boolean> {
+  const { text } = params
+  if (!text || text.trim().length === 0) return true // empty fields aren't this check's concern
+
+  try {
+    const response = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      max_tokens: 10,
+      temperature: 0,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'quality_judgment',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              is_fluent_arabic: { type: 'boolean' },
+            },
+            required: ['is_fluent_arabic'],
+            additionalProperties: false,
+          },
+        },
+      },
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a strict Arabic quality reviewer. Given a piece of text, determine if it is fluent, professional, grammatically correct Gulf/MSA Arabic with ZERO English words and ZERO foreign script characters (only allowed exceptions: CSV, SKU, API, GA4, Shopify, Jira, Intercom, Trustpilot, and similar standard tool/tech acronyms). Respond with is_fluent_arabic: true only if it fully meets this bar. Any English word, any grammatical error, any awkward or broken phrasing means false.',
+        },
+        { role: 'user', content: text },
+      ],
+    })
+
+    const content = response.choices[0]?.message?.content ?? '{}'
+    const parsed = JSON.parse(content)
+    return parsed.is_fluent_arabic === true
+  } catch (err) {
+    console.error('[content-validator] quality judge call failed:', err)
+    return true // fail open — don't block publishing if the judge itself breaks
+  }
+}
+
