@@ -509,9 +509,13 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       return NextResponse.json({ error: 'Digest generated no actions — try again' }, { status: 500 })
     }
 
-    // ── Store in action_digests as 'processing' — the OLD digest stays 'active'
-    // until this new one is fully ready (English + Arabic), so founders never
-    // see a half-finished or English-only version of the new plan. ──
+    // ── Store in action_digests — mark existing active as stale ──
+    await admin
+      .from('action_digests')
+      .update({ status: 'stale' })
+      .eq('founder_id', founderId)
+      .eq('status', 'active')
+
     const { data: digestRow, error: digestErr } = await admin
       .from('action_digests')
       .insert({
@@ -526,7 +530,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
           sources:        connectedSources,
         },
         digest,
-        status:       'processing',
+        status:       'active',
         generated_at: new Date().toISOString(),
       })
       .select('id')
@@ -613,22 +617,6 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
 
     console.log(`[digest] Generated: ${digestRow.id} — ${connectedSources.join(', ')} — ${signals.length} signals`)
 
-        // ── Validate English "how" fields for complete numbered steps — before Arabic translation ──
-        const { validateSteppedField } = await import('@/lib/content-validator')
-        const validatedActions = await Promise.all(
-          digestActions.map(async (action: Record<string, unknown>) => {
-            const validatedHow = await validateSteppedField({
-              admin,
-              founderId,
-              fieldLabel: `digest.actions[${action.title ?? '?'}].how`,
-              howText: String(action.how ?? ''),
-              context: String(action.title ?? ''),
-            })
-            return { ...action, how: validatedHow }
-          })
-        )
-        digest.actions = validatedActions
-
     // ── Arabic translation call (fire-and-forget, non-blocking) ──
     // Uses llama-3.1-8b-instant — translation only, no strategic reasoning needed
     const translationInput = {
@@ -645,155 +633,36 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
       })),
     }
 
-    try {
-      const arResponse = await groq.chat.completions.create({
-        model:           'llama-3.1-8b-instant',
-        max_tokens:      4000,
-        temperature:     0.1,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: TRANSLATION_PROMPT },
-          { role: 'user',   content: JSON.stringify(translationInput) },
-        ],
-      })
-
+    groq.chat.completions.create({
+      model:           'llama-3.1-8b-instant',
+      max_tokens:      4000,
+      temperature:     0.1,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: TRANSLATION_PROMPT },
+        { role: 'user',   content: JSON.stringify(translationInput) },
+      ],
+    }).then(async (arResponse) => {
       const arText = arResponse.choices[0]?.message?.content ?? ''
       const arFirstBrace = arText.indexOf('{')
       if (arFirstBrace === -1) {
         console.error('[digest] Arabic translation — no JSON found')
-      } else {
-        let arDigest: Record<string, unknown> | null = null
-        try {
-          arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
-        } catch (parseErr) {
-          console.error('[digest] Arabic translation parse failed:', parseErr)
-        }
-
-        if (arDigest) {
-// Step 1 — completeness: fill any entirely-missing field with English source
-try {
-  const { validateTranslationCompleteness } = await import('@/lib/content-validator')
-  arDigest = await validateTranslationCompleteness({
-    admin, founderId,
-    arDigest,
-    englishDigest: digest,
-  })
-} catch (completenessErr) {
-  console.error('[digest] completeness check failed (non-fatal):', completenessErr)
-}
-
-// Step 2 — leak check on every field the TRANSLATION_PROMPT produces.
-// Isolated — if it fails for ANY reason, save what we have rather than losing the translation.
-try {
-  const { validateArabicField } = await import('@/lib/content-validator')
-
-  if (arDigest.summary_ar) {
-    arDigest.summary_ar = await validateArabicField({
-      admin, founderId,
-      fieldLabel: 'digest.summary_ar',
-      englishText: String(digest.summary ?? ''),
-      arabicText: String(arDigest.summary_ar),
+        return
+      }
+      try {
+        const arDigest = JSON.parse(arFirstBrace > 0 ? arText.substring(arFirstBrace) : arText)
+        await admin.from('action_digests')
+          .update({ digest_ar: arDigest })
+          .eq('id', digestRow.id)
+        console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
+      } catch (parseErr) {
+        console.error('[digest] Arabic translation parse failed:', parseErr)
+      }
+    }).catch(err => {
+      console.error('[digest] Arabic translation call failed:', err)
     })
-  }
-  if (arDigest.data_quality_note_ar) {
-    arDigest.data_quality_note_ar = await validateArabicField({
-      admin, founderId,
-      fieldLabel: 'digest.data_quality_note_ar',
-      englishText: String(digest.data_quality_note ?? ''),
-      arabicText: String(arDigest.data_quality_note_ar),
-    })
-  }
-  if (arDigest.consultant_hook_ar) {
-    arDigest.consultant_hook_ar = await validateArabicField({
-      admin, founderId,
-      fieldLabel: 'digest.consultant_hook_ar',
-      englishText: String(digest.consultant_hook ?? ''),
-      arabicText: String(arDigest.consultant_hook_ar),
-    })
-  }
 
-  if (Array.isArray(arDigest.conflicts_ar)) {
-    const englishConflicts = Array.isArray(digest.conflicts_to_resolve)
-      ? digest.conflicts_to_resolve as Array<Record<string, unknown>>
-      : []
-    const validatedConflictsAr: Array<Record<string, unknown>> = []
-    for (let i = 0; i < (arDigest.conflicts_ar as Array<Record<string, unknown>>).length; i++) {
-      const conflictAr = (arDigest.conflicts_ar as Array<Record<string, unknown>>)[i]
-      const noteAr = await validateArabicField({
-        admin, founderId,
-        fieldLabel: `digest.conflicts_ar[${i}].note_ar`,
-        englishText: String(englishConflicts[i]?.note ?? ''),
-        arabicText: String(conflictAr.note_ar ?? ''),
-      })
-      validatedConflictsAr.push({ ...conflictAr, note_ar: noteAr })
-    }
-    arDigest.conflicts_ar = validatedConflictsAr
-  }
-
-  if (Array.isArray(arDigest.actions_ar)) {
-    const validatedActionsAr: Array<Record<string, unknown>> = []
-    for (let i = 0; i < (arDigest.actions_ar as Array<Record<string, unknown>>).length; i++) {
-      const actionAr = (arDigest.actions_ar as Array<Record<string, unknown>>)[i]
-      const titleAr = await validateArabicField({
-        admin, founderId,
-        fieldLabel: `digest.actions_ar[${i}].title_ar`,
-        englishText: String((validatedActions[i] as Record<string, unknown>)?.title ?? ''),
-        arabicText: String(actionAr.title_ar ?? ''),
-      })
-      const whyAr = await validateArabicField({
-        admin, founderId,
-        fieldLabel: `digest.actions_ar[${i}].why_ar`,
-        englishText: String((validatedActions[i] as Record<string, unknown>)?.why ?? ''),
-        arabicText: String(actionAr.why_ar ?? ''),
-      })
-      const howAr = await validateArabicField({
-        admin, founderId,
-        fieldLabel: `digest.actions_ar[${i}].how_ar`,
-        englishText: String((validatedActions[i] as Record<string, unknown>)?.how ?? ''),
-        arabicText: String(actionAr.how_ar ?? ''),
-      })
-      validatedActionsAr.push({ ...actionAr, title_ar: titleAr, why_ar: whyAr, how_ar: howAr })
-    }
-    arDigest.actions_ar = validatedActionsAr
-  }
-} catch (validationErr) {
-  console.error('[digest] Arabic validation failed (non-fatal — saving unvalidated translation):', validationErr)
-}
-
-try {
-  await admin.from('action_digests')
-    .update({ digest_ar: arDigest })
-    .eq('id', digestRow.id)
-  console.log(`[digest] Arabic translation saved for ${digestRow.id}`)
-} catch (saveErr) {
-  console.error('[digest] Arabic translation save failed:', saveErr)
-}
-}
-}
-} catch (err) {
-console.error('[digest] Arabic translation call failed:', err)
-}
-
-// ── Now fully ready (English + Arabic) — flip statuses.
-// Old digest goes stale, new digest goes active, in one final step. ──
-try {
-await admin
-.from('action_digests')
-.update({ status: 'stale' })
-.eq('founder_id', founderId)
-.eq('status', 'active')
-
-await admin
-.from('action_digests')
-.update({ status: 'active' })
-.eq('id', digestRow.id)
-
-console.log(`[digest] ${digestRow.id} is now active — old digest marked stale`)
-} catch (statusErr) {
-console.error('[digest] status flip failed:', statusErr)
-}
-
-return NextResponse.json({ success: true, digestId: digestRow.id })
+    return NextResponse.json({ success: true, digestId: digestRow.id })
 
   } catch (err) {
     console.error('[digest] Error:', err)
