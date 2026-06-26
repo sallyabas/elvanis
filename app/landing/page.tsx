@@ -283,7 +283,7 @@ function C6Assessment({ isAr, active }: { isAr: boolean; active: boolean }) {
           <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: '0 0 2px' }}>{isAr ? 'يحتاج اهتماماً' : 'Needs Attention'}</p>
           <p style={{ fontSize: 11, color: '#B45309', margin: '0 0 6px' }}>{isAr ? '3 مشاكل حرجة تحتاج إجراءً فورياً' : '3 critical issues need immediate action'}</p>
           <div style={{ opacity: showCTA ? 1 : 0, transform: showCTA ? 'translateY(0)' : 'translateY(6px)', transition: 'all 0.5s ease' }}>
-            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '7px 14px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+            <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '7px 14px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
               {isAr ? 'احجز جلسة استراتيجية ←' : 'Book a Strategy Briefing →'}
             </a>
           </div>
@@ -571,7 +571,7 @@ const CONTENT = {
     footer: {
       tagline: 'AI-powered business diagnostics for founders and owner-operators who run their business themselves.',
       groups: [
-        { title: 'Product', links: [{ label: 'Start free', href: '/signup' }, { label: 'Pricing', href: '#pricing' }, { label: 'Book a demo', href: 'https://calendly.com/elvanis/book-demo-session' }] },
+        { title: 'Product', links: [{ label: 'Start free', href: '/signup' }, { label: 'Pricing', href: '#pricing' }, { label: 'Book a demo', href: 'https://calendly.com/elvanis-app/30min' }] },
         { title: 'Services', links: [{ label: 'Strategic Roadmap', href: '/signup' }, { label: 'CPO Advisory', href: '/signup' }, { label: 'Contact us', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
         { title: 'Legal', links: [{ label: 'Terms of Service', href: '/terms' }, { label: 'Privacy Policy', href: '/privacy' }, { label: 'Sign in', href: '/login' }] },
       ],
@@ -709,7 +709,7 @@ const CONTENT = {
     footer: {
       tagline: 'تشخيص الأعمال بالذكاء الاصطناعي للمؤسسين وأصحاب الأعمال الذين يديرون أعمالهم بأنفسهم.',
       groups: [
-        { title: 'المنتج', links: [{ label: 'ابدأ مجاناً', href: '/signup' }, { label: 'الأسعار', href: '#pricing' }, { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis/book-demo-session' }] },
+        { title: 'المنتج', links: [{ label: 'ابدأ مجاناً', href: '/signup' }, { label: 'الأسعار', href: '#pricing' }, { label: 'احجز عرضاً', href: 'https://calendly.com/elvanis-app/30min' }] },
         { title: 'الخدمات', links: [{ label: 'خارطة طريق استراتيجية', href: '/signup' }, { label: 'استشارة CPO', href: '/signup' }, { label: 'تواصل معنا', href: 'https://calendar.app.google/BgGMvvW5VJ2rKPjP9' }] },
         { title: 'قانوني', links: [{ label: 'شروط الخدمة', href: '/terms' }, { label: 'سياسة الخصوصية', href: '/privacy' }, { label: 'تسجيل الدخول', href: '/login' }] },
       ],
@@ -768,7 +768,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             <Link href="https://app.elvanis.com/login" style={{ fontSize: 13, color: '#64748B', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{c.nav.login}</Link>
-            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="hm" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }}>
+            <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" className="hm" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 600, whiteSpace: 'nowrap' as const }}>
               {isAr ? 'احجز عرضاً' : 'Book a demo'}
             </a>
             <button onClick={toggleLang} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '5px 12px', color: '#64748B', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
@@ -915,7 +915,7 @@ export default function LandingPage() {
           <DemoPanel isAr={isAr} />
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const, marginTop: 48 }}>
             <Link href="https://app.elvanis.com/signup" className="btn">{c.hero.cta_primary}</Link>
-            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" className="btn-o">
+            <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" className="btn-o">
               {isAr ? 'احجز عرضاً مباشراً ←' : 'Book a live demo →'}
             </a>
           </div>
@@ -979,7 +979,7 @@ export default function LandingPage() {
           <span className="ey">{c.demo_cta.eyebrow}</span>
           <h2 className="sh" style={{ marginBottom: 16 }}>{c.demo_cta.headline}</h2>
           <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.75, maxWidth: 500, margin: '0 auto 36px' }}>{c.demo_cta.body}</p>
-          <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '15px 32px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(75,53,204,0.3)', marginBottom: 12 }}>
+          <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '15px 32px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(75,53,204,0.3)', marginBottom: 12 }}>
             {c.demo_cta.button}
           </a>
           <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>{c.demo_cta.note}</p>
@@ -1041,7 +1041,7 @@ export default function LandingPage() {
           <p style={{ fontSize: 22, color: '#C9A84C', fontWeight: 700, margin: '0 0 40px' }}>{c.cta.sub}</p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' as const }}>
             <Link href="https://app.elvanis.com/signup" style={{ display: 'inline-block', padding: '16px 40px', background: 'linear-gradient(135deg,#4B35CC,#7C3AED)', color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 30px rgba(75,53,204,0.4)' }}>{c.cta.button}</Link>
-            <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '16px 40px', background: 'transparent', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none' }}>
+            <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '16px 40px', background: 'transparent', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none' }}>
               {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
             </a>
           </div>
@@ -1055,7 +1055,7 @@ export default function LandingPage() {
             <div>
               <span style={{ fontSize: 18, fontWeight: 900, color: '#F8F4EE', letterSpacing: '-0.03em', display: 'block', marginBottom: 8 }}>Elvanis</span>
               <p style={{ fontSize: 13, color: '#6B7280', maxWidth: 240, lineHeight: 1.7, margin: '0 0 20px' }}>{c.footer.tagline}</p>
-              <a href="https://calendly.com/elvanis/book-demo-session" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '9px 18px', background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+              <a href="https://calendly.com/elvanis-app/30min" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '9px 18px', background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
                 {isAr ? 'احجز عرضاً ←' : 'Book a demo →'}
               </a>
             </div>
