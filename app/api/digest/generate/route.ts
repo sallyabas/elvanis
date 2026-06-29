@@ -618,7 +618,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
     console.log(`[digest] Generated: ${digestRow.id} — ${connectedSources.join(', ')} — ${signals.length} signals`)
 
     // ── Arabic translation call (fire-and-forget, non-blocking) ──
-    // Uses llama-3.1-8b-instant — translation only, no strategic reasoning needed
+    // Uses openai/gpt-oss-20b — translation only, no strategic reasoning needed
     const translationInput = {
       summary:            digest.summary ?? '',
       data_quality_note:  digest.data_quality_note ?? '',
@@ -634,7 +634,7 @@ Generate a 90-Day Action Plan for this founder. Structure actions across Phase 1
     }
 
     groq.chat.completions.create({
-      model:           'llama-3.1-8b-instant',
+      model:           'openai/gpt-oss-20b',
       max_tokens:      4000,
       temperature:     0.1,
       response_format: { type: 'json_object' },

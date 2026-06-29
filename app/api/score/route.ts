@@ -580,7 +580,7 @@ Respond with JSON only. Do NOT include overall_score — it is calculated server
         })}`
   
         const translateResponse = await groq.chat.completions.create({
-          model:            'llama-3.1-8b-instant',
+          model:            'openai/gpt-oss-20b',
           max_tokens:      4000,
           temperature:     0.3,
           response_format: { type: 'json_object' },
