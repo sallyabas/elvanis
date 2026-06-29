@@ -340,7 +340,7 @@ Respond with JSON only — no preamble, no markdown formatting blocks, no backti
   console.log('CSV analysing:', { templateType, totalRows: rows.length, sentToGroq: rowsForAnalysis.length })
 
   const response = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-20b',
     max_tokens: 4000,
     temperature: 0.2,
     messages: [{ role: 'user', content: prompt }]
