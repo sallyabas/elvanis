@@ -71,10 +71,10 @@ export default function AdminPage() {
     setBusy(true)
     const id = pushLog(`Full scan — ${selected.business_name ?? selected.email}`)
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/admin/scan', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ founderId: selected.id, force: true, sendEmail: true, triggeredBy: 'manual' }),
+        body: JSON.stringify({ founderId: selected.id, force: true, sendEmail: true }),
       })
       const data = await res.json()
       if (res.ok && data.success) {
@@ -94,10 +94,10 @@ export default function AdminPage() {
     setBusy(true)
     const id = pushLog(`Scan ${sourceType} — ${selected.business_name ?? selected.email}`)
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch('/api/admin/scan', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ founderId: selected.id, sourceType, force: true, sendEmail: false, triggeredBy: 'manual' }),
+        body: JSON.stringify({ founderId: selected.id, sourceType, force: true, sendEmail: false }),
       })
       const data = await res.json()
       if (res.ok && data.success) {
